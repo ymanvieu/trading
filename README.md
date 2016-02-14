@@ -18,15 +18,15 @@ The Web UI is based on AngularJS with Highchart (Highstock), Bootstrap and SockJ
 
 #### Data provider
 
-** Yahoo Finance ** (for continous currencies/stocks data)
+**Yahoo Finance** (for continous currencies/stocks data)
 
 Free, no registration, JSON format, 172 currencies available and stocks.
 
-** European Central Bank ** (for historical forex data)
+**European Central Bank** (for historical forex data)
 
 Free, no registration, XML format, updated daily at 3pm (CET), most common currencies available.
 
-** Quandl ** (for crude oil daily/historical data)
+**Quandl** (for crude oil daily/historical data)
 
 Free, no registration, JSON format, updated daily.
 
