@@ -39,15 +39,15 @@ public class CurrencyUtils {
 		COMMODITIES.put("XAG", "silver");
 	}
 
-	private static List<String> countryCodesForCurrency(String c) {
+	private static List<String> countryCodesForCurrency(String currency) {
 		Set<String> codes = new HashSet<>();
 
-		if (isValidCode(c)) {
+		if (currencyFromCode(currency) != null) {
 			for (Locale l : Locale.getAvailableLocales()) {
 				try {
 					Currency currentCurrency = Currency.getInstance(l);
 
-					if (currentCurrency.getCurrencyCode().equals(c)) {
+					if (currentCurrency != null && currentCurrency.getCurrencyCode().equals(currency)) {
 						codes.add(l.getCountry());
 					}
 				} catch (IllegalArgumentException e) {
@@ -58,16 +58,15 @@ public class CurrencyUtils {
 		return new ArrayList<>(codes);
 	}
 
-	public static boolean isValidCode(String cur) {
+	private static Currency currencyFromCode(String currency) {
 		try {
-			Currency.getInstance(cur);
-			return true;
+			return Currency.getInstance(currency);
 		} catch (IllegalArgumentException e) {
-			return false;
+			return null;
 		}
 	}
 
-	public static String codeForCurrency(String c) {
+	public static String countryFlagForCurrency(String c) {
 		if (EUR.equals(c)) {
 			return "europeanunion";
 		} else if (USD.equals(c)) {
@@ -90,4 +89,8 @@ public class CurrencyUtils {
 		return null;
 	}
 
+	public static String nameForCurrency(String currency) {
+		Currency cy = currencyFromCode(currency);
+		return cy == null ? null : cy.getDisplayName(Locale.ENGLISH);
+	}
 }

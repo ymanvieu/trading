@@ -23,77 +23,74 @@ import java.util.Date;
 import java.util.Objects;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.MoreObjects;
 
+import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
+
 @JsonInclude(Include.NON_NULL)
 @MappedSuperclass
-public class RateEntity implements Comparable<RateEntity> {
+@IdClass(RateEntityId.class)
+public class RateEntity {
 
-	@JsonIgnore
-	@Id
-	@Column(name = "id", columnDefinition = "integer(11)")
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private SymbolEntity fromcur;
 
-	@Column(columnDefinition = "varchar(8)", nullable = false)
-	private String fromcur;
+	private SymbolEntity tocur;
 
-	@Column(columnDefinition = "varchar(8)", nullable = false)
-	private String tocur;
-
-	@Column(precision = 20, scale = 10, nullable = false)
 	private BigDecimal value;
 
-	// @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateUtils.DT_PATTERN)
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable = false)
 	private Date date;
-
-	@Transient
-	private String countryCodeFrom;
-
-	@Transient
-	private String countryCodeTo;
-
-	@Transient
-	private String fromName;
-
-	@Transient
-	private String toName;
 
 	public RateEntity() {
 	}
 
 	public RateEntity(String from, String to, BigDecimal rate, Date date) {
+		this.fromcur = new SymbolEntity(requireNonNull(from, "from is null"));
+		this.tocur = new SymbolEntity(requireNonNull(to, "to is null"));
+		this.value = requireNonNull(rate, "rate is null");
+		this.date = requireNonNull(date, "date is null");
+	}
+
+	public RateEntity(SymbolEntity from, SymbolEntity to, BigDecimal rate, Date date) {
 		this.fromcur = requireNonNull(from, "from is null");
 		this.tocur = requireNonNull(to, "to is null");
 		this.value = requireNonNull(rate, "rate is null");
 		this.date = requireNonNull(date, "date is null");
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public String getFromcur() {
+	@Id
+	@ManyToOne
+	@JoinColumn(name = "fromcur", referencedColumnName = "code")
+	public SymbolEntity getFromcur() {
 		return fromcur;
 	}
 
-	public String getTocur() {
+	public void setFromcur(SymbolEntity fromcur) {
+		this.fromcur = fromcur;
+	}
+
+	@Id
+	@ManyToOne
+	@JoinColumn(name = "tocur", referencedColumnName = "code")
+	public SymbolEntity getTocur() {
 		return tocur;
 	}
 
+	public void setTocur(SymbolEntity tocur) {
+		this.tocur = tocur;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(nullable = false)
 	public Date getDate() {
 		return date;
 	}
@@ -102,6 +99,7 @@ public class RateEntity implements Comparable<RateEntity> {
 		this.date = date;
 	}
 
+	@Column(precision = 20, scale = 10, nullable = false)
 	public BigDecimal getValue() {
 		return value;
 	}
@@ -110,46 +108,9 @@ public class RateEntity implements Comparable<RateEntity> {
 		this.value = value;
 	}
 
-	public String getCountryCodeFrom() {
-		return countryCodeFrom;
-	}
-
-	public void setCountryCodeFrom(String countryCodeFrom) {
-		this.countryCodeFrom = countryCodeFrom;
-	}
-
-	public String getCountryCodeTo() {
-		return countryCodeTo;
-	}
-
-	public void setCountryCodeTo(String countryCodeTo) {
-		this.countryCodeTo = countryCodeTo;
-	}
-
-	public String getFromName() {
-		return fromName;
-	}
-
-	public void setFromName(String fromName) {
-		this.fromName = fromName;
-	}
-
-	public String getToName() {
-		return toName;
-	}
-
-	public void setToName(String toName) {
-		this.toName = toName;
-	}
-
-	@Override
-	public int compareTo(RateEntity o) {
-		return date.compareTo(o.date);
-	}
-
 	@Override
 	public int hashCode() {
-		return Objects.hash(date, fromcur, tocur, value);
+		return Objects.hash(date, fromcur.getCode(), tocur.getCode(), value);
 	}
 
 	@Override
@@ -163,8 +124,8 @@ public class RateEntity implements Comparable<RateEntity> {
 		RateEntity other = (RateEntity) obj;
 
 		return date.compareTo(other.date) == 0 //
-				&& Objects.equals(fromcur, other.fromcur) //
-				&& Objects.equals(tocur, other.tocur) //
+				&& Objects.equals(fromcur.getCode(), other.fromcur.getCode()) //
+				&& Objects.equals(tocur.getCode(), other.tocur.getCode()) //
 				&& value.compareTo(other.value) == 0;
 	}
 
@@ -172,8 +133,8 @@ public class RateEntity implements Comparable<RateEntity> {
 	public String toString() {
 		return MoreObjects.toStringHelper(this) //
 				.add("date", date) //
-				.add("fromcur", fromcur) //
-				.add("tocur", tocur) //
+				.add("from", fromcur.getCode()) //
+				.add("to", tocur.getCode()) //
 				.add("value", value).toString();
 	}
 }

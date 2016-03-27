@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 
+import fr.ymanvieu.forex.core.model.Quote;
 import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
 import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
 import fr.ymanvieu.forex.core.model.repositories.SymbolRepository;
@@ -77,10 +78,10 @@ public class YahooStock extends AProvider {
 	public List<RateEntity> getRates() throws IOException {
 		List<RateEntity> rates = new ArrayList<>();
 
-		List<SymbolEntity> symbols = symbolRepo.findAll();
+		List<SymbolEntity> symbols = symbolRepo.findAllByCurrencyNotNullOrderByCode();
 
 		if (symbols.isEmpty()) {
-			LOG.trace("symbols is empty");
+			LOG.trace("symbols list is empty");
 			return rates;
 		}
 
@@ -101,7 +102,7 @@ public class YahooStock extends AProvider {
 	private String getCurrency(List<SymbolEntity> symbols, String symbol) {
 		for (SymbolEntity se : symbols) {
 			if (se.getCode().equals(symbol)) {
-				return se.getCurrency();
+				return se.getCurrency().getCode();
 			}
 		}
 
@@ -124,7 +125,7 @@ public class YahooStock extends AProvider {
 		return sb.toString();
 	}
 
-	public List<RateEntity> getHistoricalRates(String code, String targetCurrency) throws IOException {
+	public List<Quote> getHistoricalRates(String code) throws IOException {
 		String response = sendGet(format(urlHistory, code));
 
 		List<String[]> csvLines;
@@ -135,7 +136,7 @@ public class YahooStock extends AProvider {
 
 		csvLines.remove(0);
 
-		List<RateEntity> rates = new ArrayList<>();
+		List<Quote> rates = new ArrayList<>();
 
 		try {
 			for (String[] line : csvLines) {
@@ -145,7 +146,7 @@ public class YahooStock extends AProvider {
 				Date date = HISTORY_DATE.parse(line[0]);
 				BigDecimal close = new BigDecimal(line[4]);
 
-				rates.add(new RateEntity(code, targetCurrency, close, date));
+				rates.add(new Quote(code, null, close, date));
 			}
 		} catch (ParseException e) {
 			throw new IOException(e);
@@ -164,7 +165,7 @@ public class YahooStock extends AProvider {
 		return o.getQuote().getCurrency();
 	}
 
-	public RateEntity getLatestRate(String symbol, String targetCurrency) throws IOException {
+	public Quote getLatestRate(String symbol) throws IOException {
 		String response = sendGet(format(url, symbol));
 
 		YahooModel model = mapper.readValue(response, YahooModel.class);
@@ -173,9 +174,8 @@ public class YahooStock extends AProvider {
 
 		YahooFields yf = o.getResource().getFields();
 
-		RateEntity rate = new RateEntity(yf.getSymbol(), targetCurrency, yf.getPrice(), yf.getUtctime());
-		rate.setFromName(yf.getIssuerName());
+		Quote quote = new Quote(yf.getSymbol(), yf.getIssuerName(), yf.getPrice(), yf.getUtctime());
 
-		return rate;
+		return quote;
 	}
 }

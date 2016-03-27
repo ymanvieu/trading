@@ -16,51 +16,53 @@
  */
 package fr.ymanvieu.forex.core;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.client.standard.WebSocketContainerFactoryBean;
-import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
-import fr.ymanvieu.forex.core.websocket.RatesWebSocketHandler;
 /**
  * http://docs.spring.io/spring/docs/current/spring-framework-reference/html/websocket.html#websocket-server-runtime-configuration </br>
- * http://docs.spring.io/spring-integration/reference/html/web-sockets.html </br>
  * https://github.com/salmar/spring-websocket-chat
  */
 public class SockJsClientTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(SockJsClientTest.class);
 
 	private static final String URL = "ws://localhost:8080/latest";
 
 	public static void main(String[] args) throws Exception {
 
-		RatesWebSocketHandler eh = new RatesWebSocketHandler();
-		
-		//startWebSocket(eh);
-		startSockJs(eh);
+		TextWebSocketHandler eh = new TextWebSocketHandler() {
+			@Override
+			public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+				LOG.info("{}", message.getPayload());
+			}
+		};
+
+		WebSocketClient wsc;
+
+		// wsc = createWebSocketClient();
+		wsc = createSockJsClient();
+
+		wsc.doHandshake(eh, URL).get();
 
 		synchronized (Thread.currentThread()) {
 			Thread.currentThread().wait();
 		}
 	}
 
-	private static void startSockJs(RatesWebSocketHandler eh) throws Exception {
-		List<Transport> transports = new ArrayList<>(2);
-		transports.add(new WebSocketTransport(createWebSocketClient()));
-		transports.add(new RestTemplateXhrTransport());
-
-		SockJsClient sockJsClient = new SockJsClient(transports);
-
-		sockJsClient.doHandshake(eh, URL).get();
-	}
-
-	private static void startWebSocket(RatesWebSocketHandler eh) throws Exception {
-		StandardWebSocketClient wsClient = createWebSocketClient();
-		wsClient.doHandshake(eh, URL).get();
+	private static WebSocketClient createSockJsClient() throws Exception {
+		return new SockJsClient(Collections.<Transport> singletonList(new WebSocketTransport(createWebSocketClient())));
 	}
 
 	private static StandardWebSocketClient createWebSocketClient() throws Exception {

@@ -14,11 +14,11 @@ Displaying data in a Web-based UI:
 
 ------------------------------------------------------------
 
-The Web UI is based on AngularJS with Highchart (Highstock), Bootstrap and SockJS. The Backend is based on Spring-boot 1.3 (JRE 7+).
+The Web UI is based on AngularJS with Highchart (Highstock), Bootstrap and SockJS (STOMP). The Backend is based on Spring-boot 1.3 (JRE 7+).
 
 #### Data provider
 
-**Yahoo Finance** (for continous currencies/stocks data)
+**Yahoo Finance** (for continuous currencies/stocks data)
 
 Free, no registration, JSON format, 172 currencies available and stocks.
 
@@ -31,9 +31,8 @@ Free, no registration, XML format, updated daily at 3pm (CET), most common curre
 Free, no registration, JSON format, updated daily.
 
 #### Todo
-* use elastic search
 * change default currency from US dollar to Euro
 * add metals market data
-* add continuous market data for oil (using yahoo futures (front + "month+1")
+* add continuous market data for oil (using yahoo futures (front + "month+1"))
 * remove discontinued currencies (old european currencies)
 * can make virtual buy/sell transactions

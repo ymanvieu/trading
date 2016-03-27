@@ -16,10 +16,9 @@
  */
 package fr.ymanvieu.forex.core.web;
 
-import java.util.Currency;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,22 +26,22 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mysema.query.BooleanBuilder;
+import com.mysema.query.types.expr.BooleanExpression;
 
 import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
 import fr.ymanvieu.forex.core.model.entity.rate.QLatestRate;
-import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
-import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
 import fr.ymanvieu.forex.core.model.repositories.HistoricalRateRepository;
 import fr.ymanvieu.forex.core.model.repositories.LatestRateRepository;
-import fr.ymanvieu.forex.core.model.repositories.SymbolRepository;
-import fr.ymanvieu.forex.core.util.CurrencyUtils;
+import fr.ymanvieu.forex.core.service.RateService;
 import fr.ymanvieu.forex.core.util.DateUtils;
 
 @ConditionalOnMissingBean(RateControllerDev.class)
@@ -51,13 +50,20 @@ import fr.ymanvieu.forex.core.util.DateUtils;
 public class RateController {
 
 	protected enum AVG_VALUES_RANGE {
-		NONE, HOUR, DAY, WEEK
+		NONE,
+		HOUR,
+		DAY,
+		WEEK
 	}
 
 	private static final long A_DAY_IN_MS = 24 * 3600 * 1000L;
 	private static final long A_WEEK_IN_MS = 7 * A_DAY_IN_MS;
 
-	private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private static final String CRITERIA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private static final String RAW_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+
+	private static final Order FROMCUR_ORDER = new Order(Direction.ASC, "fromcur");
+	private static final Order TOCUR_ORDER = new Order(Direction.ASC, "tocur");
 
 	@Value("${countperpage:10}")
 	private int countPerPage;
@@ -69,58 +75,69 @@ public class RateController {
 	private LatestRateRepository latestrepo;
 
 	@Autowired
-	private SymbolRepository symbolRepo;
+	private RateService rateService;
 
 	@RequestMapping("/latest")
-	public Page<LatestRate> findLatestByCriteria(String fromcur, String tocur, @DateTimeFormat(pattern = DATE_PATTERN) Date date, Integer pageNumber, String sortDir,
+	public Page<LatestRate> findLatestByCriteria(String fromcur, String tocur, @DateTimeFormat(pattern = CRITERIA_DATE_PATTERN) Date date,
+			Integer pageNumber, String sortDir,
 			String sortedBy) {
-		Pageable pageRequest = getPageRequest(pageNumber, sortDir, sortedBy);
 
 		QLatestRate rate = QLatestRate.latestRate;
 		BooleanBuilder builder = new BooleanBuilder();
 
 		if (fromcur != null) {
-			builder.and(rate.fromcur.startsWithIgnoreCase(fromcur));
+			BooleanExpression fromcurExpression = rate.fromcur.code.containsIgnoreCase(fromcur);
+			fromcurExpression = fromcurExpression.or(rate.fromcur.name.containsIgnoreCase(fromcur));
+			builder.and(fromcurExpression);
 		}
 		if (tocur != null) {
-			builder.and(rate.tocur.startsWithIgnoreCase(tocur));
+			BooleanExpression tocurExpression = rate.tocur.code.containsIgnoreCase(tocur);
+			tocurExpression = tocurExpression.or(rate.tocur.name.containsIgnoreCase(tocur));
+			builder.and(tocurExpression);
 		}
 		if (date != null) {
-			Date utcDate = DateUtils.toUTC(date);
-			Date nextDay = DateUtils.nextDay(utcDate);
-			builder.and(rate.date.after(utcDate).and(rate.date.before(nextDay)));
+			Date nextDay = DateUtils.nextDay(date);
+			builder.and(rate.date.after(date).and(rate.date.before(nextDay)));
 		}
 
-		Page<LatestRate> page = latestrepo.findAll(builder, pageRequest);
+		Pageable pageRequest = getPageRequest(pageNumber, sortDir, sortedBy);
 
-		addCurrenciesInfo(page);
+		Page<LatestRate> page = latestrepo.findAll(builder, pageRequest);
 
 		return page;
 	}
 
 	@RequestMapping("/raw")
-	public List<Object[]> findRawValues(String fromcur, String tocur, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ") Date startDate,
-			@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ") Date endDate) {
+	public List<Object[]> findRawValues(String fromcur, String tocur, @DateTimeFormat(pattern = RAW_DATE_PATTERN) Date startDate,
+			@DateTimeFormat(pattern = RAW_DATE_PATTERN) Date endDate) {
 
 		if (fromcur == null || tocur == null) {
 			return null;
 		}
 
+		if (startDate == null) {
+			startDate = rateService.getMin(fromcur, tocur);
+		}
+
+		if (endDate == null) {
+			endDate = rateService.getMax(fromcur, tocur);
+		}
+
 		final List<Object[]> result;
 
 		switch (getRange(startDate, endDate)) {
-		case WEEK:
-			result = repo.findWeeklyValues(fromcur, tocur, startDate, endDate);
+			case WEEK:
+				result = repo.findWeeklyValues(fromcur, tocur, startDate, endDate);
 			break;
-		case DAY:
-			result = repo.findDailyValues(fromcur, tocur, startDate, endDate);
+			case DAY:
+				result = repo.findDailyValues(fromcur, tocur, startDate, endDate);
 			break;
-		case HOUR:
-			result = repo.findHourlyValues(fromcur, tocur, startDate, endDate);
+			case HOUR:
+				result = repo.findHourlyValues(fromcur, tocur, startDate, endDate);
 			break;
-		case NONE:
-		default:
-			result = repo.findDateValues(fromcur, tocur, startDate, endDate);
+			case NONE:
+			default:
+				result = repo.findDateValues(fromcur, tocur, startDate, endDate);
 		}
 
 		return result;
@@ -148,41 +165,6 @@ public class RateController {
 		}
 
 		return AVG_VALUES_RANGE.NONE;
-
-	}
-
-	private void addCurrenciesInfo(Page<? extends RateEntity> page) {
-		List<SymbolEntity> symbols = symbolRepo.findAll();
-
-		for (RateEntity lr : page) {
-			lr.setCountryCodeFrom(CurrencyUtils.codeForCurrency(lr.getFromcur()));
-
-			if (CurrencyUtils.isValidCode(lr.getFromcur())) {
-				String fromName = Currency.getInstance(lr.getFromcur()).getDisplayName(Locale.ENGLISH);
-				lr.setFromName(fromName);
-			} else {
-				lr.setFromName(getNameFromSymbols(lr.getFromcur(), symbols));
-			}
-
-			lr.setCountryCodeTo(CurrencyUtils.codeForCurrency(lr.getTocur()));
-
-			if (CurrencyUtils.isValidCode(lr.getTocur())) {
-				String toName = Currency.getInstance(lr.getTocur()).getDisplayName(Locale.ENGLISH);
-				lr.setToName(toName);
-			} else {
-				lr.setToName(getNameFromSymbols(lr.getTocur(), symbols));
-			}
-		}
-	}
-
-	private String getNameFromSymbols(String code, List<SymbolEntity> symbols) {
-		for (SymbolEntity se : symbols) {
-			if (code.equals(se.getCode())) {
-				return se.getName();
-			}
-		}
-
-		return null;
 	}
 
 	private Pageable getPageRequest(Integer page, String dir, String sortedBy) {
@@ -192,12 +174,17 @@ public class RateController {
 			sortDir = Direction.ASC;
 		}
 		// Sort fields
-		String[] fields = new String[1];
+		String field = "date";
+
 		if (!StringUtils.isEmpty(sortedBy)) {
-			fields[0] = sortedBy;
-		} else {
-			fields[0] = "date";
+			field = sortedBy;
 		}
-		return new PageRequest(page != null && page > 0 ? page - 1 : 0, countPerPage, sortDir, fields);
+
+		Order firstOrder = new Order(sortDir, field);
+
+		List<Order> orders = Arrays.asList(firstOrder, FROMCUR_ORDER, TOCUR_ORDER);
+
+		return new PageRequest(page != null && page > 0 ? page - 1 : 0, countPerPage, new Sort(orders));
 	}
+
 }

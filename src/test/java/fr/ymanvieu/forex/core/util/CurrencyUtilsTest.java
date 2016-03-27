@@ -27,13 +27,24 @@ import org.junit.Test;
 public class CurrencyUtilsTest {
 
 	@Test
-	public void testCodeForCurrency() {
-		assertThat(CurrencyUtils.codeForCurrency(USD)).isEqualTo("us");
-		assertThat(CurrencyUtils.codeForCurrency(EUR)).isEqualTo("europeanunion");
-		assertThat(CurrencyUtils.codeForCurrency("RUB")).isEqualTo("ru");
-		assertThat(CurrencyUtils.codeForCurrency(GBP)).isEqualTo("gb");
-		assertThat(CurrencyUtils.codeForCurrency(CHF)).isEqualTo("ch");
-		assertThat(CurrencyUtils.codeForCurrency("XAU")).isEqualTo("gold");
-		assertThat(CurrencyUtils.codeForCurrency("TOTO")).isNull();
+	public void testCountryFlagForCurrency() {
+		assertThat(CurrencyUtils.countryFlagForCurrency(USD)).isEqualTo("us");
+		assertThat(CurrencyUtils.countryFlagForCurrency(EUR)).isEqualTo("europeanunion");
+		assertThat(CurrencyUtils.countryFlagForCurrency("RUB")).isEqualTo("ru");
+		assertThat(CurrencyUtils.countryFlagForCurrency(GBP)).isEqualTo("gb");
+		assertThat(CurrencyUtils.countryFlagForCurrency(CHF)).isEqualTo("ch");
+		assertThat(CurrencyUtils.countryFlagForCurrency("XAU")).isEqualTo("gold");
+		assertThat(CurrencyUtils.countryFlagForCurrency("TOTO")).isNull();
+	}
+
+	@Test
+	public void testNameForCurrency() {
+		assertThat(CurrencyUtils.nameForCurrency(USD)).isEqualTo("US Dollar");
+		assertThat(CurrencyUtils.nameForCurrency(EUR)).isEqualTo("Euro");
+		assertThat(CurrencyUtils.nameForCurrency(GBP)).isEqualTo("British Pound Sterling");
+		assertThat(CurrencyUtils.nameForCurrency("XAU")).isEqualTo("Gold");
+		assertThat(CurrencyUtils.nameForCurrency("XAF")).isEqualTo("CFA Franc BEAC");
+		assertThat(CurrencyUtils.nameForCurrency("XAG")).isEqualTo("Silver");
+		assertThat(CurrencyUtils.nameForCurrency("TOTO")).isNull();
 	}
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
+import fr.ymanvieu.forex.core.model.Quote;
 import fr.ymanvieu.forex.core.provider.AProvider;
 import fr.ymanvieu.forex.core.provider.impl.YahooStock;
 
@@ -44,11 +44,26 @@ public class Stock {
 		return provider.getCurrency(code);
 	}
 
-	public RateEntity getLatestRate(String code, String targetCurrency) throws IOException {
-		return provider.getLatestRate(code, targetCurrency);
+	public Quote getLatestRate(String code) throws IOException {
+		return provider.getLatestRate(code);
 	}
 
-	public List<RateEntity> getHistoricalRates(String code, String targetCurrency) throws IOException {
-		return provider.getHistoricalRates(code, targetCurrency);
+	public List<Quote> getHistoricalRates(String code) throws IOException {
+		return provider.getHistoricalRates(code);
+	}
+	
+	public Quote getQuoteFromProvider(String code) throws IOException {
+		String currency = getCurrency(code);
+
+		if (currency == null) {
+			return null;
+		}
+
+		currency = currency.toUpperCase();
+
+		Quote quote = getLatestRate(code);
+		quote.setCurrency(currency);
+
+		return quote;
 	}
 }

@@ -18,20 +18,20 @@ package fr.ymanvieu.forex.core.model.repositories;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 
 import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
 
-public interface SymbolRepository extends JpaRepository<SymbolEntity, Long> {
+public interface SymbolRepository extends JpaRepository<SymbolEntity, String>, QueryDslPredicateExecutor<SymbolEntity> {
 
 	SymbolEntity findByCode(String code);
 
-	List<SymbolEntity> findAllByOrderByCode();
+	List<SymbolEntity> findAllByCurrencyNotNullOrderByCode();
 
-	@Transactional
 	@Modifying
-	int deleteByCodeAndCurrency(String code, String currency);
+	int deleteByCode(String code);
+
+	List<SymbolEntity> findAllByCurrencyCode(String code);
 }

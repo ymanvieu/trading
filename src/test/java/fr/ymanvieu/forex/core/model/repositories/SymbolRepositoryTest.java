@@ -14,45 +14,56 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.ymanvieu.forex.core.websocket;
+package fr.ymanvieu.forex.core.model.repositories;
 
-import static fr.ymanvieu.forex.core.provider.impl.Quandl.BRE;
-import static fr.ymanvieu.forex.core.util.CurrencyUtils.USD;
-import static fr.ymanvieu.forex.core.util.DateUtils.DATE_TIME_WITH_TZ;
+import static fr.ymanvieu.forex.core.Utils.symbol;
+import static fr.ymanvieu.forex.core.util.CurrencyUtils.GBP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
+import java.util.List;
 
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.forex.core.ForexApplication;
-import fr.ymanvieu.forex.core.Utils;
-import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
+import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = ForexApplication.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-public class RatesWebSocketHandlerTest {
+public class SymbolRepositoryTest {
 
 	@Autowired
-	private RatesWebSocketHandler handler;
+	private SymbolRepository repo;
 
+	@Sql("/sql/insert_data.sql")
 	@Test
-	public void testSerializeRates() throws Exception {
-		// given
-		RateEntity rate = Utils.rate(BRE, USD, new BigDecimal("57.8"), DATE_TIME_WITH_TZ.parse("2015-04-07 02:00:00.0 CEST"));
-
+	@Transactional
+	public void testDeleteByCode() {
+		assertThat(repo.count()).isEqualTo(8);
 		// when
-		String result = handler.serializeRates(Lists.newArrayList(rate));
+		int result = repo.deleteByCode("UBI.PA");
 
 		// then
-		assertThat(result).isEqualTo("[{\"fromcur\":\"BRE\",\"tocur\":\"USD\",\"value\":57.8,\"date\":1428364800000}]");
+		assertThat(result).isEqualTo(1);
+		assertThat(repo.count()).isEqualTo(7);
+	}
+
+	@Sql({ "/sql/insert_data.sql", "/sql/insert_eur_gbp.sql" })
+	@Test
+	public void testFindAllByCurrencyCode() {
+		// when
+		List<SymbolEntity> result = repo.findAllByCurrencyCode(GBP);
+
+		// then
+		assertThat(result).hasSize(1);
+		assertThat(result).contains(symbol("RR.L", "Rolls Royce Holdings plc", null, symbol(GBP, "British Pound Steerling", "gbp", null)));
 	}
 }

@@ -21,6 +21,9 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,9 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.formLogin() //
 				.and() //
-				.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout")) //
-				.and() //
-				.csrf().disable();
+				.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
 	}
 
 	@Bean
@@ -53,5 +54,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.jdbcAuthentication().dataSource(ds).passwordEncoder(pwEncoder) //
 				.usersByUsernameQuery("select login,password,true from users where login=?") //
 				.authoritiesByUsernameQuery("select login,role from users where login=?");
+	}
+
+	@Configuration
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	@Profile("dev")
+	public static class H2ConsoleSecurityConfig extends WebSecurityConfigurerAdapter {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http.antMatcher("/h2-console/**").csrf().disable().headers().frameOptions().disable();
+		}
 	}
 }

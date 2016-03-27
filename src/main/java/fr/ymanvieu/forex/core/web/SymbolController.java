@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Yoann Manvieu
+ * Copyright (C) 2016 Yoann Manvieu
  *
  * This software is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -17,7 +17,6 @@
 package fr.ymanvieu.forex.core.web;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -34,17 +33,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Stopwatch;
 
-import fr.ymanvieu.forex.core.model.entity.rate.HistoricalRate;
-import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
-import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
+import fr.ymanvieu.forex.core.model.Quote;
 import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
-import fr.ymanvieu.forex.core.model.repositories.HistoricalRateRepository;
-import fr.ymanvieu.forex.core.model.repositories.LatestRateRepository;
-import fr.ymanvieu.forex.core.model.repositories.SymbolRepository;
 import fr.ymanvieu.forex.core.service.Stock;
+import fr.ymanvieu.forex.core.service.SymbolService;
 
 @RestController
 @RequestMapping("/symbol")
+@PreAuthorize("isAuthenticated()")
 public class SymbolController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SymbolController.class);
@@ -53,102 +49,72 @@ public class SymbolController {
 	private Stock stock;
 
 	@Autowired
-	private SymbolRepository symbolRepo;
-
-	@Autowired
-	private HistoricalRateRepository repo;
-
-	@Autowired
-	private LatestRateRepository latestrepo;
+	private SymbolService symbolService;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public List<SymbolEntity> get() {
-		List<SymbolEntity> symbols = symbolRepo.findAllByOrderByCode();
-
-		return symbols;
+		return symbolService.getAllWithCurrency();
 	}
 
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/{code:.+}", method = RequestMethod.GET)
 	public ResponseEntity<?> get(@PathVariable String code) throws IOException {
-		RateEntity re = getRateFromProvider(code);
+		Quote quote = stock.getQuoteFromProvider(code);
 
-		return (re == null) ? new ResponseEntity<>("Symbol unavailable: " + code, HttpStatus.NOT_FOUND) : new ResponseEntity<>(re, HttpStatus.OK);
+		return (quote == null) ? new ResponseEntity<>("Symbol unavailable: " + code, HttpStatus.NOT_FOUND)
+				: new ResponseEntity<>(quote, HttpStatus.OK);
 	}
 
-	private RateEntity getRateFromProvider(String code) throws IOException {
-		String currency = stock.getCurrency(code);
-
-		if (currency == null) {
-			return null;
-		}
-
-		currency = currency.toUpperCase();
-
-		RateEntity re = stock.getLatestRate(code, currency);
-
-		return re;
-	}
-
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> add(@RequestParam String code) throws IOException {
 		Stopwatch addWatch = Stopwatch.createStarted();
 
-		SymbolEntity se = symbolRepo.findByCode(code);
+		SymbolEntity se = symbolService.getForCode(code);
 
 		if (se != null) {
 			return new ResponseEntity<>("Already added: " + se, HttpStatus.OK);
 		}
 
-		RateEntity re = getRateFromProvider(code);
+		Quote latestQuote = stock.getQuoteFromProvider(code);
 
-		if (re == null) {
+		if (latestQuote == null) {
 			return new ResponseEntity<>("Symbol unavailable: " + code, HttpStatus.NOT_FOUND);
 		}
 
-		List<HistoricalRate> hRates = new ArrayList<>();
-
-		List<RateEntity> histoRates;
+		List<Quote> historicalQuotes;
 		try {
-			histoRates = stock.getHistoricalRates(code, re.getTocur());
+			historicalQuotes = stock.getHistoricalRates(code);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>("Symbol available, but history not found: " + code, HttpStatus.NOT_FOUND);
 		}
 
-		for (RateEntity hRate : histoRates) {
-			hRates.add(new HistoricalRate(hRate));
-		}
+		se = symbolService.addSymbol(latestQuote, historicalQuotes);
 
-		hRates.add(new HistoricalRate(re));
+		LOG.info("Symbol {}/{} added in: {}", se, se.getCurrency(), addWatch);
 
-		symbolRepo.save(new SymbolEntity(re.getFromcur(), re.getTocur(), re.getFromName()));
-		latestrepo.save(new LatestRate(re));
-		repo.save(hRates);
-
-		LOG.info("Symbol {}/{} added in: {}", re.getFromcur(), re.getTocur(), addWatch);
-
-		return new ResponseEntity<>(re, HttpStatus.OK);
+		return new ResponseEntity<>(latestQuote, HttpStatus.OK);
 	}
 
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(method = RequestMethod.DELETE)
-	public ResponseEntity<?> delete(@RequestParam String code) {
+	public ResponseEntity<String> delete(@RequestParam String code) {
 		Stopwatch addWatch = Stopwatch.createStarted();
 
-		SymbolEntity se = symbolRepo.findByCode(code);
+		SymbolEntity se = symbolService.getForCode(code);
 
 		if (se == null) {
 			return new ResponseEntity<>("Symbol not found: code=" + code, HttpStatus.NOT_FOUND);
 		}
 
-		symbolRepo.deleteByCodeAndCurrency(se.getCode(), se.getCurrency());
-		latestrepo.deleteByFromcurAndTocur(se.getCode(), se.getCurrency());
-		repo.deleteByFromcurAndTocur(se.getCode(), se.getCurrency());
+		List<SymbolEntity> seCurrencies = symbolService.getAllWithCurrency(code);
 
-		LOG.info("Symbol {}/{} deleted in: {}", se.getCode(), se.getCurrency(), addWatch);
+		if (!seCurrencies.isEmpty()) {
+			return new ResponseEntity<>("Symbol cannot be deleted because used as currency for: " + seCurrencies, HttpStatus.OK);
+		}
 
-		return new ResponseEntity<>("Symbol deleted: code=" + se.getCode() + ", currency=" + se.getCurrency(), HttpStatus.OK);
+		symbolService.removeSymbol(code);
+
+		LOG.info("Symbol {} deleted in: {}", se, addWatch);
+
+		return new ResponseEntity<>("Symbol deleted: " + se, HttpStatus.OK);
 	}
 }

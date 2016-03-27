@@ -70,6 +70,9 @@ public class ForexTest {
 	@Autowired
 	private HistoricalRateRepository repo;
 
+	@Autowired
+	private SymbolService symbolService;
+
 	@Mock
 	private ConnectionHandler handler;
 
@@ -95,7 +98,7 @@ public class ForexTest {
 		when(handler.sendGet(anyString())).thenReturn(RESULT_20141219);
 
 		forex = new Forex(defaultProvider);
-		updater = new DataUpdater(repo, latestRepo, bus);
+		updater = new DataUpdater(repo, latestRepo, symbolService, bus);
 	}
 
 	@Test
@@ -128,7 +131,7 @@ public class ForexTest {
 		List<? extends RateEntity> hRates = repo.findAll();
 		List<? extends RateEntity> lRates = latestRepo.findAll();
 
-		assertThat(hRates).hasSize(183) //
+		assertThat(hRates).hasSize(182) //
 				.doesNotContain( //
 						rate(USD, EUR, new BigDecimal("0.817595"), DATE_TIME_WITH_TZ.parse("2014-12-19 21:40:32.0 GMT")))
 				.containsOnlyOnce( //

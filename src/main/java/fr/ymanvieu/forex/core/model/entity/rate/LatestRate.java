@@ -16,16 +16,12 @@
  */
 package fr.ymanvieu.forex.core.model.entity.rate;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "latestrates")
-public class LatestRate extends RateEntity implements Serializable {
-
-	private static final long serialVersionUID = 3353138979122725386L;
+public class LatestRate extends RateEntity {
 
 	public LatestRate(RateEntity re) {
 		super(re.getFromcur(), re.getTocur(), re.getValue(), re.getDate());

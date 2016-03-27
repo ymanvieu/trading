@@ -62,12 +62,13 @@ app.controller('latestController', function($scope, api, $stateParams) {
 			$scope.current = 1;
 		});
 	};
+	
+	$scope.open1 = function() {
+		$scope.popup1.opened = true;
+	};
 
-	$scope.open = function($event, opened) {
-		$event.preventDefault();
-		$event.stopPropagation();
-
-		$scope[opened] = true;
+	$scope.popup1 = {
+		opened: false
 	};
 
 	$scope.dateOptions = {

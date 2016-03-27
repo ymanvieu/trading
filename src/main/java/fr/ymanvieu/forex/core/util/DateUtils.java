@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.joda.time.DateTime;
 import org.joda.time.Months;
@@ -41,25 +40,6 @@ public class DateUtils {
 	 */
 	public static Date parse(String dateStr) throws ParseException {
 		return DATE_TIME_WITH_TZ.parse(dateStr);
-	}
-
-	/**
-	 * Extract date and time from the given date and returns a date object with the same date/time on the UTC time zone.
-	 *
-	 * @param date
-	 */
-	public static Date toUTC(Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-
-		Calendar utcCal = Calendar.getInstance();
-		utcCal.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-		utcCal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY),
-				cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-		utcCal.set(Calendar.MILLISECOND, cal.get(Calendar.MILLISECOND));
-
-		return utcCal.getTime();
 	}
 
 	/**

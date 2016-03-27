@@ -30,10 +30,3 @@ app.factory('api', function(Restangular) {
 		},
 	};
 });
-
-//angular-sockjs
-app.factory('mySocket', function(socketFactory) {
-	return socketFactory({
-		url : '/latest'
-	});
-});

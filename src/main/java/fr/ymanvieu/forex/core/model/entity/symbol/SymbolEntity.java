@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Yoann Manvieu
+ * Copyright (C) 2016 Yoann Manvieu
  * 
  * This software is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -16,63 +16,49 @@
  */
 package fr.ymanvieu.forex.core.model.entity.symbol;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 
-import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
-
+@JsonInclude(Include.NON_NULL)
 @Entity
 @Table(name = "symbols")
 public class SymbolEntity {
 
-	@JsonIgnore
 	@Id
-	@Column(columnDefinition = "integer(11)")
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
-
-	@Column(nullable = false)
-	private String name;
-
-	@Column(columnDefinition = "varchar(8)", nullable = false)
+	@Column(length = 8)
 	private String code;
 
-	@Column(columnDefinition = "varchar(3)", nullable = false)
-	private String currency;
+	private String name;
 
-	@JsonIgnoreProperties({ "fromcur", "tocur" })
-	@OneToOne
-	@JoinColumns({ //
-			@JoinColumn(insertable = false, updatable = false, referencedColumnName = "fromcur", name = "code"), //
-			@JoinColumn(insertable = false, updatable = false, referencedColumnName = "tocur", name = "currency") })
-	private LatestRate latestrate;
+	@Column(name = "country_flag", length=16)
+	private String countryFlag;
+
+	// for stock symbols
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(nullable = true, name = "currency", referencedColumnName = "code")
+	private SymbolEntity currency;
 
 	public SymbolEntity() {
 	}
 
-	public SymbolEntity(String code, String currency, String name) {
-		this.code = requireNonNull(code, "code is null");
-		this.name = requireNonNull(name, "name is null");
-		this.currency = requireNonNull(currency, "currency is null");
-	}
+	public SymbolEntity(String code) {
+		Objects.requireNonNull(code, "code is null");
+		Preconditions.checkArgument(code.length() <= 8, "code size is more than 8: ", code);
 
-	public Long getId() {
-		return id;
+		this.code = code;
 	}
 
 	public String getCode() {
@@ -82,18 +68,30 @@ public class SymbolEntity {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
 
-	public String getCurrency() {
+	public String getCountryFlag() {
+		return countryFlag;
+	}
+
+	public void setCountryFlag(String countryFlag) {
+		this.countryFlag = countryFlag;
+	}
+
+	public SymbolEntity getCurrency() {
 		return currency;
 	}
 
-	public LatestRate getLatestrate() {
-		return latestrate;
+	public void setCurrency(SymbolEntity currency) {
+		this.currency = currency;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(code, name);
+		return Objects.hash(code, name, countryFlag);
 	}
 
 	@Override
@@ -108,7 +106,7 @@ public class SymbolEntity {
 
 		return Objects.equals(code, other.code) //
 				&& Objects.equals(name, other.name) //
-				&& Objects.equals(currency, other.currency);
+				&& Objects.equals(countryFlag, other.countryFlag);
 	}
 
 	@Override
@@ -116,6 +114,6 @@ public class SymbolEntity {
 		return MoreObjects.toStringHelper(this) //
 				.add("code", code) //
 				.add("name", name) //
-				.add("currency", currency).toString();
+				.add("countryFlag", countryFlag).toString();
 	}
 }

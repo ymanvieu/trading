@@ -26,6 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import com.google.common.io.Files;
 
 import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
+import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
 
 public class Utils {
 
@@ -35,5 +36,13 @@ public class Utils {
 
 	public static RateEntity rate(String from, String to, BigDecimal rate, Date date) {
 		return new RateEntity(from, to, rate, date);
+	}
+
+	public static SymbolEntity symbol(String code, String name, String countryFlag, SymbolEntity currency) {
+		SymbolEntity se = new SymbolEntity(code);
+		se.setName(name);
+		se.setCountryFlag(countryFlag);
+		se.setCurrency(currency);
+		return se;
 	}
 }

@@ -19,6 +19,7 @@ package fr.ymanvieu.forex.core.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import fr.ymanvieu.forex.core.event.RatesUpdatedEvent;
 import fr.ymanvieu.forex.core.model.entity.rate.HistoricalRate;
 import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
 import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
+import fr.ymanvieu.forex.core.model.entity.symbol.SymbolEntity;
 import fr.ymanvieu.forex.core.model.repositories.HistoricalRateRepository;
 import fr.ymanvieu.forex.core.model.repositories.LatestRateRepository;
 import fr.ymanvieu.forex.core.provider.AProvider;
@@ -46,12 +48,15 @@ public class DataUpdater {
 
 	private final LatestRateRepository latestrepo;
 
+	private final SymbolService symbolService;
+
 	private final EventBus bus;
 
 	@Autowired
-	public DataUpdater(HistoricalRateRepository repo, LatestRateRepository latestrepo, EventBus bus) {
+	public DataUpdater(HistoricalRateRepository repo, LatestRateRepository latestrepo, SymbolService symbolService, EventBus bus) {
 		this.repo = repo;
 		this.latestrepo = latestrepo;
+		this.symbolService = symbolService;
 		this.bus = bus;
 	}
 
@@ -68,7 +73,12 @@ public class DataUpdater {
 			return;
 		}
 
-		Collections.sort(rates);
+		Collections.sort(rates, new Comparator<RateEntity>() {
+			@Override
+			public int compare(RateEntity o1, RateEntity o2) {
+				return o1.getDate().compareTo(o2.getDate());
+			}
+		});
 
 		Stopwatch saveWatch = Stopwatch.createStarted();
 
@@ -77,10 +87,16 @@ public class DataUpdater {
 		List<HistoricalRate> newHistoRates = new ArrayList<>();
 		List<LatestRate> newLatestRates = new ArrayList<>();
 
+		List<SymbolEntity> symbols = symbolService.getAll();
+
 		for (RateEntity rate : rates) {
 			LatestRate existingLatestRate = getFromList(existingLatestRates, rate);
 
 			if (existingLatestRate == null) {
+				// optimize
+				addSymbol(symbols, rate.getFromcur().getCode());
+				addSymbol(symbols, rate.getTocur().getCode());
+
 				LatestRate newLatestRate = new LatestRate(rate);
 				newLatestRates.add(newLatestRate);
 				newHistoRates.add(new HistoricalRate(rate));
@@ -109,9 +125,19 @@ public class DataUpdater {
 		LOG.info("{}: Rates updated in {}", provider, startWatch);
 	}
 
+	private void addSymbol(List<SymbolEntity> symbols, String code) {
+		for (SymbolEntity se : symbols) {
+			if (se.getCode().equals(code)) {
+				return;
+			}
+		}
+
+		symbols.add(symbolService.addSymbolForCurrency(code));
+	}
+
 	private <T extends RateEntity> T getFromList(List<T> rates, RateEntity rate) {
 		for (T r : rates) {
-			if (r.getFromcur().equals(rate.getFromcur()) && r.getTocur().equals(rate.getTocur())) {
+			if (r.getFromcur().getCode().equals(rate.getFromcur().getCode()) && r.getTocur().getCode().equals(rate.getTocur().getCode())) {
 				return r;
 			}
 		}

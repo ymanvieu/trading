@@ -69,6 +69,9 @@ public class OilTest {
 	@Autowired
 	private HistoricalRateRepository repo;
 
+	@Autowired
+	private SymbolService symbolService;
+
 	@Mock
 	private ConnectionHandler oilHandler;
 
@@ -92,7 +95,7 @@ public class OilTest {
 		when(oilHandler.sendGet(anyString())).thenReturn(BRENT_LIGHT);
 
 		oil = new Oil(quandl);
-		updater = new DataUpdater(repo, latestRepo, bus);
+		updater = new DataUpdater(repo, latestRepo, symbolService, bus);
 	}
 
 	@Sql("/sql/insert_data.sql")
@@ -110,7 +113,7 @@ public class OilTest {
 		List<? extends RateEntity> hRates = repo.findAll();
 		List<? extends RateEntity> lRates = latestRepo.findAll();
 
-		assertThat(hRates).hasSize(14);
+		assertThat(hRates).hasSize(13);
 		assertThat(hRates).containsOnlyOnce(expectedOldLatest, expectedAdded, expectedNewLatest);
 
 		assertThat(lRates).hasSize(2);
@@ -160,7 +163,7 @@ public class OilTest {
 		List<? extends RateEntity> hRates = repo.findAll();
 		List<? extends RateEntity> lRates = latestRepo.findAll();
 
-		assertThat(hRates).hasSize(14);
+		assertThat(hRates).hasSize(13);
 		assertThat(hRates).containsOnlyOnce(expectedOldLatest, expectedAdded, expectedNewLatest);
 
 		assertThat(lRates).hasSize(2);
@@ -189,7 +192,7 @@ public class OilTest {
 		List<? extends RateEntity> hRates = repo.findAll();
 		List<? extends RateEntity> lRates = latestRepo.findAll();
 
-		assertThat(hRates).hasSize(131);
+		assertThat(hRates).hasSize(130);
 		assertThat(hRates).containsOnlyOnce(expectedOldLatest, expectedFirstCallLatest, expectedAdded, expectedNewLatest);
 
 		assertThat(lRates).hasSize(2);

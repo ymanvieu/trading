@@ -19,28 +19,20 @@ package fr.ymanvieu.forex.core.service;
 import static fr.ymanvieu.forex.core.util.CurrencyUtils.EUR;
 import static fr.ymanvieu.forex.core.util.CurrencyUtils.USD;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
-import com.mysema.query.BooleanBuilder;
-
-import fr.ymanvieu.forex.core.event.RatesUpdatedEvent;
-import fr.ymanvieu.forex.core.model.entity.rate.HistoricalRate;
-import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
-import fr.ymanvieu.forex.core.model.entity.rate.QLatestRate;
 import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
-import fr.ymanvieu.forex.core.model.repositories.HistoricalRateRepository;
-import fr.ymanvieu.forex.core.model.repositories.LatestRateRepository;
+import fr.ymanvieu.forex.core.provider.AProvider;
 
 /**
  * Fake data provider to simulate real-time data updates in the historical chart web page.
@@ -51,37 +43,29 @@ public class SchedulerRandom {
 
 	private static final Random RANDOM = new Random();
 
-	@Autowired
-	private LatestRateRepository lastRepo;
+	private final DataUpdater dataUpdater;
 
 	@Autowired
-	private HistoricalRateRepository repo;
-
-	private static final Logger LOG = LoggerFactory.getLogger(SchedulerRandom.class);
-
-	@Autowired
-	private EventBus bus;
+	public SchedulerRandom(DataUpdater dataUpdater) {
+		this.dataUpdater = dataUpdater;
+	}
 
 	@Scheduled(fixedRate = 5000)
-	public void updateRates() {
-		RateEntity rate = new RateEntity(USD, EUR, new BigDecimal(RANDOM.nextFloat()), new Date());
-		HistoricalRate hRate = new HistoricalRate(rate);
-		repo.save(hRate);
+	public void updateRates() throws IOException {
+		dataUpdater.updateRates(new AProvider() {
 
-		QLatestRate rate1 = QLatestRate.latestRate;
+			@Override
+			public List<RateEntity> getRates() throws IOException {
+				RateEntity usdeur = new RateEntity(USD, EUR, new BigDecimal(RANDOM.nextFloat()), new Date());
+				RateEntity breusd = new RateEntity("BRE", USD, new BigDecimal(10 * RANDOM.nextFloat() + 30), new Date());
 
-		LatestRate lrate = lastRepo.findOne(new BooleanBuilder(rate1.fromcur.startsWith(USD)).and(rate1.tocur.startsWith(EUR)));
+				return Arrays.asList(usdeur, breusd);
+			}
 
-		if (lrate == null) {
-			lrate = new LatestRate(rate);
-		} else {
-			lrate.setDate(rate.getDate());
-			lrate.setValue(rate.getValue());
-		}
-
-		lastRepo.save(lrate);
-
-		bus.post(new RatesUpdatedEvent(Lists.newArrayList(rate)));
-		LOG.debug("Updated: new rate is {}", rate);
+			@Override
+			public String toString() {
+				return SchedulerRandom.class.getSimpleName();
+			}
+		});
 	}
 }

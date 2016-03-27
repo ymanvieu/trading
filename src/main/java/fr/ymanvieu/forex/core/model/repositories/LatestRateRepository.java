@@ -16,17 +16,17 @@
  */
 package fr.ymanvieu.forex.core.model.repositories;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
 
 import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
 
 public interface LatestRateRepository extends JpaRepository<LatestRate, Long>, QueryDslPredicateExecutor<LatestRate> {
 
-	@Transactional
 	@Modifying
-	int deleteByFromcurAndTocur(String fromcur, String tocur);
+	@Query("delete FROM #{#entityName} where fromcur.code=:code or tocur.code=:code")
+	int deleteByFromcurCodeOrTocurCode(@Param("code") String code);
 }

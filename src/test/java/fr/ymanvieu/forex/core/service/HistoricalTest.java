@@ -52,6 +52,9 @@ public class HistoricalTest {
 	@Autowired
 	private HistoricalRateRepository repo;
 
+	@Autowired
+	private SymbolService symbolService;
+
 	@InjectMocks
 	private Quandl quandl;
 
@@ -74,7 +77,7 @@ public class HistoricalTest {
 		MockitoAnnotations.initMocks(this);
 		when(handler.sendGet(anyString())).thenReturn(MOCK_BRENT, MOCK_HIST, MOCK_BRENT, MOCK_HIST);
 
-		histo = new Historical(repo, quandl, ecb);
+		histo = new Historical(repo, quandl, ecb, symbolService);
 	}
 
 	@Test
@@ -89,7 +92,6 @@ public class HistoricalTest {
 		histo.addHistory();
 		histo.addHistory();
 
-		// FIXME do not add duplicates
-		assertThat(repo.findAll()).hasSize(74);
+		assertThat(repo.findAll()).hasSize(37);
 	}
 }

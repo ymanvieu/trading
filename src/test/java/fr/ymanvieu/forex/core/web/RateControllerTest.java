@@ -44,6 +44,8 @@ import fr.ymanvieu.forex.core.ForexApplication;
 import fr.ymanvieu.forex.core.model.entity.rate.LatestRate;
 import fr.ymanvieu.forex.core.model.entity.rate.RateEntity;
 import fr.ymanvieu.forex.core.model.repositories.HistoricalRateRepository;
+import fr.ymanvieu.forex.core.model.repositories.LatestRateRepository;
+import fr.ymanvieu.forex.core.service.RateService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = ForexApplication.class)
@@ -54,6 +56,12 @@ public class RateControllerTest {
 
 	@Mock
 	private HistoricalRateRepository repoMock;
+	
+	@Mock
+	private LatestRateRepository latestrepo;
+
+	@Mock
+	private RateService rateService;
 
 	@InjectMocks
 	private RateController mockedController;
@@ -76,8 +84,8 @@ public class RateControllerTest {
 
 		RateEntity r = result.getContent().get(0);
 
-		assertThat(r.getFromcur()).isEqualTo(USD);
-		assertThat(r.getTocur()).isEqualTo(EUR);
+		assertThat(r.getFromcur().getCode()).isEqualTo(USD);
+		assertThat(r.getTocur().getCode()).isEqualTo(EUR);
 		assertThat(r.getDate()).hasSameTimeAs(DATE_TIME_WITH_TZ.parse("2015-01-30 13:55:00.0 CET"));
 		assertThat(r.getValue()).isEqualByComparingTo("0.88");
 	}
