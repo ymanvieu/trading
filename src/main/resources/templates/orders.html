@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Orders</title>
+<link rel="stylesheet" href="/webjars/bootstrap/@bootstrap.version@/css/bootstrap.min.css" />
+<link rel="stylesheet" href="/css/style.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	
+	<div class="container">
+	
+		<div th:replace="fragments/msg :: msg(response=${response})"></div>
+
+		<form th:object="${orderInfo}" class="text-center form-inline" method="post" action="#" th:action="@{/order/}" >
+			<div class="form-group">
+				<label>Select stock:</label>
+				<select id="selectectedSymbol" class="form-control" name="code" onchange="window.location='order?selected='+this.value">
+					<option th:each="s : ${orderInfo.symbols}" th:selected="*{selected} != null and *{selected.symbol.code} == ${s.code}" 
+					onselect="window.location='order?selected='+this.value" th:value="${s.code}" th:text="${s.name}+' ('+${s.code}+')'"></option>
+				</select> 
+				<input id="quantityInputId" oninput="getData()" autocomplete="off" type="number" name="quantity" class="form-control" /> 
+				<input class="btn btn-success" type="submit" value="Buy" formaction="buy" />
+				<input class="btn btn-danger" type="submit" value="Sell" formaction="sell" />
+			</div>
+		</form>
+		
+		<script type="text/javascript" th:inline="javascript">
+		// <![CDATA[
+			function getData() {
+				var url = 'order?quantity=' + $('#quantityInputId').val() + '&selected='+$('#selectectedSymbol').val();
+			   
+			    $("#result").load(url);
+			}
+		// ]]>
+		</script>
+		
+		<p></p>
+		
+		<div id="result" th:fragment="result" class="row" th:object="${orderInfo}">
+			<div class="col-md-6 col-md-offset-3">
+				<table class="table table-striped table-hover" th:if="*{selected} != null" th:object="${orderInfo.selected}">
+					<tbody>
+						<tr th:if="*{quantity} != null">
+							<td>Owned</td>
+							<td th:text="*{{quantity}}"></td>
+						</tr>
+						<tr th:if="*{value} != null">
+							<td>Invested value</td>
+							<td th:text="*{{value}}"></td>
+						</tr>
+						<tr th:if="*{currentValue} != null">
+							<td>Current value</td>
+							<td th:text="*{{currentValue}}"></td>
+						</tr>
+						<tr th:if="*{currentRate} != null">
+							<td>Current rate</td>
+							<td th:text="*{{currentRate}}"></td>
+						</tr>
+						<tr th:if="*{percentChange} != null">
+							<td>% change</td>
+							<td class="colored" th:text="*{{percentChange}} eq 0 ? '0' : *{{percentChange}}"></td>
+						</tr>
+						<tr th:if="*{valueChange} != null">
+							<td>Value change</td>
+							<td class="colored"	th:text="(*{{valueChange}} eq 0 ? '0' : *{{valueChange}})+' '+ (${orderInfo.selectedCurrency} != null ? ${orderInfo.selectedCurrency.symbol.code} : '')"></td>
+						</tr>
+						<tr th:if="${orderInfo.selectedCurrency} != null" th:object="${orderInfo.selectedCurrency}">
+							<td>Currency available</td>
+							<td>
+								<span th:text="*{quantity} eq 0 ? '0' : *{{quantity}}+' '+*{symbol.code}"></span>
+							</td>
+						</tr>
+						<tr th:if="${orderInfo.gainCost} != null and ${orderInfo.selectedCurrency} != null">
+							<td>Gain/Cost</td>
+							<td><span th:text="${{orderInfo.gainCost}}+' '+${orderInfo.selectedCurrency.symbol.code}"></span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

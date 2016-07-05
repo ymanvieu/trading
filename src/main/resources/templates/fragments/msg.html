@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+	<div th:fragment="msg(response)" th:if="${response} != null">
+	
+		<div th:if="${response.message != null}" class="alert alert-info alert-dismissible" role="alert">
+			<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
+			<strong th:if="${response.messageTitle != null}" th:text="${response.messageTitle}"></strong>
+			<div th:text="${response.message}"></div>
+		</div>
+		
+		<div th:if="${response.errorMessage != null}" class="alert alert-danger alert-dismissible" role="alert">
+			<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
+			<div th:text="${response.errorMessage}"></div>
+		</div>
+	</div>
+</body>
+</html>

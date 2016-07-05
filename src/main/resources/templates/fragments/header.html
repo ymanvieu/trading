@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+</head>
+<body>
+	<div th:fragment="header">
+	
+		<script type="text/javascript" src="/webjars/jquery/@jquery.version@/jquery.min.js"></script>
+		<script type="text/javascript" src="/webjars/bootstrap/@bootstrap.version@/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/balance-color.js"></script>
+		
+		<nav class="navbar navbar-inverse">
+			<div class="container" th:with="url = @{${#httpServletRequest.requestURI}}">
+				
+				<div class="navbar-header">
+				    <button type="button" class="navbar-toggle" data-toggle="collapse" 
+				    	data-target="#navbar-collapse-1" aria-expanded="false">
+				      <span class="sr-only">Toggle navigation</span>
+				      <span class="icon-bar"></span>
+				      <span class="icon-bar"></span>
+				      <span class="icon-bar"></span>
+				    </button>
+
+					<a class="navbar-brand" href="#" th:href="@{/}" >
+						<span class="hidden-xs" th:text="#{app.name}"></span> 
+						<span class="visible-xs glyphicon glyphicon-home" aria-hidden="true"></span> 
+					</a>
+					<a class="visible-xs navbar-brand" sec:authorize="isAuthenticated()" th:href="@{/portofolio}">
+						<span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> 
+					</a>
+					<a class="visible-xs navbar-brand" sec:authorize="hasAuthority('ADMIN')" th:href="@{/admin}">
+						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> 
+					</a>					
+				</div>
+				
+				<div class="collapse navbar-collapse" id="navbar-collapse-1">
+					
+					<ul class="nav navbar-nav navbar-left">
+						<li sec:authorize="isAuthenticated()" th:class="${#strings.contains(url,'/portofolio')} ? 'active'">
+							<a th:href="@{/portofolio}" th:text="#{portofolio.name}"></a>
+						</li>
+						<li sec:authorize="hasAuthority('ADMIN')" th:class="${#strings.contains(url,'/admin')} ? 'active'">
+							<a th:href="@{/admin}" th:text="#{admin.name}"></a>
+						</li>
+						<li class="visible-md visible-lg">
+							<p class="navbar-text">@project.version@-@project.build.timestamp@</p>
+						</li>
+					</ul>
+					
+					<ul class="nav navbar-nav navbar-right">
+						<li sec:authorize="!isAuthenticated()">
+							<form action="#" class="navbar-form">
+							    <button type="submit" th:formaction="@{/user/signup}" class="btn btn-success form-control" th:utext="#{user.create}"></button>
+							</form>
+						</li>
+						<li sec:authorize="isAuthenticated()" th:if="${portofolio.baseCurrency} != null">				
+							<p class="navbar-text" th:object="${portofolio.baseCurrency}">
+								<span class="balance">
+									<strong th:inline="text">[[*{quantity} eq 0 ? '0':*{{quantity}}+' '+*{symbol.code}]]</strong>
+								</span>
+							</p>
+						</li>
+						<li sec:authorize="isAuthenticated()">
+							<p class="navbar-text" th:text="${#authentication.name}"></p>
+						</li>
+						<li sec:authorize="!isAuthenticated()">
+							<form action="#" class="navbar-form">
+								<button type="submit" th:formaction="@{/login}" class="btn btn-primary form-control" th:utext="#{user.logon}"></button>
+							</form>
+						</li>
+						<li sec:authorize="isAuthenticated()">
+							<form action="#" method="post" th:action="@{/logout}" class="navbar-form">
+								<button type="submit" class="btn btn-danger form-control" th:inline="text">
+									<span class="visible-sm glyphicon glyphicon-off" aria-hidden="true"></span> 
+									<span class="visible-xs visible-md visible-lg">[[#{user.logout}]]</span>
+								</button>
+							</form>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>
+</body>
+</html>

@@ -14,3 +14,7 @@
 h1 {
 	text-align: center;
 }
+
+.m-align {
+	vertical-align: middle;
+}
