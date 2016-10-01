@@ -1,6 +1,6 @@
 #Trading
 Running demo: 
-<https://srv.cloud-app.one>
+<https://cloud-app.one>
 
 This project has 3 goals : 
 
