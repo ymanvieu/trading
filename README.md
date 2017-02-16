@@ -1,42 +1,48 @@
-#Trading
-Running demo: 
+# Trading
+
+Trading is an application collecting financial data from several providers and allow users to play with their virtual portofolio.
+
+## Live demo
 <https://cloud-app.one>
 
-This project has 3 goals : 
-
-Collecting financial data from providers (see list below): 
+## Modules
+#### trading-data-collect
+Collecting financial data from providers: 
 * Currencies and stocks : every 5 min 
-* Crude oil (Brent) : everyday at 6 AM (UTC)
+* Crude oil (Brent) : everyday at 8 AM (UTC)
 
-Displaying data in a Web-based UI: 
-* Latest collected data
-* Historical data with an interactive chart
+#### trading-webapp
+Responsive Web inteface containing the following screens : 
+* Index: Latest collected data 
+* Chart: Historical data with an interactive chart
+* Portofolio: Buy/sell stocks and currencies
+* Admin: add/remove stocks to collect (ADMIN users only, search is based on Yahoo tickers)
 
-Make orders with virtual money (free registration):
-* Buy/sell stocks and currencies
+#### trading-common
+Contains the business and DAO layers as well as the implementation how financial data is collected.
 
-------------------------------------------------------------
+## Requirements
+Trading requires Java 1.8 or later.
+With few modifications (mostly replacing lambda expressions and streams by good ol' java loop/for syntax), it can be backported to Java 1.7 !
 
-The Web UI is based on Thymeleaf, AngularJS with Highchart (Highstock), Bootstrap and SockJS (STOMP). 
-The Backend is based on Spring-boot 1.3 (JRE 7+).
+## Building from Source
 
-Users registration secured with anti-bot [Google reCAPTCHA 2](https://www.google.com/recaptcha/intro/index.html)
+Trading uses Maven for its build. To build the complete project run
 
-#### Data provider
+    mvn clean install
 
-**Yahoo Finance** (for continuous currencies/stocks data and ticker lookup)
+from the root of the project directory. To build deployable WAR files (one for each module), run 
 
-Free, no registration, JSON format, 172 currencies available and stocks.
+    mvn clean install -P prod-package
 
-**European Central Bank** (for historical forex data)
+## Under the hood
+* Frontend is powered by Thymeleaf, AngularJS with Highchart (Highstock), Bootstrap and SockJS (STOMP). 
+* Backend is powered by Spring-boot 1.5 and use a lot of Spring modules (spring-web, spring-security, spring-data-jpa, spring-session, etc...) and third-party dependencies like Querydsl, Guava, Lombok, Mapstruct...
+* Persistence is configured to use H2DB in dev-mode and MySQL otherwise, but can use other DBMS in no time by switching the database driver dependency and editing the main configuration file.
+* Users registration is secured with [Google reCAPTCHA 2](https://www.google.com/recaptcha/intro/index.html) (optional)
 
-Free, no registration, XML format, updated daily at 3pm (CET), most common currencies available.
-
-**Quandl** (for crude oil daily/historical data)
-
-Free, optional registration, JSON format, updated daily.
-
-#### Todo
-* change default currency from US dollar to Euro
-* add metals market data
-* add continuous market data for oil (using yahoo futures (front + "month+1"))
+## Todo : Because the road never ends
+* Configurable default portofolio currency
+* add metals market data (which provider ?)
+* implement a trading bot
+* Suggestions appreciated :)
