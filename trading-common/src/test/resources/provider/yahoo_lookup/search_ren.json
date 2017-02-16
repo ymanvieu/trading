@@ -1,0 +1,98 @@
+{
+	"ResultSet": 
+	{
+		"Query": "ren",
+		"Result": 
+		[
+			{
+				"symbol": "REN",
+				"name": "Resolute Energy Corporation",
+				"exch": "NYQ",
+				"type": "S",
+				"exchDisp": "NYSE",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "RNO.PA",
+				"name": "Renault SA",
+				"exch": "PAR",
+				"type": "S",
+				"exchDisp": "Paris",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "RTO.L",
+				"name": "Rentokil Initial plc",
+				"exch": "LSE",
+				"type": "S",
+				"exchDisp": "Londres",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "IMPACTISRREN.PA",
+				"name": "Impact ISR Rendement Solidaire I",
+				"exch": "YHD",
+				"type": "M",
+				"exchDisp": "Industrie",
+				"typeDisp": "Fonds"
+			},
+
+			{
+				"symbol": "FR0010820332.PA",
+				"name": "Amundi Rendement Plus PC",
+				"exch": "YHD",
+				"type": "M",
+				"exchDisp": "Industrie",
+				"typeDisp": "Fonds"
+			},
+
+			{
+				"symbol": "RNL.BE",
+				"name": "RENAULT",
+				"exch": "BER",
+				"type": "S",
+				"exchDisp": "Berlin",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "ELRC",
+				"name": "Electro Rent Corporation",
+				"exch": "NMS",
+				"type": "S",
+				"exchDisp": "NASDAQ",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "RENN",
+				"name": "Renren Inc.",
+				"exch": "NYQ",
+				"type": "S",
+				"exchDisp": "NYSE",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "RNO.SW",
+				"name": "RENAULT",
+				"exch": "EBS",
+				"type": "S",
+				"exchDisp": "Suisse",
+				"typeDisp": "Titres"
+			},
+
+			{
+				"symbol": "LREN3.SA",
+				"name": "Lojas Renner S.A.",
+				"exch": "SAO",
+				"type": "S",
+				"exchDisp": "Sao Paolo",
+				"typeDisp": "Titres"
+			}
+		]
+	}
+}
