@@ -2,13 +2,13 @@
 
 ## Data providers (see [provider.properties](src/main/resources/provider.properties) for URLs)
 
-**Yahoo Finance** (for continuous currencies/stocks data and ticker lookup)
+#### Yahoo Finance (for continuous currencies/stocks data and ticker lookup)
 Free, no registration, JSON format, 172 currencies available and stocks.
 
-**European Central Bank** (for historical currencies data)
+#### European Central Bank (for historical currencies data)
 Free, no registration, XML format, updated daily, most common currencies available.
 
-**Quandl** (for crude oil daily/historical data)
+#### Quandl (for crude oil daily/historical data)
 Free, optional registration, JSON format, updated daily.
 
 ## Known issues
