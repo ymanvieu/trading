@@ -6,19 +6,19 @@ Trading is an application collecting financial data from several providers and a
 <https://cloud-app.one>
 
 ## Modules
-#### trading-data-collect
+### Trading-data-collect
 Collecting financial data from providers: 
 * Currencies and stocks : every 5 min 
 * Crude oil (Brent) : everyday at 8 AM (UTC)
 
-#### trading-webapp
+### Trading-webapp
 Responsive Web inteface containing the following screens : 
 * Index: Latest collected data 
 * Chart: Historical data with an interactive chart
 * Portofolio: Buy/sell stocks and currencies
 * Admin: add/remove stocks to collect (ADMIN users only, search is based on Yahoo tickers)
 
-#### trading-common
+### Trading-common
 Contains the business and DAO layers as well as the implementation how financial data is collected.
 
 ## Requirements
