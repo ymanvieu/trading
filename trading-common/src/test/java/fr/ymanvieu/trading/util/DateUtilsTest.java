@@ -16,7 +16,7 @@
  */
 package fr.ymanvieu.trading.util;
 
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
@@ -24,22 +24,20 @@ import java.util.Date;
 import org.junit.Test;
 
 public class DateUtilsTest {
-	
+
 	@Test
-	public void testNextDay() throws Exception {
-		// given
-		Date date = parse("2015-09-12 18:50:26.55 CEST");
+	public void testNextDay() {
+		Date date = parse("2015-09-12T18:50:26+02:00");
 
-		// when
-		Date actual = DateUtils.nextDay(date);
+		Date result = DateUtils.nextDay(date);
 
-		assertThat(actual).hasSameTimeAs(parse("2015-09-13 18:50:26.55 CEST"));
+		assertThat(result).hasSameTimeAs(parse("2015-09-13T18:50:26+02:00"));
 	}
 
 	@Test
-	public void testGetNbOfMonths() throws Exception {
-		Date date1 = parse("2015-02-05 18:50:26.55 CET");
-		Date date2 = parse("2015-08-05 18:50:26.55 CEST");
+	public void testGetNbOfMonths() {
+		Date date1 = parse("2015-02-05T18:50:26+01:00");
+		Date date2 = parse("2015-08-05T18:50:26+02:00");
 
 		int result = DateUtils.getNbOfMonths(date1, date2);
 
@@ -47,9 +45,9 @@ public class DateUtilsTest {
 	}
 
 	@Test
-	public void testGetNbOfMonths_JustBelowSixMonths() throws Exception {
-		Date date1 = parse("2015-02-05 18:50:26.55 CET");
-		Date date2 = parse("2015-08-05 18:50:26.54 CEST");
+	public void testGetNbOfMonths_JustBelowSixMonths() {
+		Date date1 = parse("2015-02-05T18:50:26.556+01:00");
+		Date date2 = parse("2015-08-05T18:50:26.555+02:00");
 
 		int result = DateUtils.getNbOfMonths(date1, date2);
 
@@ -57,9 +55,9 @@ public class DateUtilsTest {
 	}
 
 	@Test
-	public void testGetNbOfMonths_DatesfromDifferentYears() throws Exception {
-		Date date1 = parse("2014-12-31 18:50:26.55 CET");
-		Date date2 = parse("2015-01-01 18:50:26.54 CET");
+	public void testGetNbOfMonths_DatesfromDifferentYears() {
+		Date date1 = parse("2014-12-31T18:50:26+01:00");
+		Date date2 = parse("2015-01-01T18:50:26+01:00");
 
 		int result = DateUtils.getNbOfMonths(date1, date2);
 

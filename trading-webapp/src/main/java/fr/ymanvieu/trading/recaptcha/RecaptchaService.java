@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import fr.ymanvieu.trading.config.RecaptchaProperties;
 import lombok.ToString;
 
 @ConditionalOnBean(RecaptchaProperties.class)

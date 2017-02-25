@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Yoann Manvieu
+ * Copyright (C) 2015 Yoann Manvieu
  *
  * This software is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -14,30 +14,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.ymanvieu.trading.util;
+package fr.ymanvieu.trading.test.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
+import java.util.Date;
 
 import org.junit.Test;
 
-import fr.ymanvieu.trading.util.MathUtils;
-
-public class MathUtilsTest {
+public class DateParserTest {
 
 	@Test
-	public void testDivide() {
-		assertThat(MathUtils.divide(new BigDecimal("1.2"), new BigDecimal("0.7"))).isEqualByComparingTo("1.7142857143");
+	public void testParse() {
+		Date result = DateParser.parse("2015-04-09T02:15:10.554");
+		assertThat(result).hasSameTimeAs(new Date(1428538510554L));
 	}
-
+	
 	@Test
-	public void testInvert() {
-		assertThat(MathUtils.invert(new BigDecimal("2.3"))).isEqualByComparingTo("0.4347826087");
-	}
-
-	@Test
-	public void testPercentChange() {
-		assertThat(MathUtils.percentChange(new BigDecimal("100"), new BigDecimal("110"))).isEqualTo(10f);
+	public void testParseWithTimeZone() {
+		Date result = DateParser.parse("2015-04-09T02:15:10.554-02:00");
+		assertThat(result).hasSameTimeAs(new Date(1428552910554L));
 	}
 }

@@ -32,11 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import fr.ymanvieu.trading.config.RecaptchaProperties;
 import fr.ymanvieu.trading.controller.Response;
 import fr.ymanvieu.trading.portofolio.Portofolio;
 import fr.ymanvieu.trading.portofolio.PortofolioService;
 import fr.ymanvieu.trading.recaptcha.RecaptchaFormValidator;
-import fr.ymanvieu.trading.recaptcha.RecaptchaProperties;
 import fr.ymanvieu.trading.symbol.util.CurrencyUtils;
 import fr.ymanvieu.trading.user.UserException;
 import fr.ymanvieu.trading.user.UserService;

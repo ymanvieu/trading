@@ -26,8 +26,6 @@ import org.springframework.core.io.ClassPathResource;
 import com.google.common.io.Files;
 
 import fr.ymanvieu.trading.rate.Quote;
-import fr.ymanvieu.trading.rate.entity.RateEntity;
-import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
 
 public class TestUtils {
 
@@ -35,24 +33,7 @@ public class TestUtils {
 		return Files.toString(new ClassPathResource(path).getFile(), StandardCharsets.UTF_8);
 	}
 
-	public static RateEntity rate(String from, String to, BigDecimal rate, Date date) {
-		return new RateEntity(from, to, rate, date);
-	}
-
 	public static Quote quote(String code, String currency, BigDecimal rate, Date date) {
 		return new Quote(code, currency, rate, date);
-	}
-
-	public static SymbolEntity symbol(String code, String name, String countryFlag, SymbolEntity currency) {
-		SymbolEntity se = symbol(code, name, countryFlag);
-		se.setCurrency(currency);
-		return se;
-	}
-
-	public static SymbolEntity symbol(String code, String name, String countryFlag) {
-		SymbolEntity se = new SymbolEntity(code);
-		se.setName(name);
-		se.setCountryFlag(countryFlag);
-		return se;
 	}
 }

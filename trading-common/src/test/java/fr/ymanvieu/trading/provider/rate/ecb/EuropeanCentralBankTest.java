@@ -22,7 +22,7 @@ import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.CHF;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.EUR;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.GBP;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -67,9 +67,9 @@ public class EuropeanCentralBankTest {
 
 		server.expect(anything()).andRespond(withSuccess(MOCK_HIST, MediaType.APPLICATION_XML));
 
-		Quote rateEurUsd = quote(USD, EUR, new BigDecimal("0.8607333448"), parse("2015-01-22 14:15:00.0 CET"));
-		Quote rateEurGbp = quote(USD, GBP, new BigDecimal("0.66381076549656"), parse("2015-03-10 14:15:00.0 CET"));
-		Quote rateEurChf = quote(USD, CHF, new BigDecimal("0.95813084117036"), parse("2015-04-21 14:15:00.0 CEST"));
+		Quote rateEurUsd = quote(USD, EUR, new BigDecimal("0.8607333448"), parse("2015-01-22T14:15:00+01:00"));
+		Quote rateEurGbp = quote(USD, GBP, new BigDecimal("0.66381076549656"), parse("2015-03-10T14:15:00+01:00"));
+		Quote rateEurChf = quote(USD, CHF, new BigDecimal("0.95813084117036"), parse("2015-04-21T14:15:00+02:00"));
 
 		List<Quote> r = ecb.getHistoricalRates();
 

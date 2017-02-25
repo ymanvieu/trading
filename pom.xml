@@ -14,6 +14,7 @@
 
 	<modules>
 		<module>trading-common</module>
+		<module>trading-test</module>
 		<module>trading-webapp</module>
 		<module>trading-data-collect</module>
 	</modules>

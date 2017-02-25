@@ -16,7 +16,7 @@
  */
 package fr.ymanvieu.trading.admin;
 
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -76,13 +76,11 @@ public class AdminServiceTest {
 		String name = "Ubi";
 		String provider = "Provider";
 
-		when(lookupService.search(provider))
-				.thenReturn(asList(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
-		when(lookupService.getDetails(symbol, provider))
-				.thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", provider));
+		when(lookupService.search(provider)).thenReturn(asList(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
+		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", provider));
 
-		Quote histoQuote = new Quote(symbol, new BigDecimal("25.2"), parse("2016-06-30 02:00:00.0 CEST"));
-		Quote latestQuote = new Quote(symbol, new BigDecimal("25"), parse("2016-06-30 19:32:00.0 CEST"));
+		Quote histoQuote = new Quote(symbol, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
+		Quote latestQuote = new Quote(symbol, new BigDecimal("25"), parse("2016-06-30T19:32:00+02:00"));
 
 		when(stock.getHistoricalRates(symbol)).thenReturn(asList(histoQuote));
 		when(stock.getLatestRate(symbol)).thenReturn(latestQuote);
@@ -99,7 +97,7 @@ public class AdminServiceTest {
 		assertThat(result.getQuote().getCurrency()).isEqualTo(pairResult.getTarget().getCode());
 
 		assertThat(result.getQuote().getPrice()).isEqualTo("25");
-		assertThat(result.getQuote().getTime()).isEqualTo(parse("2016-06-30 19:32:00.0 CEST"));
+		assertThat(result.getQuote().getTime()).isEqualTo(parse("2016-06-30T19:32:00+02:00"));
 
 		QHistoricalRate qHistoRate = QHistoricalRate.historicalRate;
 		BooleanExpression exp = qHistoRate.fromcur.code.eq("UBI").and(qHistoRate.tocur.code.eq("EUR"));

@@ -16,29 +16,17 @@
  */
 package fr.ymanvieu.trading.util;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.joda.time.DateTime;
-import org.joda.time.Months;
-
 public class DateUtils {
 
-	private static final String DT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS z";
-
 	/**
-	 * Parses a string with format: yyyy-MM-dd HH:mm:ss.SSS z
-	 * 
-	 * @return the corresponding date object
-	 */
-	public static Date parse(String dateStr) throws ParseException {
-		return new SimpleDateFormat(DT_PATTERN).parse(dateStr);
-	}
-
-	/**
-	 * Returns a new date with 1 day after the given date (others fields are untouched)
+	 * Returns a new date with 1 day after the given date (others fields are
+	 * untouched)
 	 * 
 	 * @param date
 	 */
@@ -55,9 +43,10 @@ public class DateUtils {
 	 * @return the number of months between the two dates
 	 */
 	public static int getNbOfMonths(Date date1, Date date2) {
-		DateTime startDt = new DateTime(date1.getTime());
-		DateTime endDt = new DateTime(date2.getTime());
+		LocalDateTime ldt1 = LocalDateTime.ofInstant(date1.toInstant(), ZoneId.systemDefault());
+		LocalDateTime ldt2 = LocalDateTime.ofInstant(date2.toInstant(), ZoneId.systemDefault());
 
-		return Months.monthsBetween(startDt, endDt).getMonths();
+		return (int) ChronoUnit.MONTHS.between(ldt1, ldt2);
+
 	}
 }

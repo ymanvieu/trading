@@ -19,29 +19,23 @@ package fr.ymanvieu.trading.rate.entity;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.EUR;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.GBP;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RateEntityTest {
 
-	private static Date date;
-
-	@BeforeClass
-	public static void createDates() throws Exception {
-		date = parse("2014-12-18 15:00:00.0 CET");
-	}
+	private static final Date DEFAULT_TEST_DATE = parse("2014-12-18T15:00:00+01:00");
 
 	@Test
 	public void testEqualsOK() {
-		Date d1 = date;
-		Date d2 = date;
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = DEFAULT_TEST_DATE;
 		BigDecimal v1 = new BigDecimal("1.5465");
 		BigDecimal v2 = new BigDecimal("1.5465");
 
@@ -53,7 +47,7 @@ public class RateEntityTest {
 
 	@Test
 	public void testEqualsOK_SameObject() {
-		Date d1 = date;
+		Date d1 = DEFAULT_TEST_DATE;
 		BigDecimal v1 = BigDecimal.valueOf(1.5f);
 
 		RateEntity r1 = new RateEntity(GBP, USD, v1, d1);
@@ -63,8 +57,8 @@ public class RateEntityTest {
 	
 	@Test
 	public void testEquals_SameWithTimestampForDates() {
-		Date d1 = new Timestamp(date.getTime());
-		Date d2 = date;
+		Date d1 = new Timestamp(DEFAULT_TEST_DATE.getTime());
+		Date d2 = DEFAULT_TEST_DATE;
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.5");
@@ -77,8 +71,8 @@ public class RateEntityTest {
 	
 	@Test
 	public void testEquals_SameValuesNotSameFraction() {
-		Date d1 = date;
-		Date d2 = date;
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = DEFAULT_TEST_DATE;
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.500000");
@@ -91,8 +85,8 @@ public class RateEntityTest {
 	
 	@Test
 	public void testEquals_Subclasses() {
-		Date d1 = date;
-		Date d2 = date;
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = DEFAULT_TEST_DATE;
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.5");
@@ -104,9 +98,9 @@ public class RateEntityTest {
 	}
 
 	@Test
-	public void testEqualsKO_DifferentDates() throws Exception {
-		Date d1 = date;
-		Date d2 = parse("2014-12-19 15:00:00.02 CET");
+	public void testEqualsKO_DifferentDates() {
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = parse("2014-12-19T15:00:01+01:00");
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.5");
@@ -119,8 +113,8 @@ public class RateEntityTest {
 
 	@Test
 	public void testEqualsKO_DifferentCurrenciesFrom() {
-		Date d1 = date;
-		Date d2 = date;
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = DEFAULT_TEST_DATE;
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.5");
@@ -133,8 +127,8 @@ public class RateEntityTest {
 
 	@Test
 	public void testEqualsKO_DifferentCurrenciesTo() {
-		Date d1 = date;
-		Date d2 = date;
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = DEFAULT_TEST_DATE;
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.5");
@@ -147,8 +141,8 @@ public class RateEntityTest {
 
 	@Test
 	public void testEqualsKO_DifferentValue() {
-		Date d1 = date;
-		Date d2 = date;
+		Date d1 = DEFAULT_TEST_DATE;
+		Date d2 = DEFAULT_TEST_DATE;
 
 		BigDecimal v1 = new BigDecimal("1.5");
 		BigDecimal v2 = new BigDecimal("1.6");

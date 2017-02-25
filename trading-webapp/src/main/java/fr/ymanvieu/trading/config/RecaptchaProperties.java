@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Yoann Manvieu
+ * Copyright (C) 2017 Yoann Manvieu
  *
  * This software is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -14,20 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.ymanvieu.trading.util;
+package fr.ymanvieu.trading.config;
 
-import java.text.MessageFormat;
+import java.net.URI;
 
-public class StringUtils {
+import javax.validation.constraints.NotNull;
 
-	public static String toOneLine(String str) {
-		if (str == null)
-			throw new IllegalArgumentException("str is null");
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-		return str.replaceAll("[\r\n]+", "");
-	}
-	
-	public static String format(String text, Object... args) {
-		return (text == null) ? null : MessageFormat.format(text, args);
-	}
+import lombok.Getter;
+import lombok.Setter;
+
+@ConditionalOnProperty(prefix = "recaptcha", name = "enabled", havingValue = "true")
+@ConfigurationProperties("recaptcha")
+@Getter
+@Setter
+public class RecaptchaProperties {
+
+	private boolean enabled;
+
+	@NotNull
+	private URI url;
+	@NotNull
+	private String siteKey;
+	@NotNull
+	private String secretKey;
 }

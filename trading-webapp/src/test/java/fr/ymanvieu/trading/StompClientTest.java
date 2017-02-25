@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.messaging.converter.CompositeMessageConverter;
@@ -66,22 +65,7 @@ public class StompClientTest {
 	}
 
 	private static void start() throws Exception {
-		ResponseEntity<String> response = tp.getForEntity(LOGIN_URL, String.class);
-
-		Pattern p = Pattern.compile(".*name=\"_csrf\" value=\"([\\w-]*)\".*", Pattern.DOTALL);
-		Matcher m = p.matcher(response.getBody());
-
-		m.matches();
-		String csrf = m.group(1);
-
-		LOG.info("{}", csrf);
-
-		MultiValueMap<String, String> v = new LinkedMultiValueMap<>();
-		v.add("username", "user");
-		v.add("password", "password");
-		v.add("_csrf", csrf);
-
-		response = tp.postForEntity(LOGIN_URL, v, String.class);
+		
 
 		List<Transport> transports = asList(new WebSocketTransport(new StandardWebSocketClient()));
 		WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(transports));
@@ -100,29 +84,42 @@ public class StompClientTest {
 			}
 		};
 
-		WebSocketHttpHeaders wsHeaders = new WebSocketHttpHeaders();
-
-		final String cookie = response.getHeaders().get("Set-Cookie").get(0);
-		LOG.info("Cookie: {}", cookie);
-
-		wsHeaders.set(HttpHeaders.COOKIE, cookie);
+		WebSocketHttpHeaders wsHeaders = null;
+		
+//		wsHeaders = new WebSocketHttpHeaders();
+//		String cookie = getAuthenticationSessionCookie();
+//		LOG.info("Cookie: {}", cookie);
+//		wsHeaders.set(HttpHeaders.COOKIE, cookie);
 
 		ListenableFuture<StompSession> lss = stompClient.connect(STOMP_URL, wsHeaders, handler);
 
 		StompSession ss = lss.get();
-
-		//StringHandler sh = new StringHandler();
-
-		//LOG.info("subscribe result: {}", ss.subscribe("/user/queue/hello", sh));
-		//LOG.info("subscribe result: {}", ss.subscribe("/topic/hello", sh));
-		//LOG.info("subscribe result: {}", ss.subscribe("/topic/time", sh));
 		
 		RatesHandler rh = new RatesHandler();
 
 		ss.subscribe("/topic/latest/USD/EUR", rh);
 		ss.subscribe("/topic/latest/BRE/USD", rh);
+	}
 
-		//ss.send("/app/hello", "hey");
+	public static String getAuthenticationSessionCookie() {
+		ResponseEntity<String> response = tp.getForEntity(LOGIN_URL, String.class);
+
+		Pattern p = Pattern.compile(".*name=\"_csrf\" value=\"([\\w-]*)\".*", Pattern.DOTALL);
+		Matcher m = p.matcher(response.getBody());
+
+		m.matches();
+		String csrf = m.group(1);
+
+		LOG.info("{}", csrf);
+
+		MultiValueMap<String, String> v = new LinkedMultiValueMap<>();
+		v.add("username", "user");
+		v.add("password", "password");
+		v.add("_csrf", csrf);
+
+		response = tp.postForEntity(LOGIN_URL, v, String.class);		
+		
+		return response.getHeaders().get("Set-Cookie").get(0);
 	}
 
 	public static class RatesHandler extends StompSessionHandlerAdapter {
@@ -135,14 +132,6 @@ public class StompClientTest {
 		@Override
 		public Type getPayloadType(StompHeaders headers) {
 			return RateEntity.class;
-		}
-	}
-
-	public static class StringHandler extends StompSessionHandlerAdapter {
-
-		@Override
-		public void handleFrame(StompHeaders headers, Object payload) {
-			LOG.info("{}: {}", headers.getDestination(), payload);
 		}
 	}
 }

@@ -16,7 +16,6 @@
  */
 package fr.ymanvieu.trading.symbol;
 
-import static fr.ymanvieu.trading.TestUtils.symbol;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,7 +58,7 @@ public class SymbolServiceTest {
 		SymbolEntity result = symbolService.addSymbol(code, name, countryFlag, null);
 
 		// then
-		assertThat(result).isEqualTo(symbol(code, name, countryFlag, null));
+		assertThat(result).isEqualTo(new SymbolEntity(code, name, countryFlag, null));
 		assertThat(result).isEqualTo(symbolRepo.findOne(code));
 	}
 
@@ -75,7 +74,7 @@ public class SymbolServiceTest {
 		SymbolEntity result = symbolService.addSymbol(code, name, null, currencyCode);
 
 		// then
-		assertThat(result).isEqualTo(symbol(code, name, null, symbol(USD, "US Dollar", "us", null)));
+		assertThat(result).isEqualTo(new SymbolEntity(code, name, null, new SymbolEntity(USD, "US Dollar", "us", null)));
 		assertThat(result).isEqualTo(symbolRepo.findOne(code));
 	}
 
@@ -107,7 +106,7 @@ public class SymbolServiceTest {
 		SymbolEntity result = symbolService.addSymbol(code, name, countryFlag, null);
 
 		// then
-		assertThat(result).isEqualTo(symbol(code, name, countryFlag, null));
+		assertThat(result).isEqualTo(new SymbolEntity(code, name, countryFlag, null));
 		assertThat(result).isEqualTo(symbolRepo.findOne(code));
 	}
 
@@ -116,7 +115,7 @@ public class SymbolServiceTest {
 	public void testGetForCode() {
 		SymbolEntity result = symbolService.getForCode(USD);
 
-		assertThat(result).isEqualTo(symbol(USD, "US Dollar", "us"));
+		assertThat(result).isEqualTo(new SymbolEntity(USD, "US Dollar", "us", null));
 		assertThat(result).isEqualToIgnoringGivenFields(symbolRepo.findOne(USD), "currencyCode");
 	}
 

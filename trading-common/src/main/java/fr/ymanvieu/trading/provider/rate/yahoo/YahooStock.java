@@ -21,9 +21,10 @@ import static fr.ymanvieu.trading.util.StringUtils.format;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -48,8 +49,8 @@ import fr.ymanvieu.trading.rate.Quote;
 @Component
 public class YahooStock extends Yahoo implements HistoricalRateProvider {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
-
+	private static final Logger log = LoggerFactory.getLogger(YahooStock.class);
+	
 	@Value("${provider.yahoo.url.latest}")
 	private String url;
 
@@ -93,9 +94,7 @@ public class YahooStock extends Yahoo implements HistoricalRateProvider {
 
 		YahooFields yf = o.getResource().getFields();
 
-		Quote quote = new Quote(yf.getSymbol(), yf.getPrice(), yf.getUtctime());
-
-		return quote;
+		return  new Quote(yf.getSymbol(), yf.getPrice(), yf.getUtctime());
 	}
 
 	@Override
@@ -116,21 +115,23 @@ public class YahooStock extends Yahoo implements HistoricalRateProvider {
 		csvLines.remove(0);
 
 		List<Quote> rates = new ArrayList<>();
+		
+		for (String[] line : csvLines) {
+			// Date,Open,High,Low,Close,Volume,Adj Close
+			// 2016-02-04,75.95,76.77,71.70,72.88,1782700,72.88
 
-		DateFormat histoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			LocalDate date = LocalDate.parse(line[0]);
+			
+			// open 
+			Date openDate = Date.from(ZonedDateTime.of(date, LocalTime.MIN, ZoneOffset.UTC).toInstant());
+			BigDecimal open = new BigDecimal(line[1]);
+			rates.add(new Quote(code, open, openDate));
+			
+			// close
+			Date closeDate = Date.from(ZonedDateTime.of(date, LocalTime.MAX, ZoneOffset.UTC).toInstant());
+			BigDecimal close = new BigDecimal(line[4]);
 
-		try {
-			for (String[] line : csvLines) {
-				// Date,Open,High,Low,Close,Volume,Adj Close
-				// 2016-02-04,75.95,76.77,71.70,72.88,1782700,72.88
-
-				Date date = histoDateFormat.parse(line[0]);
-				BigDecimal close = new BigDecimal(line[4]);
-
-				rates.add(new Quote(code, close, date));
-			}
-		} catch (ParseException e) {
-			throw new IOException(e);
+			rates.add(new Quote(code, close, closeDate));
 		}
 
 		return rates;

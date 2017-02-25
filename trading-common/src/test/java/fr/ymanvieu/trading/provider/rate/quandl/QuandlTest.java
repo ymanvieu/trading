@@ -19,7 +19,7 @@ package fr.ymanvieu.trading.provider.rate.quandl;
 import static fr.ymanvieu.trading.TestUtils.quote;
 import static fr.ymanvieu.trading.TestUtils.readFile;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -63,7 +63,7 @@ public class QuandlTest {
 		server.expect(anything()).andRespond(withSuccess(LATEST_DATA, MediaType.APPLICATION_JSON));
 
 		assertThat(quandl.getRates()) //
-				.containsExactly(quote("BRE", USD, new BigDecimal("31.31"), parse("2016-02-13 00:00:00.0 GMT")));
+				.containsExactly(quote("BRE", USD, new BigDecimal("31.31"), parse("2016-02-13T00:00:00+00:00")));
 	}
 
 	@Test

@@ -55,6 +55,13 @@ public class SymbolEntity {
 		this.code = code;
 	}
 
+	public SymbolEntity(String code, String name, String countryFlag, SymbolEntity currency) {
+		this(code);
+		this.name = name;
+		this.countryFlag = countryFlag;
+		this.currency = currency;
+	}
+
 	public String getCode() {
 		return code;
 	}

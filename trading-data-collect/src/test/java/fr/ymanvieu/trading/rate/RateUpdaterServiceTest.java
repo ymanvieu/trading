@@ -1,10 +1,8 @@
 package fr.ymanvieu.trading.rate;
 
-import static fr.ymanvieu.trading.TestUtils.quote;
-import static fr.ymanvieu.trading.TestUtils.rate;
 import static fr.ymanvieu.trading.provider.rate.quandl.Quandl.BRE;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
@@ -60,28 +58,28 @@ public class RateUpdaterServiceTest {
 		rateUpdaterService = new RateUpdaterService(latestRepo, symbolRepo, rateService, bus);
 	}
 
-	private List<Quote> getBrentQuotes() throws Exception {
+	private List<Quote> getBrentQuotes() {
 		List<Quote> quotes = new ArrayList<>();
 
-		quotes.add(quote(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09 02:00:00.0 CEST")));
-		quotes.add(quote(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08 02:00:00.0 CEST")));
-		quotes.add(quote(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07 02:00:00.0 CEST")));
-		quotes.add(quote(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03 02:00:00.0 CEST")));
-		quotes.add(quote(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02 02:00:00.0 CEST")));
+		quotes.add(new Quote(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00+02:00")));
+		quotes.add(new Quote(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00+02:00")));
+		quotes.add(new Quote(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00+02:00")));
+		quotes.add(new Quote(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00+02:00")));
+		quotes.add(new Quote(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00+02:00")));
 
 		return quotes;
 	}
 
 	@Test
-	public void testUpdateRates() throws Exception {
+	public void testUpdateRates() {
 		// given
 		List<Quote> quotes = getBrentQuotes();
 
-		RateEntity expected1 = rate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02 02:00:00.0 CEST"));
-		RateEntity expected2 = rate(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03 02:00:00.0 CEST"));
-		RateEntity expected3 = rate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07 02:00:00.0 CEST"));
-		RateEntity expected4 = rate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08 02:00:00.0 CEST"));
-		RateEntity expected5 = rate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09 02:00:00.0 CEST"));
+		RateEntity expected1 = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00+02:00"));
+		RateEntity expected2 = new RateEntity(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00+02:00"));
+		RateEntity expected3 = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00+02:00"));
+		RateEntity expected4 = new RateEntity(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00+02:00"));
+		RateEntity expected5 = new RateEntity(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00+02:00"));
 
 		// when
 		rateUpdaterService.updateRates(quotes);
@@ -100,14 +98,14 @@ public class RateUpdaterServiceTest {
 	@Sql("/sql/insert_symbols_bre_usd.sql")
 	@Sql("/sql/insert_rates_bre_usd.sql")
 	@Test
-	public void testUpdateRates_WithExistingData() throws Exception {
+	public void testUpdateRates_WithExistingData() {
 		// given
 		List<Quote> quotes = getBrentQuotes();
 
-		RateEntity expectedOldLatest = rate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-06 02:00:00.0 CEST"));
-		RateEntity expectedAdded = rate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08 02:00:00.0 CEST"));
-		RateEntity expectedNewLatest = rate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09 02:00:00.0 CEST"));
-		RateEntity olderButAdded = rate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02 02:00:00.0 CEST"));
+		RateEntity expectedOldLatest = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-06T02:00:00+02:00"));
+		RateEntity expectedAdded = new RateEntity(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00+02:00"));
+		RateEntity expectedNewLatest = new RateEntity(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00+02:00"));
+		RateEntity olderButAdded = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00+02:00"));
 
 		// when
 		rateUpdaterService.updateRates(quotes);
