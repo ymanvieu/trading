@@ -20,7 +20,7 @@ import static fr.ymanvieu.trading.TestUtils.quote;
 import static fr.ymanvieu.trading.TestUtils.readFile;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.EUR;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -63,7 +63,7 @@ public class YahooTest {
 	public void testGetRates() throws Exception {
 		server.expect(anything()).andRespond(withSuccess(MOCK_ALL, MediaType.APPLICATION_JSON));
 		
-		Quote expectedRate = quote(USD, EUR, new BigDecimal("0.817595"), parse("2014-12-19 22:40:32.0 CET"));
+		Quote expectedRate = quote(USD, EUR, new BigDecimal("0.817595"), parse("2014-12-19T21:40:32+00:00"));
 
 		assertThat(yahoo.getRates()).hasSize(172).containsOnlyOnce(expectedRate);
 	}

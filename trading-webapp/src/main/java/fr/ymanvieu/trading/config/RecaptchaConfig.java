@@ -16,11 +16,13 @@
  */
 package fr.ymanvieu.trading.config;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @PropertySource("classpath:recaptcha.properties")
 @Configuration
+@EnableConfigurationProperties(RecaptchaProperties.class)
 public class RecaptchaConfig {
 
 }

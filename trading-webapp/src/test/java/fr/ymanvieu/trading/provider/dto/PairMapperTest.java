@@ -1,6 +1,6 @@
 package fr.ymanvieu.trading.provider.dto;
 
-import static fr.ymanvieu.trading.assertions.ObjectAssertions.assertThat;
+import static fr.ymanvieu.trading.test.assertions.ObjectAssertions.assertThat;
 
 import org.junit.Test;
 

@@ -16,7 +16,7 @@
  */
 package fr.ymanvieu.trading;
 
-import java.util.Collections;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,6 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.client.standard.WebSocketContainerFactoryBean;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
@@ -39,7 +38,7 @@ public class SockJsClientTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SockJsClientTest.class);
 
-	private static final String URL = "wss://echo.websocket.org";
+	private static final String URL = "http://localhost:8080/stomp";
 
 	public static void main(String[] args) throws Exception {
 
@@ -50,10 +49,7 @@ public class SockJsClientTest {
 			}
 		};
 
-		WebSocketClient wsc;
-
-		 wsc = createWebSocketClient();
-		//wsc = createSockJsClient();
+		WebSocketClient wsc = createSockJsClient();
 
 		WebSocketSession wss = wsc.doHandshake(eh, URL).get();
 		
@@ -64,21 +60,14 @@ public class SockJsClientTest {
 		}
 	}
 
-	private static WebSocketClient createSockJsClient() throws Exception {
-		return new SockJsClient(Collections.<Transport> singletonList(new WebSocketTransport(createWebSocketClient())));
+	private static WebSocketClient createSockJsClient() {
+		return new SockJsClient(Arrays.<Transport> asList(new WebSocketTransport(createWebSocketClient())));
 	}
 
-	private static StandardWebSocketClient createWebSocketClient() throws Exception {
-		StandardWebSocketClient swc = new StandardWebSocketClient(createWebSocketContainer().getObject());
+	private static StandardWebSocketClient createWebSocketClient() {
+		StandardWebSocketClient swc = new StandardWebSocketClient();
 		//SSLContext sslContext = //...;
 		//wsClient.setUserProperties(WsWebSocketContainer.SSL_CONTEXT_PROPERTY, sslContext);
 		return swc;
-	}
-
-	private static WebSocketContainerFactoryBean createWebSocketContainer() {
-		WebSocketContainerFactoryBean container = new WebSocketContainerFactoryBean();
-		container.setMaxTextMessageBufferSize(128 * 1024);
-		container.setMaxBinaryMessageBufferSize(128 * 1024);
-		return container;
 	}
 }

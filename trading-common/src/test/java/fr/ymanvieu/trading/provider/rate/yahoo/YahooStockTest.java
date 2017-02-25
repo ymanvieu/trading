@@ -19,7 +19,7 @@ package fr.ymanvieu.trading.provider.rate.yahoo;
 import static fr.ymanvieu.trading.TestUtils.quote;
 import static fr.ymanvieu.trading.TestUtils.readFile;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.EUR;
-import static fr.ymanvieu.trading.util.DateUtils.parse;
+import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -78,10 +78,12 @@ public class YahooStockTest {
 	public void testGetHistoricalRates() throws Exception {
 		server.expect(anything()).andRespond(withSuccess(DATA_HISTORY, MediaType.TEXT_PLAIN));
 		
-		Quote expectedRate0 = quote("TOTO", null, new BigDecimal("72.88"), parse("2016-02-04 00:00:00.0 CET"));
-		Quote expectedRate1 = quote("TOTO", null, new BigDecimal("48.80"), parse("2000-01-03 00:00:00.0 CET"));
+		Quote expectedRate0 = quote("TOTO", null, new BigDecimal("75.95"), parse("2016-02-04T00:00:00+00:00"));
+		Quote expectedRate1 = quote("TOTO", null, new BigDecimal("72.88"), parse("2016-02-04T23:59:59.999+00:00"));
+		Quote expectedRate2 = quote("TOTO", null, new BigDecimal("48.57"), parse("2000-01-03T00:00:00+00:00"));
+		Quote expectedRate3 = quote("TOTO", null, new BigDecimal("48.80"), parse("2000-01-03T23:59:59.999+00:00"));
 
-		assertThat(yahooStock.getHistoricalRates("TOTO")).containsExactlyInAnyOrder(expectedRate0, expectedRate1);
+		assertThat(yahooStock.getHistoricalRates("TOTO")).containsExactly(expectedRate0, expectedRate1, expectedRate2, expectedRate3);
 	}
 
 	@Test
@@ -93,15 +95,15 @@ public class YahooStockTest {
 
 		List<Quote> result = yahooStock.getRates();
 
-		assertThat(result).containsExactly(quote("UBI", EUR, new BigDecimal("26.35"), parse("2016-03-18 17:35:16.0 CET")));
+		assertThat(result).containsExactly(quote("UBI", EUR, new BigDecimal("26.35"), parse("2016-03-18T16:35:16+00:00")));
 	}
 
 	@Test
-	public void testGetLatestRate() throws Exception {
+	public void testGetLatestRate() {
 		server.expect(anything()).andRespond(withSuccess(DATA_LATEST, MediaType.APPLICATION_JSON));
 
-		Quote result = yahooStock.getLatestRate(null);
+		Quote result = yahooStock.getLatestRate("UBI.PA");
 
-		assertThat(result).isEqualTo(quote("UBI.PA", null, new BigDecimal("26.35"), parse("2016-03-18 17:35:16.0 CET")));
+		assertThat(result).isEqualTo(quote("UBI.PA", null, new BigDecimal("26.35"), parse("2016-03-18T16:35:16+00:00")));
 	}
 }

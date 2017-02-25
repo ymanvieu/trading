@@ -1,7 +1,6 @@
 package fr.ymanvieu.trading.symbol.dto;
 
-import static fr.ymanvieu.trading.TestUtils.symbol;
-import static fr.ymanvieu.trading.assertions.ObjectAssertions.assertThat;
+import static fr.ymanvieu.trading.test.assertions.ObjectAssertions.assertThat;
 
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ public class SymbolMapperTest {
 
 	@Test
 	public void testToDto() {
-		SymbolEntity se = symbol("TOTO", "toto", "country", null);
+		SymbolEntity se = new SymbolEntity("TOTO", "toto", "country", null);
 
 		SymbolDTO result = SymbolMapper.MAPPER.toDto(se);
 

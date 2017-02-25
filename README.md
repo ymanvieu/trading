@@ -6,34 +6,29 @@ Trading is an application collecting financial data from several providers and a
 <https://cloud-app.one>
 
 ## Modules
-### Trading-data-collect
+### trading-data-collect
 Collecting financial data from providers: 
 * Currencies and stocks : every 5 min 
 * Crude oil (Brent) : everyday at 8 AM (UTC)
 
-### Trading-webapp
+### trading-webapp
 Responsive Web inteface containing the following screens : 
 * Index: Latest collected data 
 * Chart: Historical data with an interactive chart
 * Portofolio: Buy/sell stocks and currencies
 * Admin: add/remove stocks to collect (ADMIN users only, search is based on Yahoo tickers)
 
-### Trading-common
+### trading-common
 Contains the business and DAO layers as well as the implementation how financial data is collected.
 
 ## Requirements
-Trading requires Java 1.8 or later.
-With few modifications (mostly replacing lambda expressions and streams by good ol' java loop/for syntax), it can be backported to Java 1.7 !
+Trading requires Java 1.8+.
 
 ## Building from Source
 
 Trading uses Maven for its build. To build the complete project run
 
     mvn clean install
-
-from the root of the project directory. To build deployable WAR files (one for each module), run 
-
-    mvn clean install -P prod-package
 
 ## Under the hood
 * Frontend is powered by Thymeleaf, AngularJS with Highchart (Highstock), Bootstrap and SockJS (STOMP). 
