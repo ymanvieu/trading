@@ -16,39 +16,14 @@
  */
 package fr.ymanvieu.trading.provider;
 
+import lombok.Value;
+
+@Value
 public class LookupDetails {
-
-	private String code;
-	private String name;
-	private String source;
-	private String currency;
-	private String provider;
-
-	public LookupDetails(String code, String name, String source, String currency, String provider) {
-		this.code = code;
-		this.name = name;
-		this.source = source;
-		this.currency = currency;
-		this.provider = provider;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public String getCurrency() {
-		return currency;
-	}
-
-	public String getProvider() {
-		return provider;
-	}
+	String code;
+	String name;
+	String source;
+	String currency;
+	String exchange;
+	String provider;
 }

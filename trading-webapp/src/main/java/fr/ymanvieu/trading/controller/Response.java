@@ -16,48 +16,20 @@
  */
 package fr.ymanvieu.trading.controller;
 
-public class Response {
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+
+@Data
+@Accessors(chain = true)
+public class Response implements Serializable {
+
+	private static final long serialVersionUID = 8477577718004281211L;
 
 	private String messageTitle;
-
 	private String message;
-
 	private String warningMessage;
-
 	private String errorMessage;
-
-	public Response() {
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public String getMessageTitle() {
-		return messageTitle;
-	}
-
-	public void setMessageTitle(String messageTitle) {
-		this.messageTitle = messageTitle;
-	}
-
-	public String getWarningMessage() {
-		return warningMessage;
-	}
-
-	public void setWarningMessage(String warningMessage) {
-		this.warningMessage = warningMessage;
-	}
-
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
+	private Object[] args;
 }

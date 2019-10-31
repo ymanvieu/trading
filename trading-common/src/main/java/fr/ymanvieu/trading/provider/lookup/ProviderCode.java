@@ -17,5 +17,6 @@
 package fr.ymanvieu.trading.provider.lookup;
 
 public enum ProviderCode {
-	YAHOO
+	YAHOO,
+	GOOGLE
 }

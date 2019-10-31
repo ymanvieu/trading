@@ -1,0 +1,8 @@
+.favorite-col-width {
+    min-width: 3rem;
+    width: 3rem;
+}
+
+.datagrid-cell {
+    min-width: 0;
+}

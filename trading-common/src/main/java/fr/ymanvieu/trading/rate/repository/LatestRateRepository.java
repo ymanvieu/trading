@@ -16,17 +16,20 @@
  */
 package fr.ymanvieu.trading.rate.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import fr.ymanvieu.trading.rate.FavoriteRate;
 import fr.ymanvieu.trading.rate.entity.LatestRate;
 
 @Transactional(readOnly = true)
-public interface LatestRateRepository extends JpaRepository<LatestRate, Long>, QueryDslPredicateExecutor<LatestRate> {
+public interface LatestRateRepository extends JpaRepository<LatestRate, Integer>, QuerydslPredicateExecutor<LatestRate> {
 
 	@Transactional
 	@Modifying
@@ -34,4 +37,7 @@ public interface LatestRateRepository extends JpaRepository<LatestRate, Long>, Q
 	int deleteByFromcurCodeOrTocurCode(@Param("code") String code);
 
 	LatestRate findByFromcurCodeAndTocurCode(String fromcur, String tocur);
+
+	@Query("SELECT (fs.username is not null) as favorite, lr.fromcur as fromcur, lr.tocur as tocur, lr.value as value, lr.date as date FROM #{#entityName} lr LEFT JOIN FavoriteSymbolEntity fs ON lr.fromcur=fs.fromSymbolCode AND lr.tocur=fs.toSymbolCode AND fs.username=:username")
+	List<FavoriteRate> findAllWithFavorites(@Param("username") String username);
 }

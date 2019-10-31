@@ -16,11 +16,7 @@
  */
 package fr.ymanvieu.trading.portofolio.dto;
 
-import static fr.ymanvieu.trading.portofolio.util.NumberFormatUtils.NUMBER_WITH_SIGN_PATTERN;
-
 import java.math.BigDecimal;
-
-import org.springframework.format.annotation.NumberFormat;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +27,5 @@ public class OrderInfoDTO {
 
 	private AssetDTO selected;
 	private AssetDTO selectedCurrency;
-
-	@NumberFormat(pattern = NUMBER_WITH_SIGN_PATTERN)
 	private BigDecimal gainCost;	
 }

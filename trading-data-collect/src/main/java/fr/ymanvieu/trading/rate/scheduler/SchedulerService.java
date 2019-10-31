@@ -19,12 +19,8 @@ package fr.ymanvieu.trading.rate.scheduler;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +29,14 @@ import com.google.common.base.Stopwatch;
 import fr.ymanvieu.trading.provider.ProviderType;
 import fr.ymanvieu.trading.provider.RateProviderService;
 import fr.ymanvieu.trading.provider.rate.LatestRateProvider;
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.rate.Rate;
 import fr.ymanvieu.trading.rate.RateUpdaterService;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @ConditionalOnProperty(name = "trading.scheduler.type", havingValue = "fixed-rate")
 public class SchedulerService {
-
-	private static final Logger log = LoggerFactory.getLogger(SchedulerService.class);
 
 	@Autowired
 	private SchedulerService service;
@@ -56,26 +52,16 @@ public class SchedulerService {
 		updateRates(ProviderType.FOREX);
 	}
 
-	@Scheduled(fixedRateString = "${scheduler.interval.fixed-rate.oil}")
-	public void updateOil() throws IOException {
-		updateRates(ProviderType.OIL);
-	}
-
 	@Scheduled(fixedRateString = "${scheduler.interval.fixed-rate.stock}")
 	public void updateStock() throws IOException {
 		updateRates(ProviderType.STOCK);
 	}
 
 	private void updateRates(ProviderType type) throws IOException {
-		service.updateRates(dataProvider.getProvider(type));
+		service.updateRates(dataProvider.getLatestProvider(type));
 	}
 
-	@Retryable
 	public void updateRates(LatestRateProvider provider) throws IOException {
-
-		// use of retry to compensate bad QoS of Yahoo provider 
-		// sometimes responding with HttpServerErrorException: 504 Maximum Transaction Time Exceeded, 
-		// HttpClientErrorException: 404 Not Found, ResourceAccessException: Connection timed out, etc...
 
 		String providerName = provider.getClass().getSimpleName();
 
@@ -83,7 +69,9 @@ public class SchedulerService {
 
 		Stopwatch startWatch = Stopwatch.createStarted();
 
-		List<Quote> quotes = provider.getRates();
+		List<Rate> quotes = provider.getRates();
+
+		String downloadTimeFormatted =  startWatch.toString();
 
 		if (quotes == null || quotes.isEmpty()) {
 			log.info("{}: No rate to update", providerName);
@@ -95,11 +83,6 @@ public class SchedulerService {
 		dataUpdater.updateRates(quotes);
 
 		log.debug("{}: Rates stored in {}", providerName, saveWatch);
-		log.info("{}: Update done in {}", providerName, startWatch);
-	}
-
-	@Recover
-	public void recover(Exception e, LatestRateProvider provider) {
-		log.error("{}", provider.getClass().getSimpleName(), e);
+		log.info("{}: Update done in {} (download time: {})", providerName, startWatch, downloadTimeFormatted);
 	}
 }

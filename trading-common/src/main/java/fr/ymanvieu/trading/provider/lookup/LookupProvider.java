@@ -21,7 +21,6 @@ import java.util.List;
 
 import fr.ymanvieu.trading.provider.LookupDetails;
 import fr.ymanvieu.trading.provider.LookupInfo;
-import fr.ymanvieu.trading.provider.ProviderException;
 
 public interface LookupProvider {
 
@@ -29,5 +28,5 @@ public interface LookupProvider {
 
 	String getProviderCode();
 
-	LookupDetails getDetails(String code) throws IOException, ProviderException;
+	LookupDetails getDetails(String code) throws IOException;
 }

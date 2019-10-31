@@ -1,0 +1,26 @@
+<form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="signupForm" id="signupForm" role="form" novalidate>
+	
+	<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="error = null"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
+
+	<clr-input-container>
+		<label>{{ 'signup.username' | translate }}</label> 
+		<input clrInput type="text" formControlName="username" /> 
+	</clr-input-container>
+	<p></p>
+	<clr-password-container>
+		<label>{{ 'signup.password' | translate }}</label> 
+		<input clrPassword formControlName="password" /> 
+	</clr-password-container>
+	<clr-password-container>
+		<label>{{ 'signup.confirmation' | translate }}</label> 
+		<input clrPassword formControlName="confirmation" /> 
+	</clr-password-container>
+	
+	<div id="recaptcha" *ngIf="recaptcha">
+		<p-captcha #recaptcha siteKey="[add site-key here]" (onResponse)="showResponse($event)" (onExpire)="expireRecaptcha()"></p-captcha>
+	</div>
+
+  <p></p>
+		
+	<button class="btn btn-success btn-block clr-col-sm-6" [disabled]="!signupForm.valid" (click)="signup()">{{ 'signup.title' | translate }}</button>
+</form>

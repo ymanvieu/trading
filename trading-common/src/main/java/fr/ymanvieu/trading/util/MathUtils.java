@@ -38,8 +38,8 @@ public class MathUtils {
 		return divide(BigDecimal.ONE, d);
 	}
 
-	public static float percentChange(BigDecimal oldValue, BigDecimal newValue) {
-		return divide(newValue.subtract(oldValue), oldValue).multiply(HUNDRED).floatValue();
+	public static double percentChange(BigDecimal oldValue, BigDecimal newValue) {
+		return divide(newValue.subtract(oldValue), oldValue).multiply(HUNDRED).doubleValue();
 	}
 
 	public static boolean equalsByComparingTo(BigDecimal bd1, BigDecimal bd2) {

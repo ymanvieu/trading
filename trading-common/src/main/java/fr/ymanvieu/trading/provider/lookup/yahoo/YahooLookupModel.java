@@ -18,35 +18,19 @@ package fr.ymanvieu.trading.provider.lookup.yahoo;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.Data;
+
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class YahooLookupModel {
 
-	@JsonProperty("ResultSet")
-	private YahooResultSet resultSet;
+	private List<Item> items;
 
-	public YahooResultSet getResultSet() {
-		return resultSet;
-	}
-
-	public static class YahooResultSet {
-
-		@JsonProperty("Query")
-		private String query;
-
-		@JsonProperty("Result")
-		private List<YahooCompanyLookupResult> result;
-
-		public String getQuery() {
-			return query;
-		}
-
-		public List<YahooCompanyLookupResult> getResult() {
-			return result;
-		}
-	}
-
-	public static class YahooCompanyLookupResult {
+	@Data
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Item {
 
 		private String symbol;
 		private String name;
@@ -55,32 +39,5 @@ public class YahooLookupModel {
 		private String exchDisp;
 		private String typeDisp;
 
-		public String getSymbol() {
-			return symbol;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		protected void setName(String name) {
-			this.name = name;
-		}
-
-		public String getExch() {
-			return exch;
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public String getExchDisp() {
-			return exchDisp;
-		}
-
-		public String getTypeDisp() {
-			return typeDisp;
-		}
 	}
 }

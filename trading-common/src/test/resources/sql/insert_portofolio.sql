@@ -1,4 +1,4 @@
-insert into users (id,login,password) values 
+insert into users (id,username,password) values 
 (0,'toto',''),
 (1,'seller',''),
 (2,'user','');
@@ -10,7 +10,9 @@ insert into symbols (code,name,country_flag,currency) values
 ('BRE','Brent Crude Futures','oil','USD'),
 ('GBP','British Pound Sterling','gb',null),
 ('RR','Rolls Royce Holdings plc',null,'GBP'),
-('MKS','Marks & Spencer Group plc',null,'GBP');
+('MKS','Marks & Spencer Group plc',null,'GBP'),
+('RDSB','Royal Dutch Shell plc',null,'GBP')
+;
 
 INSERT INTO PAIR (symbol,name,source,target,provider_code) VALUES
 ('UBI.PA','Ubisoft Entertainment SA','UBI','EUR','YAHOO'),
@@ -23,15 +25,9 @@ INSERT INTO LATESTRATES(DATE,FROMCUR,TOCUR,VALUE) VALUES
 ('2016-04-19 11:37:44.0','USD','EUR',0.882106),
 ('2016-04-22 08:16:45.0','USD','GBP', 0.6965),
 ('2016-04-21 17:35:28.0','RR','GBP', 692),
-('2016-04-22 17:29:44.0','MKS','GBP', 426.8);
-
-INSERT INTO RATES(DATE,FROMCUR,TOCUR,VALUE) VALUES 
-('2016-03-30 17:35:24.0','UBI','EUR',28.155001),
-('2016-04-12 00:00:00.0','BRE','USD',41.8),
-('2016-04-19 11:37:44.0','USD','EUR',0.882106),
-('2016-04-22 08:16:45.0','USD','GBP', 0.6965),
-('2016-04-21 17:35:28.0','RR','GBP', 692),
-('2016-04-22 17:29:44.0','MKS','GBP', 426.8);
+('2016-04-22 17:29:44.0','MKS','GBP', 426.8),
+('2019-04-08 13:48:44.0','RDSB','GBP', 2512)
+;
 
 insert into portofolio (id,user_id,base_currency_code,amount,version) values 
 (0,0,'EUR',2000,1),

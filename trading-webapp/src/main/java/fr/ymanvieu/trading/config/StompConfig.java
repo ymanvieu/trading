@@ -19,18 +19,43 @@ package fr.ymanvieu.trading.config;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
-import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+import fr.ymanvieu.trading.jwt.JwtTokenUtil;
+import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 
 @ConditionalOnWebApplication
 @Configuration
 @EnableWebSocketMessageBroker
-public class StompConfig extends AbstractWebSocketMessageBrokerConfigurer {
+@Slf4j
+public class StompConfig implements WebSocketMessageBrokerConfigurer {
+	
+	@Autowired
+	private WebSocketMessageBrokerStats webSocketMessageBrokerStats;
+	
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
+	
+	@Value("${jwt.header}")
+	private String tokenHeader;
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -40,14 +65,63 @@ public class StompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/stomp").withSockJS();
+		registry.addEndpoint("/stomp").setAllowedOrigins("*").withSockJS();
 	}
-	
-	@Autowired
-	private WebSocketMessageBrokerStats webSocketMessageBrokerStats;
 
 	@PostConstruct
 	public void init() {
 	    webSocketMessageBrokerStats.setLoggingPeriod(-1); // disable log of stats
+	}
+	
+	@Override
+	public void configureClientInboundChannel(ChannelRegistration registration) {
+		registration.interceptors(new ChannelInterceptor() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+				if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+					String bearer = accessor.getFirstNativeHeader(tokenHeader);
+					log.debug("StompHeader {}: {}", tokenHeader, bearer);
+					Authentication user = getUser(bearer);
+					accessor.setUser(user);
+				}
+				return message;
+			}
+		});
+	}
+	
+	private Authentication getUser(String authToken) {
+		if(authToken == null) {
+			return null;
+		}
+
+		String username = null;
+		try {
+			username = jwtTokenUtil.getUsernameFromToken(authToken);
+		} catch (IllegalArgumentException e) {
+			log.error("an error occured during getting username from token", e);
+		} catch (JwtException e) {
+			log.info("Security exception - {}", e.getMessage());
+		}
+
+
+		if (username != null) {
+			log.debug("checking authentication for user " + username);
+
+			// It is not compelling necessary to load the user details from the database.
+			// You could also store the information in the token and read it from it. It's up to you ;)
+			User userDetails = new User(username, "", jwtTokenUtil.getGrantedAuthoritiesFromToken(authToken));
+
+			// For simple validation it is completely sufficient to just check the token integrity. You don't have to call
+			// the database compellingly. Again it's up to you ;)
+			if (jwtTokenUtil.validateToken(authToken, userDetails)) {
+				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+						userDetails.getAuthorities());
+				
+				return authentication;
+			}
+		}
+		
+		return null;
 	}
 }

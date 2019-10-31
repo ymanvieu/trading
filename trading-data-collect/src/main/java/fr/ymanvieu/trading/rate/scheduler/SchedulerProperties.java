@@ -25,9 +25,10 @@ public class SchedulerProperties {
 
 	/**
 	 * Scheduling type for data collect.
-	 * Empty to disable scheduling (default).
+	 * Empty/{none} to disable scheduling (default).
 	 */
-	private SchedulerType type;
+	private SchedulerType type = SchedulerType.NONE;
+	
 	
 	public SchedulerType getType() {
 		return type;

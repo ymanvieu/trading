@@ -19,9 +19,12 @@ package fr.ymanvieu.trading.rate.dto;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import fr.ymanvieu.trading.rate.DateValue;
+import fr.ymanvieu.trading.rate.FavoriteRate;
+import fr.ymanvieu.trading.rate.Rate;
+import fr.ymanvieu.trading.rate.entity.LatestRate;
 import fr.ymanvieu.trading.rate.entity.RateEntity;
 import fr.ymanvieu.trading.symbol.dto.SymbolMapper;
 
@@ -30,11 +33,17 @@ public interface RateMapper {
 
 	RateMapper MAPPER = Mappers.getMapper(RateMapper.class);
 
-	DateValueDTO toDateValueDto(DateValue value);
-
-	List<DateValueDTO> toDateValueDto(List<DateValue> values);
-
+	@Mapping(target = "favorite", ignore = true)
 	RateDTO toRateDto(RateEntity value);
-
-	List<RateDTO> toRateDto(List<? extends RateEntity> values);
+	List<RateDTO> toRateDto(List<LatestRate> values);
+	
+	@Mapping(target = "favorite", ignore = true)
+	@Mapping(source = "code", target = "fromcur.code")
+	@Mapping(source = "currency", target = "tocur.code")
+	@Mapping(source = "price", target = "value")
+	@Mapping(source = "time", target = "date")
+	RateDTO toRateDto(Rate rate);
+	
+	RateDTO favoriteRateToRateDto(FavoriteRate value);
+	List<RateDTO> favoriteRatesToRateDtos(List<FavoriteRate> values);
 }

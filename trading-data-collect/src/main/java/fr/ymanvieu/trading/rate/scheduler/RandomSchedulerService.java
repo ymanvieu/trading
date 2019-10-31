@@ -21,8 +21,8 @@ import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -32,7 +32,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import fr.ymanvieu.trading.provider.rate.LatestRateProvider;
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.rate.Rate;
 
 /**
  * Fake data provider to simulate real-time data updates.
@@ -56,19 +56,19 @@ public class RandomSchedulerService extends SchedulerService implements LatestRa
 	}
 
 	@Override
-	public void updateOil() throws IOException {
-	}
-
-	@Override
 	public void updateStock() throws IOException {
 	}
+	
+	@Override
+	public Rate getLatestRate(String code) throws IOException {
+		throw new RuntimeException("not implemented");
+	}
 
 	@Override
-	public List<Quote> getRates() throws IOException {
-		Quote usdeur = new Quote(USD, EUR, new BigDecimal(RANDOM.nextFloat()), new Date());
-		Quote breusd = new Quote("BRE", USD, new BigDecimal(10 * RANDOM.nextFloat() + 30), new Date());
-		Quote fakeeur = new Quote("FAKE", EUR, new BigDecimal(10 * RANDOM.nextFloat() + 30), new Date());
+	public List<Rate> getRates() throws IOException {
+		Rate usdeur = new Rate(USD, EUR, BigDecimal.valueOf(RANDOM.nextDouble()), Instant.now());
+		Rate breusd = new Rate("BZ=F", USD, BigDecimal.valueOf(10 * RANDOM.nextDouble() + 30), Instant.now());
 
-		return Arrays.asList(usdeur, breusd, fakeeur);
+		return Arrays.asList(usdeur, breusd);
 	}
 }

@@ -18,11 +18,12 @@ package fr.ymanvieu.trading.config;
 
 import java.net.URI;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,14 +31,13 @@ import lombok.Setter;
 @ConfigurationProperties("recaptcha")
 @Getter
 @Setter
+@Valid
 public class RecaptchaProperties {
 
 	private boolean enabled;
 
 	@NotNull
 	private URI url;
-	@NotNull
-	private String siteKey;
-	@NotNull
+	@NotBlank
 	private String secretKey;
 }

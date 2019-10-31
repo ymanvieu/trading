@@ -19,116 +19,112 @@ package fr.ymanvieu.trading.provider.lookup.yahoo;
 import static fr.ymanvieu.trading.util.StringUtils.format;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import fr.ymanvieu.trading.provider.LookupDetails;
 import fr.ymanvieu.trading.provider.LookupInfo;
-import fr.ymanvieu.trading.provider.ProviderException;
 import fr.ymanvieu.trading.provider.lookup.LookupProvider;
 import fr.ymanvieu.trading.provider.lookup.ProviderCode;
-import fr.ymanvieu.trading.provider.lookup.yahoo.YahooLookupModel.YahooCompanyLookupResult;
-import fr.ymanvieu.trading.provider.rate.yahoo.Yahoo;
+import fr.ymanvieu.trading.provider.rate.yahoo.YahooModel;
 import fr.ymanvieu.trading.symbol.util.CurrencyUtils;
-import fr.ymanvieu.trading.util.StringUtils;
 
 @Component
 public class YahooLookup implements LookupProvider {
 
-	private static final Pattern STOCK_PATTERN = Pattern.compile("([\\w_]+)[\\.[\\w]*]*");
+	private static final Pattern EQUITY_PATTERN = Pattern.compile("([\\w_-]+)[\\.[\\w]*]*");
+	private static final Pattern FOREX_PATTERN = Pattern.compile("(\\w{3})(\\w{3})?=X");
+	private static final Pattern FUTURE_PATTERN = Pattern.compile("(\\w+=F)");
+	private static final Pattern CRYPTOCURRENCY_PATTERN = Pattern.compile("([\\w]{3,4})-([\\w]{3,4})");
 
-	@Value("${provider.yahoo.url.company-lookup}")
+	@Value("${provider.yahoo.url.lookup}")
 	private String url;
 
-	@Value("${provider.yahoo.url.info}")
-	private String urlInfo;
+	@Value("${provider.yahoo.url.latest}")
+	private String urlLatest;
 
 	private final RestTemplate rt = new RestTemplate();
 
-	Logger log = LoggerFactory.getLogger(getClass());
-
-	private <T> T sendGet(String url, Class<T> returnType) {
-		log.debug(url);
-		return rt.getForObject(url, returnType);
-	}
-
 	@Override
 	public List<LookupInfo> search(String symbolOrName) throws IOException {
-		List<YahooCompanyLookupResult> result = sendGet(format(url, symbolOrName), YahooLookupModel.class).getResultSet().getResult();
+		YahooLookupModel result = rt.getForObject(format(url, symbolOrName), YahooLookupModel.class);
 
-		List<LookupInfo> results = new ArrayList<>();
-
-		for (YahooCompanyLookupResult r : result) {
-			// workaround to avoid unintended chars (ex: FNAC)
-			r.setName(StringUtils.toOneLine(r.getName()));
-
-			results.add(new LookupInfo(r.getSymbol(), r.getName(), r.getExchDisp(), r.getTypeDisp(), getProviderCode()));
-		}
-
-		return results;
+		return result.getItems().stream()
+		.map(r -> new LookupInfo(r.getSymbol(), r.getName(), r.getExchDisp(), r.getTypeDisp(), getProviderCode()))
+		.collect(Collectors.toList());
 	}
 
+	
 	@Override
-	public LookupDetails getDetails(String code) throws IOException, ProviderException {
+	public LookupDetails getDetails(String code) throws IOException {
 		List<LookupInfo> result = search(code);
 
-		String name = null;
+		LookupInfo cl = result.stream().filter(li -> li.getCode().equals(code)).findFirst().orElse(null);
 
-		for (LookupInfo cl : result) {
-			if (cl.getCode().equals(code)) {
-				name = cl.getName();
-				break;
-			}
-		}
-
+		String name = cl.getName();
 		String source = parseSource(code);
 		String currency = parseTarget(code);
 
 		if (currency == null) {
-			currency = StringUtils.toOneLine(sendGet(format(urlInfo, code), String.class));
-
-			if (currency.equals("N/A")) {
-				throw ProviderException.currencyNotFound(code);
-			}
-
-			currency = currency.replaceAll("\"", "").toUpperCase();
+			currency = rt.getForObject(format(urlLatest, code), YahooModel.class).getQuoteResponse().getResult().get(0).getCurrency();
 		}
 
-		return new LookupDetails(code, name, source, currency, getProviderCode());
+		return new LookupDetails(code, name, source, currency, cl.getExchange(), getProviderCode());
 	}
 
+	@VisibleForTesting
 	protected static String parseSource(String code) {
-		Matcher stockMatcher = STOCK_PATTERN.matcher(code);
-
-		if (stockMatcher.matches())
-			return stockMatcher.group(1);
-
-		Matcher forexMatcher = Yahoo.FOREX_PATTERN.matcher(code);
-
+		Matcher forexMatcher = FOREX_PATTERN.matcher(code);
+		
 		if (forexMatcher.matches()) {
 			String source = forexMatcher.group(1);
 			String target = forexMatcher.group(2);
 			return (target != null) ? source : CurrencyUtils.USD;
 		}
+		
+		Matcher cryptoMatcher = CRYPTOCURRENCY_PATTERN.matcher(code);
+		
+		if (cryptoMatcher.matches()) {
+			return cryptoMatcher.group(1);
+		}
+		
+		Matcher stockMatcher = EQUITY_PATTERN.matcher(code);
+
+		if (stockMatcher.matches()) {
+			return stockMatcher.group(1);
+		}
+		
+		Matcher futureMatcher = FUTURE_PATTERN.matcher(code);
+
+		if (futureMatcher.matches()) {
+			return futureMatcher.group(1);
+		}
 
 		return null;
 	}
 
+	@VisibleForTesting
 	protected static String parseTarget(String code) {
-		Matcher forexMatcher = Yahoo.FOREX_PATTERN.matcher(code);
+		Matcher forexMatcher = FOREX_PATTERN.matcher(code);
 
 		if (forexMatcher.matches()) {
 			String source = forexMatcher.group(1);
 			String target = forexMatcher.group(2);
 			return (target != null) ? target : source;
+		}
+		
+		Matcher cryptoMatcher = CRYPTOCURRENCY_PATTERN.matcher(code);
+
+		if (cryptoMatcher.matches()) {
+			return cryptoMatcher.group(2);
 		}
 
 		return null;

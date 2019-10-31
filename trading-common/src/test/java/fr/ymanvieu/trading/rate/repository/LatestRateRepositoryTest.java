@@ -18,28 +18,31 @@ package fr.ymanvieu.trading.rate.repository;
 
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.atIndex;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import fr.ymanvieu.trading.rate.FavoriteRate;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 public class LatestRateRepositoryTest {
 
 	@Autowired
 	private LatestRateRepository repo;
 
-	@Sql({ "/sql/insert_data.sql", "/sql/insert_eur_gbp.sql" })
+	@Sql("/sql/insert_data.sql")
+	@Sql("/sql/insert_eur_gbp.sql")
 	@Test
-	@Transactional
 	public void testDeleteByFromcurCodeAndTocurCode() {
 		// when
 		int result = repo.deleteByFromcurCodeOrTocurCode(USD);
@@ -47,5 +50,19 @@ public class LatestRateRepositoryTest {
 		// then
 		assertThat(result).isEqualTo(3);
 		assertThat(repo.count()).isEqualTo(1);
+	}
+
+	@Sql("/sql/insert_data.sql")
+	@Sql("/sql/insert_favorite_symbol.sql")
+	@Test
+	public void testFindAllWithFavorites() throws Exception {
+		
+		List<FavoriteRate> result = repo.findAllWithFavorites("user");
+		assertThat(result).hasSize(3)
+		.satisfies(fr -> {
+			assertThat(fr.getFromcur().getCode()).isEqualTo("BRE");
+			assertThat(fr.getTocur().getCode()).isEqualTo("USD");
+			assertThat(fr.getFavorite()).isTrue();
+		}, atIndex(1));
 	}
 }

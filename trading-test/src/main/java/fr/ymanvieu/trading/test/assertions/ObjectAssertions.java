@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.AbstractObjectAssert;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Preconditions;
@@ -35,7 +34,7 @@ import org.assertj.core.util.Preconditions;
  * Inherited/static fields of the object to verify are ignored.
  *
  */
-public class ObjectAssertions extends Assertions {
+public class ObjectAssertions {
 
 	public static ObjectAssert assertThat(Object actual) {
 		return new ObjectAssert(actual);
@@ -46,13 +45,15 @@ public class ObjectAssertions extends Assertions {
 		private static final String MSG_IGNORED_FIELD_NOT_FOUND = "Ignored fields %s were not found in class %s, maybe a typo or have been renamed";
 		private static final String MSG_TRUE = "%s must be true";
 		private static final String MSG_FALSE = "%s must be false";
+
+		private static final String MSG_NULL = "%s must be null";
 		private static final String MSG_NOT_NULL = "%s must be non-null";
+
+		private static final String MSG_EMPTY = "%s must be empty";
 		private static final String MSG_NOT_EMPTY = "%s must be non-empty";
 
 		private static final String MSG_ZERO = "%s must be == 0";
 		private static final String MSG_NOT_ZERO = "%s must be != 0";
-
-		private static final String MSG_EMPTY = "%s must be empty";
 
 		private final List<String> ignoredFields = new ArrayList<>();
 
@@ -169,7 +170,9 @@ public class ObjectAssertions extends Assertions {
 					throw new IllegalStateException(e);
 				}
 
-				softAss.assertThat(o).overridingErrorMessage(MSG_NOT_NULL, field.getName()).isNotNull();
+				if (!field.getType().isPrimitive()) {
+					softAss.assertThat(o).overridingErrorMessage(MSG_NULL, field.getName()).isNull();
+				}
 
 				if (o instanceof Boolean) {
 					softAss.assertThat(((Boolean) o)).overridingErrorMessage(MSG_FALSE, field.getName()).isFalse();

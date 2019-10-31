@@ -19,7 +19,7 @@ package fr.ymanvieu.trading.provider.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.Predicate;
@@ -27,10 +27,14 @@ import com.querydsl.core.types.Predicate;
 import fr.ymanvieu.trading.provider.entity.PairEntity;
 
 @Transactional(readOnly = true)
-public interface PairRepository extends JpaRepository<PairEntity, String>, QueryDslPredicateExecutor<PairEntity> {
+public interface PairRepository extends JpaRepository<PairEntity, Integer>, QuerydslPredicateExecutor<PairEntity> {
 
-	PairEntity findBySymbol(String symbol);
+	PairEntity findBySymbolAndProviderCode(String symbol, String provider);
 
 	@Override
 	List<PairEntity> findAll(Predicate predicate);
+
+	List<PairEntity> findAllByProviderCode(String providerCode);
+	
+	List<PairEntity> findAllBySymbolContainsIgnoreCaseOrNameContainsIgnoreCase(String symbol, String name);
 }

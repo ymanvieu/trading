@@ -32,7 +32,7 @@ public class SymbolException extends BusinessException {
 		return new SymbolException("symbols.error.unknown", code);
 	}
 
-	public static SymbolException ALREADY_EXISTS(String code) {
+	public static SymbolException alreadyExists(String code) {
 		return new SymbolException("symbols.error.already_exists", code);
 	}
 

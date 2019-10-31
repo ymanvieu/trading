@@ -16,26 +16,28 @@
  */
 package fr.ymanvieu.trading.config;
 
-import java.util.UUID;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.RememberMeConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import fr.ymanvieu.trading.jwt.JwtAuthenticationTokenFilter;
+import fr.ymanvieu.trading.jwt.JwtTokenUtil;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -43,64 +45,41 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 @Order
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Autowired(required = false)
-	private PersistentTokenRepository persistentTokenRepository;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
+    @Value("${jwt.header}")
+    private String tokenHeader;
+	
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-
-		http.formLogin().defaultSuccessUrl("/portofolio") //
-				.loginPage("/user/login") //
-				.loginProcessingUrl("/user/login") //
-				.and() //
-				.logout().logoutSuccessUrl("/");
-
-		RememberMeConfigurer<HttpSecurity> rememberMeConfigurer = http.rememberMe();
-
-		if (persistentTokenRepository != null) {
-			UserDetailsService uds = http.getSharedObject(UserDetailsService.class);
-			String key = UUID.randomUUID().toString();
-
-			CustomPersistentTokenBasedRememberMeServices customRememberMeServices = new CustomPersistentTokenBasedRememberMeServices(key, uds, persistentTokenRepository);
-			// 2 months validity
-			customRememberMeServices.setTokenValiditySeconds(5184000);
-
-			rememberMeConfigurer.tokenRepository(persistentTokenRepository) //
-					.key(customRememberMeServices.getKey()) //
-					.rememberMeServices(customRememberMeServices);
-		}
+	protected void configure(HttpSecurity http) throws Exception {		
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+		
+		// Custom JWT based security filter
+		.csrf().disable()
+		.addFilterBefore(new JwtAuthenticationTokenFilter(jwtTokenUtil, tokenHeader), UsernamePasswordAuthenticationFilter.class);
+	}
+	
+	@Override
+	public void configure(WebSecurity web) {
+		web.ignoring().antMatchers("/api/rate/.**", "/api/refresh", "/api/auth"); //
 	}
 
-	@Profile("!dev")
 	@Bean
-	public PersistentTokenRepository persistentTokenRepository(DataSource ds) {
-		JdbcTokenRepositoryImpl tokenRepositoryImpl = new JdbcTokenRepositoryImpl();
-		tokenRepositoryImpl.setDataSource(ds);
-		return tokenRepositoryImpl;
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
-
-	/**
-	 * Disable Cookie theft check. <br>
-	 * Avoid CookieTheftException when some browsers (chrome/firefox) quickly reload multiple times a page. <br>
-	 * (sending the same remember-me cookie multiple times) <br>
-	 * https://github.com/spring-projects/spring-security/issues/3079
-	 */
-	public class CustomPersistentTokenBasedRememberMeServices extends PersistentTokenBasedRememberMeServices {
-		public CustomPersistentTokenBasedRememberMeServices(String key, UserDetailsService userDetailsService, PersistentTokenRepository tokenRepository) {
-			super(key, userDetailsService, tokenRepository);
-		}
-
-		@Override
-		protected String generateTokenData() {
-			// Return a constant value for the token value to avoid CookieTheftExceptions.
-			return "n59D4i1dnaBaPyh5LkZldQ==";
-		}
+	
+	@Bean
+	public JdbcUserDetailsManager configureGlobal(AuthenticationManagerBuilder auth, DataSource ds, PasswordEncoder pwEncoder) throws Exception {
+		JdbcUserDetailsManager jdbcUserDetailsManager = auth.jdbcAuthentication().dataSource(ds).passwordEncoder(pwEncoder).getUserDetailsService();
+		jdbcUserDetailsManager.setAuthenticationManager(authenticationManagerBean());
+		return jdbcUserDetailsManager;
 	}
-
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth, DataSource ds, PasswordEncoder pwEncoder) throws Exception {
-		auth.jdbcAuthentication().dataSource(ds).passwordEncoder(pwEncoder) //
-				.usersByUsernameQuery("select login,password,true from users where login=?") //
-				.authoritiesByUsernameQuery("select login,role from users where login=?");
+	
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
 	}
 }

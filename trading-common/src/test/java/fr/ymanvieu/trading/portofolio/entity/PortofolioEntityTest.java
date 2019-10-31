@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2016 Yoann Manvieu
+ *
+ * This software is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package fr.ymanvieu.trading.portofolio.entity;
 
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.EUR;
@@ -13,8 +29,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +42,7 @@ import fr.ymanvieu.trading.symbol.repository.SymbolRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 @Sql("/sql/insert_portofolio.sql")
 public class PortofolioEntityTest {
 
@@ -46,95 +60,91 @@ public class PortofolioEntityTest {
 
 	// FIXME add error cases
 
-	@Transactional
 	@Test
 	public void testBuy_WithBaseCurrency() throws Exception {
 		String login = "toto";
 		String assetCode = "UBI";
-		float quantity = 50;
+		double quantity = 50;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
-		Order order = portofolio.buy(symbolRepo.findOne(assetCode), quantity, rateService);
+		Order order = portofolio.buy(symbolRepo.findById(assetCode).get(), quantity, rateService);
 
 		assertThat(order.getFrom().getCode()).isEqualTo(EUR);
-		assertThat(order.getQuantity()).isEqualTo(1407.75005f);
+		assertThat(order.getQuantity()).isEqualTo(1407.75005);
 		assertThat(order.getTo().getCode()).isEqualTo(assetCode);
 		assertThat(order.getValue()).isEqualByComparingTo(quantity);
 
 		AssetEntity updatedEntity = portofolio.getAsset(assetCode);
 
 		assertThat(updatedEntity.getSymbol().getCode()).isEqualTo(assetCode);
-		assertThat(updatedEntity.getQuantity()).isEqualByComparingTo(new BigDecimal(quantity));
+		assertThat(updatedEntity.getQuantity()).isEqualByComparingTo(BigDecimal.valueOf(quantity));
 		assertThat(updatedEntity.getCurrencyAmount()).isEqualByComparingTo("1407.75005");
 
 		assertThat(portofolio.getAmount()).isEqualByComparingTo("592.24995");
 	}
 
-	@Transactional
 	@Test
 	public void testBuy_NoFund() throws Exception {
 		String login = "seller";
 		String assetCode = "BRE";
-		float quantity = 1;
+		double quantity = 1;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
 		exception.expect(OrderException.class);
 		exception.expectMessage("not_enough_fund");
 
-		portofolio.buy(symbolRepo.findOne(assetCode), quantity, rateService);
+		portofolio.buy(symbolRepo.findById(assetCode).get(), quantity, rateService);
 	}
 
 	@Test
 	public void testBuy_NotEnoughFund() throws Exception {
 		String login = "seller";
 		String assetCode = "UBI";
-		float quantity = 1;
+		double quantity = 1;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
 		exception.expect(OrderException.class);
 		exception.expectMessage("not_enough_fund");
 
-		portofolio.buy(symbolRepo.findOne(assetCode), quantity, rateService);
+		portofolio.buy(symbolRepo.findById(assetCode).get(), quantity, rateService);
 	}
 
-	@Transactional
 	@Test
 	public void testBuy_Currency() throws Exception {
 		String login = "toto";
 		String assetCode = USD;
-		float quantity = 50;
+		double quantity = 50;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
-		Order order = portofolio.buy(symbolRepo.findOne(assetCode), quantity, rateService);
+		Order order = portofolio.buy(symbolRepo.findById(assetCode).get(), quantity, rateService);
 
 		assertThat(order.getFrom().getCode()).isEqualTo(EUR);
-		assertThat(order.getQuantity()).isEqualTo(44.1053f);
+		assertThat(order.getQuantity()).isEqualTo(44.1053);
 		assertThat(order.getTo().getCode()).isEqualTo(assetCode);
 		assertThat(order.getValue()).isEqualByComparingTo(quantity);
 
 		AssetEntity updatedEntity = portofolio.getAsset(assetCode);
 
 		assertThat(updatedEntity.getSymbol().getCode()).isEqualTo(assetCode);
-		assertThat(updatedEntity.getQuantity()).isEqualByComparingTo(new BigDecimal(quantity));
+		assertThat(updatedEntity.getQuantity()).isEqualByComparingTo(BigDecimal.valueOf(quantity));
 		assertThat(updatedEntity.getCurrencyAmount()).isEqualByComparingTo("44.1053");
 
 		assertThat(portofolio.getAmount()).isEqualByComparingTo("1955.8947");
 	}
 
-	@Transactional
 	@Test
 	public void testBuy_Stock() throws Exception {
 		String login = "toto";
 		String assetCode = "RR";
-		float quantity = 5;
+		double quantity = 5;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
-		Order order = portofolio.buy(symbolRepo.findOne(assetCode), quantity, rateService);
+		Order order = portofolio.buy(symbolRepo.findById(assetCode).get(), quantity, rateService);
 
 		assertThat(order.getFrom().getCode()).isEqualTo(GBP);
 		assertThat(order.getQuantity()).isEqualTo(3460f);
@@ -144,7 +154,7 @@ public class PortofolioEntityTest {
 		AssetEntity updatedEntity = portofolio.getAsset(assetCode);
 
 		assertThat(updatedEntity.getSymbol().getCode()).isEqualTo(assetCode);
-		assertThat(updatedEntity.getQuantity()).isEqualByComparingTo(new BigDecimal(quantity));
+		assertThat(updatedEntity.getQuantity()).isEqualByComparingTo(BigDecimal.valueOf(quantity));
 		assertThat(updatedEntity.getCurrencyAmount()).isEqualByComparingTo("3460");
 
 		// EUR->GBP: 0.789587645929174
@@ -157,21 +167,20 @@ public class PortofolioEntityTest {
 		assertThat(updatedCurrencyEntity.getCurrencyAmount()).isEqualByComparingTo("1848");
 	}
 
-	@Transactional
 	@Test
 	public void testSell_WithBaseCurrency() throws Exception {
 		String login = "seller";
 		String assetCode = "UBI";
-		int quantity = 50;
+		double quantity = 50;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
-		Order order = portofolio.sell(symbolRepo.findOne(assetCode), quantity, rateService);
+		Order order = portofolio.sell(symbolRepo.findById(assetCode).get(), quantity, rateService);
 
 		assertThat(order.getFrom().getCode()).isEqualTo(assetCode);
 		assertThat(order.getQuantity()).isEqualTo(quantity);
 		assertThat(order.getTo().getCode()).isEqualTo(EUR);
-		assertThat(order.getValue()).isEqualByComparingTo(1407.75005f);
+		assertThat(order.getValue()).isEqualByComparingTo(1407.75005d);
 
 		AssetEntity updatedEntity = portofolio.getAsset(assetCode);
 
@@ -182,21 +191,20 @@ public class PortofolioEntityTest {
 		assertThat(portofolio.getAmount()).isEqualByComparingTo("1407.75005");
 	}
 
-	@Transactional
 	@Test
 	public void testSell_All() throws Exception {
 		String login = "seller";
 		String assetCode = "UBI";
-		int quantity = 60;
+		double quantity = 60;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
-		Order order = portofolio.sell(symbolRepo.findOne(assetCode), quantity, rateService);
+		Order order = portofolio.sell(symbolRepo.findById(assetCode).get(), quantity, rateService);
 
 		assertThat(order.getFrom().getCode()).isEqualTo(assetCode);
 		assertThat(order.getQuantity()).isEqualTo(quantity);
 		assertThat(order.getTo().getCode()).isEqualTo(EUR);
-		assertThat(order.getValue()).isEqualByComparingTo(1689.300065f);
+		assertThat(order.getValue()).isEqualByComparingTo(1689.30006);
 
 		AssetEntity updatedEntity = portofolio.getAsset(assetCode);
 
@@ -205,21 +213,20 @@ public class PortofolioEntityTest {
 		assertThat(portofolio.getAmount()).isEqualByComparingTo("1689.30006");
 	}
 	
-	@Transactional
 	@Test
 	public void testSell_Stock() throws Exception {
 		String login = "toto";
 		String assetCode = "MKS";
-		float quantity = 5;
+		double quantity = 5;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
 
-		Order order = portofolio.sell(symbolRepo.findOne(assetCode), quantity, rateService);
+		Order order = portofolio.sell(symbolRepo.findById(assetCode).get(), quantity, rateService);
 
 		assertThat(order.getFrom().getCode()).isEqualTo(assetCode);
 		assertThat(order.getQuantity()).isEqualTo(quantity);
 		assertThat(order.getTo().getCode()).isEqualTo(GBP);
-		assertThat(order.getValue()).isEqualByComparingTo(2134f);
+		assertThat(order.getValue()).isEqualByComparingTo(2134d);
 
 		AssetEntity updatedEntity = portofolio.getAsset(assetCode);
 
@@ -239,8 +246,8 @@ public class PortofolioEntityTest {
 		String login = "toto";
 		String assetCode = USD;
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
-		SymbolEntity se = symbolRepo.findOne(assetCode);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+		SymbolEntity se = symbolRepo.findById(assetCode).get();
 
 		SymbolEntity currency = portofolio.getCurrencyFor(se);
 
@@ -252,8 +259,8 @@ public class PortofolioEntityTest {
 		String login = "toto";
 		String assetCode = "RR";
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserLogin(login);
-		SymbolEntity se = symbolRepo.findOne(assetCode);
+		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+		SymbolEntity se = symbolRepo.findById(assetCode).get();
 
 		SymbolEntity currency = portofolio.getCurrencyFor(se);
 

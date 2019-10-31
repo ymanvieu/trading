@@ -1,6 +1,21 @@
+/**
+ * Copyright (C) 2016 Yoann Manvieu
+ *
+ * This software is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package fr.ymanvieu.trading.rate;
 
-import static fr.ymanvieu.trading.provider.rate.quandl.Quandl.BRE;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
 import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,26 +30,29 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import fr.ymanvieu.trading.rate.entity.RateEntity;
+import fr.ymanvieu.trading.rate.entity.HistoricalRate;
+import fr.ymanvieu.trading.rate.entity.LatestRate;
 import fr.ymanvieu.trading.rate.event.RatesUpdatedEvent;
 import fr.ymanvieu.trading.rate.repository.HistoricalRateRepository;
 import fr.ymanvieu.trading.rate.repository.LatestRateRepository;
 import fr.ymanvieu.trading.symbol.repository.SymbolRepository;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DataJpaTest(properties = "spring.flyway.enabled=false")
+@Transactional
+@Import(RateService.class)
 @Sql("/sql/insert_symbols_bre_usd.sql")
 public class RateUpdaterServiceTest {
+	
+	private static final String BRE = "BRE";
 
 	@Autowired
 	private LatestRateRepository latestRepo;
@@ -58,14 +76,14 @@ public class RateUpdaterServiceTest {
 		rateUpdaterService = new RateUpdaterService(latestRepo, symbolRepo, rateService, bus);
 	}
 
-	private List<Quote> getBrentQuotes() {
-		List<Quote> quotes = new ArrayList<>();
+	private List<Rate> getBrentQuotes() {
+		List<Rate> quotes = new ArrayList<>();
 
-		quotes.add(new Quote(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00+02:00")));
-		quotes.add(new Quote(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00+02:00")));
-		quotes.add(new Quote(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00+02:00")));
-		quotes.add(new Quote(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00+02:00")));
-		quotes.add(new Quote(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00+02:00")));
+		quotes.add(new Rate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00")));
+		quotes.add(new Rate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00")));
+		quotes.add(new Rate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00")));
+		quotes.add(new Rate(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00")));
+		quotes.add(new Rate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00")));
 
 		return quotes;
 	}
@@ -73,24 +91,25 @@ public class RateUpdaterServiceTest {
 	@Test
 	public void testUpdateRates() {
 		// given
-		List<Quote> quotes = getBrentQuotes();
+		List<Rate> quotes = getBrentQuotes();
 
-		RateEntity expected1 = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00+02:00"));
-		RateEntity expected2 = new RateEntity(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00+02:00"));
-		RateEntity expected3 = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00+02:00"));
-		RateEntity expected4 = new RateEntity(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00+02:00"));
-		RateEntity expected5 = new RateEntity(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00+02:00"));
+		HistoricalRate expected1 = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00"));
+		HistoricalRate expected2 = new HistoricalRate(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00"));
+		HistoricalRate expected3 = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00"));
+		HistoricalRate expected4 = new HistoricalRate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00"));
+		HistoricalRate expected5 = new HistoricalRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		LatestRate expected6 = new LatestRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
 
 		// when
 		rateUpdaterService.updateRates(quotes);
 
 		// then
-		List<RateEntity> hRates = new ArrayList<>(histoRepo.findAll());
-		List<RateEntity> lRates = new ArrayList<>(latestRepo.findAll());
+		List<HistoricalRate> hRates = new ArrayList<>(histoRepo.findAll());
+		List<LatestRate> lRates = new ArrayList<>(latestRepo.findAll());
 
 		assertThat(hRates).containsExactlyInAnyOrder(expected1, expected2, expected3, expected4, expected5);
 
-		assertThat(lRates).containsExactly(expected5);
+		assertThat(lRates).containsExactly(expected6);
 
 		verify(bus).publishEvent(ArgumentMatchers.<RatesUpdatedEvent>any());
 	}
@@ -100,25 +119,26 @@ public class RateUpdaterServiceTest {
 	@Test
 	public void testUpdateRates_WithExistingData() {
 		// given
-		List<Quote> quotes = getBrentQuotes();
+		List<Rate> quotes = getBrentQuotes();
 
-		RateEntity expectedOldLatest = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-06T02:00:00+02:00"));
-		RateEntity expectedAdded = new RateEntity(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00+02:00"));
-		RateEntity expectedNewLatest = new RateEntity(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00+02:00"));
-		RateEntity olderButAdded = new RateEntity(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00+02:00"));
+		HistoricalRate expectedOldLatest = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-06T02:00:00"));
+		HistoricalRate expectedAdded = new HistoricalRate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00"));
+		HistoricalRate expectedNewLatest = new HistoricalRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		LatestRate expectedNewLatest1 = new LatestRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		HistoricalRate olderButAdded = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00"));
 
 		// when
 		rateUpdaterService.updateRates(quotes);
 
 		// then
-		List<RateEntity> hRates = new ArrayList<>(histoRepo.findAll());
-		List<RateEntity> lRates = new ArrayList<>(latestRepo.findAll());
+		List<HistoricalRate> hRates = new ArrayList<>(histoRepo.findAll());
+		List<LatestRate> lRates = new ArrayList<>(latestRepo.findAll());
 
 		assertThat(hRates).hasSize(7);
 		assertThat(hRates).containsOnlyOnce(expectedOldLatest, expectedAdded, expectedNewLatest, olderButAdded);
 
 		assertThat(lRates).hasSize(1);
-		assertThat(lRates).containsOnly(expectedNewLatest);
+		assertThat(lRates).containsOnly(expectedNewLatest1);
 
 		verify(bus).publishEvent(ArgumentMatchers.<RatesUpdatedEvent>any());
 	}

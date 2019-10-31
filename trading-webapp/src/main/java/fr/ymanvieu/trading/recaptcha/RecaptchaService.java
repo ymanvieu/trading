@@ -1,6 +1,26 @@
+/**
+ * Copyright (C) 2016 Yoann Manvieu
+ *
+ * This software is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package fr.ymanvieu.trading.recaptcha;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import fr.ymanvieu.trading.config.RecaptchaProperties;
+import fr.ymanvieu.trading.recaptcha.exception.RecaptchaException;
 import lombok.ToString;
 
 @ConditionalOnBean(RecaptchaProperties.class)
@@ -35,8 +56,16 @@ public class RecaptchaService {
 
 	@Autowired
 	private RecaptchaProperties recaptchaProperties;
+	
+	public boolean isValidRecaptcha(String recaptchaResponse, HttpServletRequest httpServletRequest) {
+		if(isNullOrEmpty(recaptchaResponse)) {
+			throw new RecaptchaException("recaptchaResponse is null");
+		}
+		
+		return isResponseValid(getRemoteIp(httpServletRequest), recaptchaResponse);
+	}
 
-	public boolean isResponseValid(String remoteIp, String response) {
+	private boolean isResponseValid(String remoteIp, String response) {
 		log.debug("Validating captcha response for remoteIp={}, response={}", remoteIp, response);
 
 		RecaptchaResponse recaptchaResponse;
@@ -45,7 +74,7 @@ public class RecaptchaService {
 			recaptchaResponse = restTemplate.postForEntity(recaptchaProperties.getUrl(), createBody(recaptchaProperties.getSecretKey(), remoteIp, response), 
 					RecaptchaResponse.class).getBody();
 		} catch (RestClientException e) {
-			throw new RecaptchaServiceException("Recaptcha API exception", e);
+			throw new RecaptchaException("Recaptcha API exception", e);
 		}
 
 		if (recaptchaResponse.success) {
@@ -55,6 +84,20 @@ public class RecaptchaService {
 		log.debug("Unsuccessful recaptchaResponse={}", recaptchaResponse);
 
 		return false;
+	}
+	
+	private String getRemoteIp(HttpServletRequest request) {
+		String ip = request.getHeader("x-forwarded-for");
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
+		}
+		return ip;
 	}
 
 	private MultiValueMap<String, String> createBody(String secret, String remoteIp, String response) {

@@ -16,12 +16,7 @@
  */
 package fr.ymanvieu.trading.portofolio.dto;
 
-import static fr.ymanvieu.trading.portofolio.util.NumberFormatUtils.NUMBER_PATTERN;
-import static fr.ymanvieu.trading.portofolio.util.NumberFormatUtils.NUMBER_WITH_SIGN_PATTERN;
-
 import java.util.List;
-
-import org.springframework.format.annotation.NumberFormat;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,12 +31,7 @@ public class PortofolioDTO {
 
 	private List<AssetDTO> assets;
 
-	@NumberFormat(pattern = NUMBER_PATTERN)
-	private float currentValue;
-
-	@NumberFormat(pattern = NUMBER_WITH_SIGN_PATTERN)
-	private float percentChange;
-
-	@NumberFormat(pattern = NUMBER_WITH_SIGN_PATTERN)
-	private float valueChange;
+	private double currentValue;
+	private double percentChange;
+	private double valueChange;
 }

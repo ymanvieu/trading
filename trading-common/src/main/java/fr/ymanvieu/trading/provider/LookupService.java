@@ -42,7 +42,7 @@ public class LookupService {
 		return result;
 	}
 
-	public LookupDetails getDetails(String code, String provider) throws IOException, ProviderException {
+	public LookupDetails getDetails(String code, String provider) throws IOException {
 		for (LookupProvider lp : lProviders) {
 			if (lp.getProviderCode().equals(provider)) {
 				return lp.getDetails(code);

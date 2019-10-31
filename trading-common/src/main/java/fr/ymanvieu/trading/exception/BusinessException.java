@@ -18,7 +18,7 @@ package fr.ymanvieu.trading.exception;
 
 import java.util.Arrays;
 
-public class BusinessException extends Exception {
+public class BusinessException extends RuntimeException {
 
 	private static final long serialVersionUID = 5894630703257348547L;
 

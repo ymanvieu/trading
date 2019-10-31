@@ -1,0 +1,94 @@
+{
+	"suggestionTitleAccessor": "symbol",
+	"suggestionMeta": [
+		"symbol",
+		"name",
+		"exch",
+		"type",
+		"exchDisp",
+		"typeDisp"
+	],
+	"hiConf": false,
+	"items": [
+		{
+			"symbol": "UBNT",
+			"name": "Ubiquiti Networks, Inc.",
+			"exch": "NAS",
+			"type": "S",
+			"exchDisp": "NASDAQ",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBQU",
+			"name": "UbiquiTECH Software Corp.",
+			"exch": "PNK",
+			"type": "S",
+			"exchDisp": "OTC Markets",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBI.PA",
+			"name": "Ubisoft Entertainment SA",
+			"exch": "PAR",
+			"type": "S",
+			"exchDisp": "Paris",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBIO",
+			"name": "ProShares UltraPro Nasdaq Biotechnology",
+			"exch": "NGM",
+			"type": "E",
+			"exchDisp": "NASDAQ",
+			"typeDisp": "ETF"
+		},
+		{
+			"symbol": "UBSFY",
+			"name": "Ubisoft Entertainment SA",
+			"exch": "PNK",
+			"type": "S",
+			"exchDisp": "OTC Markets",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBIQ",
+			"name": "Ubiquity, Inc.",
+			"exch": "PNK",
+			"type": "S",
+			"exchDisp": "OTC Markets",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBIA",
+			"name": "UBI BLOCKCHAIN INT COM USD0.001",
+			"exch": "PNK",
+			"type": "S",
+			"exchDisp": "OTC Markets",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBSFF",
+			"name": "Ubisoft Entertainment SA",
+			"exch": "PNK",
+			"type": "S",
+			"exchDisp": "OTC Markets",
+			"typeDisp": "Equity"
+		},
+		{
+			"symbol": "UBIQFX",
+			"name": "ADT 1533 Ubiquitous Portfolio S",
+			"exch": "NAS",
+			"type": "M",
+			"exchDisp": "NASDAQ",
+			"typeDisp": "Fund"
+		},
+		{
+			"symbol": "IT0003242424.MI",
+			"name": "UBI Pramerica Azioni Euro",
+			"exch": "MIL",
+			"type": "M",
+			"exchDisp": "Milan",
+			"typeDisp": "Fund"
+		}
+	]
+}

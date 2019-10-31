@@ -21,40 +21,29 @@ import org.springframework.stereotype.Service;
 
 import fr.ymanvieu.trading.provider.rate.HistoricalRateProvider;
 import fr.ymanvieu.trading.provider.rate.LatestRateProvider;
-import fr.ymanvieu.trading.provider.rate.ecb.EuropeanCentralBank;
-import fr.ymanvieu.trading.provider.rate.quandl.Quandl;
-import fr.ymanvieu.trading.provider.rate.yahoo.Yahoo;
-import fr.ymanvieu.trading.provider.rate.yahoo.YahooStock;
+import fr.ymanvieu.trading.provider.rate.yahoo.YahooCurrencyProvider;
+import fr.ymanvieu.trading.provider.rate.yahoo.YahooStockProvider;
 
 @Service
 public class RateProviderService {
 
 	@Autowired
-	private Yahoo yahoo;
+	private YahooCurrencyProvider currencyProvider;
 
 	@Autowired
-	private YahooStock yahooStock;
+	private YahooStockProvider stockProvider;
 
-	@Autowired
-	private Quandl quandl;
-
-	@Autowired
-	private EuropeanCentralBank ecb;
-
-	public LatestRateProvider getProvider(ProviderType type) {
+	public LatestRateProvider getLatestProvider(ProviderType type) {
 		LatestRateProvider provider = null;
 
 		switch (type) {
-			case FOREX:
-				provider = yahoo;
+		case FOREX:
+			provider = currencyProvider;
 			break;
-			case OIL:
-				provider = quandl;
+		case STOCK:
+			provider = stockProvider;
 			break;
-			case STOCK:
-				provider = yahooStock;
-			break;
-			default:
+		default:
 			break;
 		}
 
@@ -65,14 +54,11 @@ public class RateProviderService {
 		HistoricalRateProvider provider = null;
 
 		switch (type) {
-			case FOREX:
-				provider = ecb;
+		case STOCK:
+			provider = stockProvider;
 			break;
-			case OIL:
-				provider = quandl;
+		default:
 			break;
-			case STOCK:
-			default:
 		}
 
 		return provider;

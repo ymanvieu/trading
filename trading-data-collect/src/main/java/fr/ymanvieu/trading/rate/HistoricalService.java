@@ -16,6 +16,9 @@
  */
 package fr.ymanvieu.trading.rate;
 
+import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.countryFlagForCurrency;
+import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.nameForCurrency;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +39,6 @@ import com.google.common.collect.Table;
 import fr.ymanvieu.trading.provider.ProviderType;
 import fr.ymanvieu.trading.provider.RateProviderService;
 import fr.ymanvieu.trading.provider.rate.HistoricalRateProvider;
-import fr.ymanvieu.trading.rate.Quote;
-import fr.ymanvieu.trading.rate.RateService;
-import fr.ymanvieu.trading.symbol.CurrencyInfo;
 import fr.ymanvieu.trading.symbol.SymbolService;
 import fr.ymanvieu.trading.symbol.repository.SymbolRepository;
 
@@ -68,37 +68,40 @@ public class HistoricalService implements ApplicationRunner {
 	public void run(ApplicationArguments args) throws Exception {
 		addHistoricalRates(providerService.getHistoricalProvider(ProviderType.OIL));
 		addHistoricalRates(providerService.getHistoricalProvider(ProviderType.FOREX));
+		addHistoricalRates(providerService.getHistoricalProvider(ProviderType.STOCK));
 	}
 
 	private void addHistoricalRates(HistoricalRateProvider provider) throws IOException {
 		Stopwatch startWatch = Stopwatch.createStarted();
+		
+		String providerName = provider.getClass().getSimpleName();
 
-		log.info("{}: Adding historical rates", provider);
+		log.info("{}: Adding historical rates", providerName);
 
-		List<Quote> quotes = provider.getHistoricalRates();
+		List<Rate> quotes = provider.getHistoricalRates();
 
 		Stopwatch saveWatch = Stopwatch.createStarted();
 
 		addHistoricalRates(quotes);
 
-		log.debug("{}: Data saved in {}", provider, saveWatch);
-		log.info("{}: Historical rates added in {}", provider, startWatch);
+		log.debug("{}: Data saved in {}", providerName, saveWatch);
+		log.info("{}: Historical rates added in {}", providerName, startWatch);
 	}
 
 	@VisibleForTesting
-	protected void addHistoricalRates(List<Quote> quotes) {
+	protected void addHistoricalRates(List<Rate> quotes) {
 
 		log.debug("{} quotes as parameter", quotes.size());
 
-		Table<String, String, List<Quote>> sortedQuotes = sort(quotes);
+		Table<String, String, List<Rate>> sortedQuotes = sort(quotes);
 
-		sortedQuotes.cellSet().stream().forEach(e -> {
+		sortedQuotes.cellSet().forEach(e -> {
 
-			if (!symbolRepo.exists(e.getColumnKey())) {
+			if (!symbolRepo.existsById(e.getColumnKey())) {
 				addCurrency(e.getColumnKey());
 			}
 			
-			if (!symbolRepo.exists(e.getRowKey())) {
+			if (!symbolRepo.existsById(e.getRowKey())) {
 				addCurrency(e.getRowKey());
 			}
 
@@ -109,11 +112,11 @@ public class HistoricalService implements ApplicationRunner {
 		});
 	}
 
-	private Table<String, String, List<Quote>> sort(List<Quote> quotes) {
-		Table<String, String, List<Quote>> sortedQuotes = HashBasedTable.create();
+	private Table<String, String, List<Rate>> sort(List<Rate> quotes) {
+		Table<String, String, List<Rate>> sortedQuotes = HashBasedTable.create();
 
-		for (Quote q : quotes) {
-			List<Quote> res = sortedQuotes.get(q.getCode(), q.getCurrency());
+		for (Rate q : quotes) {
+			List<Rate> res = sortedQuotes.get(q.getCode(), q.getCurrency());
 
 			if (res == null) {
 				res = new ArrayList<>();
@@ -127,7 +130,6 @@ public class HistoricalService implements ApplicationRunner {
 	}
 
 	private void addCurrency(String code) {
-		CurrencyInfo ci = symbolService.getCurrencyInfo(code);
-		symbolService.addSymbol(ci.getCode(), ci.getName(), ci.getCountryFlag(), null);
+		symbolService.addSymbol(code, nameForCurrency(code), countryFlagForCurrency(code), null);
 	}
 }

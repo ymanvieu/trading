@@ -19,7 +19,7 @@ package fr.ymanvieu.trading.rate.repository;
 import static com.querydsl.core.types.Projections.constructor;
 import static fr.ymanvieu.trading.rate.entity.QHistoricalRate.historicalRate;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -37,7 +37,7 @@ public class HistoricalRateRepositoryImpl implements HistoricalRateRepositoryCus
 	private EntityManager em;
 
 	@Override
-	public List<DateValue> findValues(String fromcur, String tocur, Date startDate, Date endDate) {
+	public List<DateValue> findValues(String fromcur, String tocur, Instant startDate, Instant endDate) {
 
 		AverageRangeType type = AverageRangeType.getRange(startDate, endDate);
 

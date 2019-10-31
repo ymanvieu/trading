@@ -16,15 +16,12 @@
  */
 package fr.ymanvieu.trading.rate.repository;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
-
-import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.rate.DateValue;
 
-@Transactional(readOnly = true)
 public interface HistoricalRateRepositoryCustom {
 
-	List<DateValue> findValues(String fromcur, String tocur, Date startDate, Date endDate);
+	List<DateValue> findValues(String fromcur, String tocur, Instant startDate, Instant endDate);
 }

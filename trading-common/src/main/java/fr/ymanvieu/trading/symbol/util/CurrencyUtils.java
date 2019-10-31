@@ -17,6 +17,7 @@
 package fr.ymanvieu.trading.symbol.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,6 +83,7 @@ public class CurrencyUtils {
 		List<String> codes = countryCodesForCurrency(c);
 
 		if (!codes.isEmpty()) {
+			Collections.sort(codes);
 			String code = codes.get(0);
 			return code.toLowerCase();
 		}

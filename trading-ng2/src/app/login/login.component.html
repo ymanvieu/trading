@@ -1,0 +1,15 @@
+<form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="loginForm" id="loginForm" role="form" novalidate>
+		
+	<clr-alert clrAlertType="danger" *ngIf="!!hasError"><clr-alert-item><span class="alert-text">{{ 'login.error.bad-credentials' | translate }}</span></clr-alert-item></clr-alert>
+
+	<clr-input-container>
+		<label>{{ 'login.login' | translate }}</label> 
+		<input clrInput type="text" formControlName="username" /> 
+	</clr-input-container>
+	<clr-password-container>
+		<label>{{ 'login.password' | translate }}</label> 
+		<input clrPassword formControlName="password" /> 
+	</clr-password-container>
+		
+	<button class="btn btn-primary btn-block clr-col-sm-6" [disabled]="!loginForm.valid" (click)="login()">{{ 'login.title' | translate }}</button>
+</form>

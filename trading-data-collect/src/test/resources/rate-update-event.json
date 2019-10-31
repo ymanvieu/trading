@@ -1,0 +1,18 @@
+{
+	"rates": [
+		{
+			"fromcur": {
+				"code": "FROM",
+				"name": "from",
+				"countryFlag": "fcountry"
+			},
+			"tocur": {
+				"code": "TO",
+				"name": "to",
+				"countryFlag": "tcountry"
+			},
+			"value": 25.5,
+			"date": 1506186661
+		}
+	]
+}

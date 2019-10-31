@@ -19,13 +19,6 @@ package fr.ymanvieu.trading.util;
 import java.text.MessageFormat;
 
 public class StringUtils {
-
-	public static String toOneLine(String str) {
-		if (str == null)
-			throw new IllegalArgumentException("str is null");
-
-		return str.replaceAll("[\r\n]+", "");
-	}
 	
 	public static String format(String text, Object... args) {
 		return (text == null) ? null : MessageFormat.format(text, args);

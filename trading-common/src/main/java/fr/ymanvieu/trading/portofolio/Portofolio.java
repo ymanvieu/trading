@@ -18,43 +18,15 @@ package fr.ymanvieu.trading.portofolio;
 
 import java.util.List;
 
+import lombok.Value;
+
+@Value
 public class Portofolio {
-
-	private final AssetInfo baseCurrency;
-
-	private final List<AssetInfo> assets;
-
-	private final float currentValue;
-
-	private final float percentChange;
-
-	private final float valueChange;
-
-	public Portofolio(AssetInfo baseCurrency, List<AssetInfo> assets, float currentValue, float percentChange, float valueChange) {
-		this.baseCurrency = baseCurrency;
-		this.assets = assets;
-		this.currentValue = currentValue;
-		this.percentChange = percentChange;
-		this.valueChange = valueChange;
-	}
-
-	public AssetInfo getBaseCurrency() {
-		return baseCurrency;
-	}
-
-	public List<AssetInfo> getAssets() {
-		return assets;
-	}
-
-	public float getCurrentValue() {
-		return currentValue;
-	}
-
-	public float getPercentChange() {
-		return percentChange;
-	}
-
-	public float getValueChange() {
-		return valueChange;
-	}
+	
+	AssetInfo baseCurrency;
+	List<AssetInfo> assets;
+	
+	double currentValue;
+	double percentChange;
+	double valueChange;
 }

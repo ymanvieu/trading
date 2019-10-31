@@ -18,7 +18,10 @@ package fr.ymanvieu.trading.test.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.junit.Test;
 
@@ -26,13 +29,13 @@ public class DateParserTest {
 
 	@Test
 	public void testParse() {
-		Date result = DateParser.parse("2015-04-09T02:15:10.554");
-		assertThat(result).hasSameTimeAs(new Date(1428538510554L));
+		Instant result = DateParser.parse("2015-04-09T02:15:10.554");
+		assertThat(result).isEqualTo(ZonedDateTime.of(LocalDateTime.parse("2015-04-09T02:15:10.554"), ZoneId.systemDefault()).toInstant());
 	}
 	
 	@Test
 	public void testParseWithTimeZone() {
-		Date result = DateParser.parse("2015-04-09T02:15:10.554-02:00");
-		assertThat(result).hasSameTimeAs(new Date(1428552910554L));
+		Instant result = DateParser.parse("2015-04-09T00:15:10.554-02:00");
+		assertThat(result).isEqualTo("2015-04-09T02:15:10.554Z");
 	}
 }
