@@ -16,49 +16,14 @@
  */
 package fr.ymanvieu.trading.portofolio;
 
-import com.google.common.base.MoreObjects;
-
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
+import lombok.Value;
 
+@Value
 public class Order {
 
-	private final SymbolEntity from;
-
-	private final float quantity;
-
-	private final SymbolEntity to;
-
-	private final float value;
-
-	public Order(SymbolEntity from, float quantity, SymbolEntity to, float value) {
-		this.from = from;
-		this.quantity = quantity;
-		this.to = to;
-		this.value = value;
-	}
-
-	public SymbolEntity getFrom() {
-		return from;
-	}
-
-	public float getQuantity() {
-		return quantity;
-	}
-
-	public SymbolEntity getTo() {
-		return to;
-	}
-
-	public float getValue() {
-		return value;
-	}
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this) //
-				.add("from", from) //
-				.add("quantity", quantity) //
-				.add("to", to) //
-				.add("value", value).toString();
-	}
+	SymbolEntity from;
+	double quantity;
+	SymbolEntity to;
+	double value;
 }

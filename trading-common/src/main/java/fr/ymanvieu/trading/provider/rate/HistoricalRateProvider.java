@@ -19,12 +19,18 @@ package fr.ymanvieu.trading.provider.rate;
 import java.io.IOException;
 import java.util.List;
 
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.rate.Rate;
 
 public interface HistoricalRateProvider {
 
-	List<Quote> getHistoricalRates() throws IOException;
+	List<Rate> getHistoricalRates() throws IOException;
 	
-	List<Quote> getHistoricalRates(String code) throws IOException;
+	/**
+	 * @param code  
+	 * @throws IOException 
+	 */
+	default List<Rate> getHistoricalRates(String code) throws IOException {
+		throw new RuntimeException("not implemented");
+	}
 	
 }

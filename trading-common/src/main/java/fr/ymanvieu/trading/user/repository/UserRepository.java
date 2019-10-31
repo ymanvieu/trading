@@ -24,5 +24,5 @@ import fr.ymanvieu.trading.user.entity.UserEntity;
 @Transactional(readOnly = true)
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
-	UserEntity findByLogin(String name);
+	UserEntity findByUsername(String name);
 }

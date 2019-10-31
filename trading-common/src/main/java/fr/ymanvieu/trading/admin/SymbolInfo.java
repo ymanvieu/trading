@@ -16,38 +16,13 @@
  */
 package fr.ymanvieu.trading.admin;
 
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.rate.Rate;
+import lombok.Value;
 
+@Value
 public class SymbolInfo {
-
-	private final String code;
-
-	private final String name;
-
-	private final boolean historyFound;
-
-	private final Quote quote;
-
-	public SymbolInfo(String code, String name, boolean historyFound, Quote quote) {
-		this.code = code;
-		this.name = name;
-		this.historyFound = historyFound;
-		this.quote = quote;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public boolean isHistoryFound() {
-		return historyFound;
-	}
-
-	public Quote getQuote() {
-		return quote;
-	}
+	String code;
+	String name;
+	boolean historyFound;
+	Rate quote;
 }

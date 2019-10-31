@@ -16,60 +16,40 @@
  */
 package fr.ymanvieu.trading.user.entity;
 
+import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.google.common.base.MoreObjects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "users")
+@ToString(exclude="password")
+@Getter
+@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Integer id;
 
-	@Column(nullable = false, unique = true, length = 64)
-	private String login;
+	@Nonnull
+	@Column(nullable = false, unique = true, length = 50)
+	private String username;
 
+	@Nonnull
 	@Column(nullable = false, length = 64)
 	private String password;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, columnDefinition = "VARCHAR(32) default 'USER'")
-	private Role role = Role.USER;
-
-	public UserEntity() {
-	}
-
-	public UserEntity(String login, String password) {
-		this.login = login;
-		this.password = password;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getLogin() {
-		return login;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this) //
-				.add("login", login) //
-				.add("password", "[PROTECTED]") //
-				.add("role", role).toString();
-	}
+	@Column(nullable = false, columnDefinition = "INT(1) DEFAULT 1")
+	private boolean enabled;
 }

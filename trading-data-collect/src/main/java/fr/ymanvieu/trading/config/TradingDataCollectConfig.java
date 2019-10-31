@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 Yoann Manvieu
+ * Copyright (C) 2019 Yoann Manvieu
  *
  * This software is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -19,7 +19,8 @@ package fr.ymanvieu.trading.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
 @PropertySource("classpath:trading-data-collect.properties")
+@Configuration
 public class TradingDataCollectConfig {
+
 }

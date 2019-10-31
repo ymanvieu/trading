@@ -22,29 +22,47 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.ymanvieu.trading.rate.event.RatesUpdatedEvent;
+import lombok.extern.slf4j.Slf4j;
 
 @EnableJms
 @Configuration
+@Slf4j
 public class JmsConfig {
 
 	@Autowired
 	private ApplicationEventPublisher bus;
 
 	@Bean // Serialize message content to json using TextMessage
-	public MessageConverter jacksonJmsMessageConverter() {
+	public MessageConverter jacksonJmsMessageConverter(ObjectMapper mapper) {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		converter.setObjectMapper(mapper);
 		converter.setTargetType(MessageType.TEXT);
 		converter.setTypeIdPropertyName("_type");
 		return converter;
 	}
+	
+	@Bean
+	public JmsListenerContainerFactory<?> myFactory(DefaultJmsListenerContainerFactory factory) {
+		// DefaultJmsListenerContainerFactory provides all boot's default to this factory, including the message converter
+		// You could still override some of Boot's default if necessary.
+		factory.setClientId("trading-webapp");
+		factory.setSubscriptionDurable(true);
+		return factory;
+	}
 
-	@JmsListener(destination = "trading.rate.latest")
+	@JmsListener(destination = "trading.rate.latest?consumer.retroactive=true")
 	public void receiveMessage(RatesUpdatedEvent event) {
+		log.debug("Received: {}", event);
+		
 		bus.publishEvent(event);
 	}
 }

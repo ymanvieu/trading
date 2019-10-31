@@ -17,89 +17,26 @@
 package fr.ymanvieu.trading.portofolio;
 
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
+@Data
+@RequiredArgsConstructor
 public class AssetInfo {
 
 	private final SymbolEntity symbol;
-
 	private final SymbolEntity currency;
 
-	private Float quantity;
+	private Double quantity;
+	private Double value;
+	private Double currentValue;
+	private Double currentRate;
+	private Double percentChange;
+	private Double valueChange;
 
-	private Float value;
-
-	private Float currentValue;
-
-	private Float currentRate;
-
-	private Float percentChange;
-
-	private Float valueChange;
-
-	public AssetInfo(SymbolEntity symbol, SymbolEntity currency, float quantity) {
+	public AssetInfo(SymbolEntity symbol, SymbolEntity currency, double quantity) {
 		this.symbol = symbol;
 		this.currency = currency;
 		this.quantity = quantity;
-	}
-
-	public AssetInfo(SymbolEntity symbol, SymbolEntity currency) {
-		this.symbol = symbol;
-		this.currency = currency;
-	}
-
-	public SymbolEntity getSymbol() {
-		return symbol;
-	}
-
-	public SymbolEntity getCurrency() {
-		return currency;
-	}
-
-	public Float getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(float quantity) {
-		this.quantity = quantity;
-	}
-
-	public Float getValue() {
-		return value;
-	}
-
-	public void setValue(float value) {
-		this.value = value;
-	}
-
-	public Float getCurrentValue() {
-		return currentValue;
-	}
-
-	public void setCurrentValue(float currentValue) {
-		this.currentValue = currentValue;
-	}
-
-	public Float getCurrentRate() {
-		return currentRate;
-	}
-
-	public void setCurrentRate(float currentRate) {
-		this.currentRate = currentRate;
-	}
-
-	public Float getPercentChange() {
-		return percentChange;
-	}
-
-	public void setPercentChange(float percentChange) {
-		this.percentChange = percentChange;
-	}
-
-	public Float getValueChange() {
-		return valueChange;
-	}
-
-	public void setValueChange(float valueChange) {
-		this.valueChange = valueChange;
 	}
 }

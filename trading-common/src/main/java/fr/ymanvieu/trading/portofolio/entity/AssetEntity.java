@@ -32,14 +32,18 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
+import fr.ymanvieu.trading.audit.AuditableEntity;
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
+import lombok.Getter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "assets", uniqueConstraints = @UniqueConstraint(columnNames = { "portofolio_id", "symbol_code" }))
-public class AssetEntity {
+@Getter
+@ToString
+public class AssetEntity extends AuditableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,31 +81,7 @@ public class AssetEntity {
 		this.currencyAmount = requireNonNull(currencyAmount);
 	}
 
-	public SymbolEntity getSymbol() {
-		return symbol;
-	}
-
-	public BigDecimal getQuantity() {
-		return quantity;
-	}
-
-	public SymbolEntity getCurrency() {
-		return currency;
-	}
-
-	public BigDecimal getCurrencyAmount() {
-		return currencyAmount;
-	}
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this) //
-				.add("symbol", symbol) //
-				.add("quantity", quantity) //
-				.add("currency", currency) //
-				.add("currencyAmount", currencyAmount).toString();
-	}
-
+	
 	public void makeDeposit(BigDecimal quantity, BigDecimal currencyAmount) {
 		requireNonNull(quantity);
 		requireNonNull(currencyAmount);

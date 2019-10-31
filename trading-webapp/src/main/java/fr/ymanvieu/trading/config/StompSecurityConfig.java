@@ -18,34 +18,23 @@ package fr.ymanvieu.trading.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
 import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 
 @Configuration
 @Order(1)
-public class StompSecurityConfig extends WebSecurityConfigurerAdapter {
-	
+public class StompSecurityConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.antMatcher("/stomp/**").csrf().disable();
+	protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
+		messages
+			.nullDestMatcher().permitAll()
+			.simpSubscribeDestMatchers("/topic/latest/**").permitAll()
+			.anyMessage().denyAll();
 	}
 
-	@Configuration
-	public static class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
-
-		@Override
-		protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
-			messages
-            .nullDestMatcher().permitAll()
-            .simpSubscribeDestMatchers("/topic/latest/**").permitAll() 
-            .anyMessage().denyAll(); 
-		}
-
-		@Override
-		protected boolean sameOriginDisabled() {
-			return true;
-		}
+	@Override
+	protected boolean sameOriginDisabled() {
+		return true;
 	}
 }

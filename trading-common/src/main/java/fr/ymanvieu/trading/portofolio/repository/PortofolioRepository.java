@@ -17,13 +17,13 @@
 package fr.ymanvieu.trading.portofolio.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.portofolio.entity.PortofolioEntity;
 
 @Transactional(readOnly = true)
-public interface PortofolioRepository extends JpaRepository<PortofolioEntity, Integer>, QueryDslPredicateExecutor<PortofolioEntity> {
+public interface PortofolioRepository extends JpaRepository<PortofolioEntity, Integer>, QuerydslPredicateExecutor<PortofolioEntity> {
 
-	PortofolioEntity findByUserLogin(String login);
+	PortofolioEntity findByUserUsername(String login);
 }

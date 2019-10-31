@@ -18,20 +18,13 @@ package fr.ymanvieu.trading.rate.event;
 
 import java.util.List;
 
-import fr.ymanvieu.trading.rate.entity.RateEntity;
+import fr.ymanvieu.trading.rate.entity.LatestRate;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
+@Data
+@Accessors(chain = true)
 public class RatesUpdatedEvent {
 
-	private List<? extends RateEntity> rates;
-	
-	public RatesUpdatedEvent() {
-	}
-
-	public RatesUpdatedEvent(List<? extends RateEntity> rates) {
-		this.rates = rates;
-	}
-
-	public List<? extends RateEntity> getRates() {
-		return rates;
-	}
+	private List<LatestRate> rates;
 }

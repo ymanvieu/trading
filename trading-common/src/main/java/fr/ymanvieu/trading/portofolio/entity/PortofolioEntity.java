@@ -17,7 +17,6 @@
 package fr.ymanvieu.trading.portofolio.entity;
 
 import static java.math.BigDecimal.ZERO;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigDecimal;
@@ -26,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,29 +41,42 @@ import javax.persistence.Version;
 
 import com.google.common.base.Preconditions;
 
+import fr.ymanvieu.trading.audit.AuditableEntity;
 import fr.ymanvieu.trading.portofolio.Order;
 import fr.ymanvieu.trading.portofolio.OrderException;
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.rate.Rate;
 import fr.ymanvieu.trading.rate.RateService;
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.user.entity.UserEntity;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Table(name = "portofolio")
-public class PortofolioEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor
+public class PortofolioEntity extends AuditableEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	@Getter
+	@Nonnull
 	@OneToOne
 	@JoinColumn(name = "user_id", unique = true, nullable = false)
 	private UserEntity user;
 
+	@Getter
+	@Nonnull
 	@ManyToOne
 	@JoinColumn(name = "base_currency_code", nullable = false)
 	private SymbolEntity baseCurrency;
 
+	@Getter
+	@Nonnull
 	@Column(precision = 20, scale = 10, nullable = false)
 	private BigDecimal amount;
 
@@ -71,29 +84,7 @@ public class PortofolioEntity {
 	private long version;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "portofolio")
-	private List<AssetEntity> assets;
-
-	protected PortofolioEntity() {
-	}
-
-	public PortofolioEntity(UserEntity user, SymbolEntity baseCurrency, BigDecimal amount) {
-		this.user = requireNonNull(user, "user is null");
-		this.baseCurrency = requireNonNull(baseCurrency, "baseCurrency is null");
-		this.amount = requireNonNull(amount, "amount is null");
-		this.assets = new ArrayList<>();
-	}
-
-	public UserEntity getUser() {
-		return user;
-	}
-
-	public SymbolEntity getBaseCurrency() {
-		return baseCurrency;
-	}
-
-	public BigDecimal getAmount() {
-		return amount;
-	}
+	private List<AssetEntity> assets = new ArrayList<>();
 
 	public List<AssetEntity> getAssets() {
 		return Collections.unmodifiableList(assets);
@@ -118,7 +109,7 @@ public class PortofolioEntity {
 		return currencies;
 	}
 
-	public Order buy(SymbolEntity fromSymbol, float quantity, RateService rateService) throws OrderException {
+	public Order buy(SymbolEntity fromSymbol, double quantity, RateService rateService) throws OrderException {
 
 		Objects.requireNonNull(fromSymbol, "fromSymbol must be not null");
 
@@ -127,7 +118,7 @@ public class PortofolioEntity {
 
 		final SymbolEntity currency = getCurrencyFor(fromSymbol);
 
-		Quote q = rateService.getLatest(fromSymbol.getCode(), currency.getCode());
+		Rate q = rateService.getLatest(fromSymbol.getCode(), currency.getCode());
 
 		final BigDecimal currencyAmount;
 
@@ -139,11 +130,11 @@ public class PortofolioEntity {
 			currencyAmount = ZERO;
 		}
 
-		BigDecimal amountNeeded = q.getPrice().multiply(new BigDecimal(quantity));
+		BigDecimal amountNeeded = q.getPrice().multiply(BigDecimal.valueOf(quantity));
 
 		if (currencyAmount.compareTo(amountNeeded) < 0) {
-			throw OrderException.NOT_ENOUGH_FUND(fromSymbol.getCode(), quantity, currency.getCode(), currencyAmount.floatValue(),
-					amountNeeded.floatValue());
+			throw OrderException.NOT_ENOUGH_FUND(fromSymbol.getCode(), quantity, currency.getCode(), currencyAmount.doubleValue(),
+					amountNeeded.doubleValue());
 		}
 
 		AssetEntity ownedAsset = getAsset(fromSymbol.getCode());
@@ -162,12 +153,12 @@ public class PortofolioEntity {
 			currencyAsset.withdraw(amountNeeded);
 		}
 
-		ownedAsset.makeDeposit(new BigDecimal(quantity), amountNeeded);
+		ownedAsset.makeDeposit(BigDecimal.valueOf(quantity), amountNeeded);
 
-		return new Order(currency, amountNeeded.floatValue(), fromSymbol, quantity);
+		return new Order(currency, amountNeeded.doubleValue(), fromSymbol, quantity);
 	}
 
-	public Order sell(SymbolEntity fromSymbol, float quantity, RateService rateService) throws OrderException {
+	public Order sell(SymbolEntity fromSymbol, double quantity, RateService rateService) throws OrderException {
 		Objects.requireNonNull(fromSymbol, "fromSymbol must be not null");
 
 		Preconditions.checkArgument(quantity > 0, "quantity must be positive: %s", getBaseCurrency());
@@ -179,18 +170,18 @@ public class PortofolioEntity {
 			throw OrderException.NO_QUANTITY_OWNED(fromSymbol.getCode());
 		}
 
-		BigDecimal quantityAfterSell = ownedAsset.getQuantity().subtract(new BigDecimal(quantity));
+		BigDecimal quantityAfterSell = ownedAsset.getQuantity().subtract(BigDecimal.valueOf(quantity));
 
 		if (quantityAfterSell.signum() < 0) {
-			throw OrderException.NOT_ENOUGH_OWNED(fromSymbol.getCode(), ownedAsset.getQuantity().floatValue(), quantity);
+			throw OrderException.NOT_ENOUGH_OWNED(fromSymbol.getCode(), ownedAsset.getQuantity().doubleValue(), quantity);
 		}
 
 		final SymbolEntity currency = getCurrencyFor(fromSymbol);
 
-		Quote q = rateService.getLatest(fromSymbol.getCode(), currency.getCode());
+		Rate q = rateService.getLatest(fromSymbol.getCode(), currency.getCode());
 
 		// buy currency
-		BigDecimal purchasedValue = q.getPrice().multiply(new BigDecimal(quantity));
+		BigDecimal purchasedValue = q.getPrice().multiply(BigDecimal.valueOf(quantity));
 
 		if (currency.equals(getBaseCurrency())) {
 			amount = amount.add(purchasedValue);
@@ -203,7 +194,7 @@ public class PortofolioEntity {
 				assets.add(purchasedAsset);
 			}
 
-			Quote currencyQuote = rateService.getLatest(purchasedAsset.getSymbol().getCode(), purchasedAsset.getCurrency().getCode());
+			Rate currencyQuote = rateService.getLatest(purchasedAsset.getSymbol().getCode(), purchasedAsset.getCurrency().getCode());
 			BigDecimal purchasedValueTotalPrice = currencyQuote.getPrice().multiply(purchasedValue);
 
 			purchasedAsset.makeDeposit(purchasedValue, purchasedValueTotalPrice);
@@ -214,10 +205,10 @@ public class PortofolioEntity {
 		if (quantityAfterSell.signum() <= 0) {
 			removeAsset(ownedAsset);
 		} else {
-			ownedAsset.withdraw((new BigDecimal(quantity)));
+			ownedAsset.withdraw((BigDecimal.valueOf(quantity)));
 		}
 
-		return new Order(ownedAsset.getSymbol(), quantity, currency, purchasedValue.floatValue());
+		return new Order(ownedAsset.getSymbol(), quantity, currency, purchasedValue.doubleValue());
 	}
 
 	private void removeAsset(AssetEntity ownedAsset) {

@@ -1,47 +1,59 @@
+INSERT INTO symbols (code,currency,name,country_flag) VALUES ('USD',NULL,'US Dollar','us');
+INSERT INTO symbols (code,currency,name,country_flag) VALUES ('BTC','USD','Bitcoin',NULL);
+INSERT INTO symbols (code,currency,name,country_flag) VALUES ('EUR',NULL,'Euro','europeanunion');
+INSERT INTO symbols (code,currency,name,country_flag) VALUES ('GBP',NULL,'British Pound Sterling','gb');
+
 insert into symbols (code,name,country_flag,currency) values 
-('EUR','Euro','europeanunion',null),
-('USD','US Dollar','us',null),
 ('UBI','Ubisoft Entertainment SA',null,'EUR'),
 ('GFT','GameLoft S.E.',null,'EUR'),
-('BRE','Brent Crude Futures','oil','USD'),
-('GBP','British Pound Sterling','gb',null),
+('BZ=F','Brent Crude Oil Last Day Financfuture','oil','USD'),
 ('RR','Rolls Royce Holdings plc',null,'GBP'),
 ('FAKE', 'Fake data', null, 'EUR');
 
-INSERT INTO PAIR (symbol,name,source,target,provider_code) VALUES
-('UBI.PA','Ubisoft Entertainment SA','UBI','EUR','YAHOO'),
-('GFT.PA','GameLoft S.E.','GFT','EUR','YAHOO'),
-('RR.L','Rolls Royce Holdings plc','RR','GBP','YAHOO');
+INSERT INTO PAIR (symbol,name,source,target,exchange,provider_code) VALUES
+('UBI.PA','Ubisoft Entertainment SA','UBI','EUR',null,'YAHOO'),
+('GFT.PA','GameLoft S.E.','GFT','EUR',null,'YAHOO'),
+('RR.L','Rolls Royce Holdings plc','RR','GBP',null,'YAHOO'),
+('BZ=F', 'Brent Crude Oil Last Day Financfuture', 'BZ=F', 'USD', 'NY Mercantile', 'YAHOO'),
+('BTCUSD=X','Bitcoin','BTC','USD','CCY','YAHOO'),
+('FAKE','Fake data','FAKE','EUR',null,'YAHOO');
 
-insert into users (id,login,password,role) values 
+
+insert into users (id,username,password) values 
 -- admin/password
-(0,'admin','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG','ADMIN'),
+(0,'admin','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG'),
 -- user/password
-(1,'user','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG','USER');
+(1,'user','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG');
+
+insert into authorities (username,authority) values 
+('admin', 'ADMIN'),
+('user', 'USER');
 
 insert into portofolio (id,user_id,base_currency_code,amount,version) values 
-(0,0,'EUR',18500,'20160427173601'),
-(1,1,'EUR',100000,'20160427173601');
+(0,0,'EUR',18500,'0'),
+(1,1,'EUR',100000,'0');
 
 insert into assets (id,portofolio_id,symbol_code,quantity,currency_code,currency_amount,version) values 
-(1,0,'USD',10000,'EUR',8821.06,'20160301180001'),
-(2,0,'GBP',5000,'EUR',5000,'20160421180001'),
-(3,0,'UBI',50,'EUR',3000,'20160330173600'),
-(4,0,'GFT',100,'EUR',700,'20160301173700');
+(1,0,'USD',10000,'EUR',8821.06,'0'),
+(2,0,'GBP',5000,'EUR',5000,'0'),
+(3,0,'UBI',50,'EUR',3000,'0'),
+(4,0,'GFT',100,'EUR',700,'0');
 
 
 INSERT INTO LATESTRATES(DATE,FROMCUR,TOCUR,VALUE) VALUES 
 ('2016-04-04 13:08:00.0','GFT','EUR',7.45),
 ('2016-04-04 13:08:00.0','UBI','EUR',27.860001),
-('2016-04-12 00:00:00.0','BRE','USD',42.7),
+('2016-04-12 00:00:00.0','BZ=F','USD',42.7),
 ('2016-04-19 11:37:44.0','USD','EUR',0.882106),
 ('2016-04-22 08:16:45.0','USD','GBP', 0.6965),
-('2016-04-21 17:35:28.0','RR','GBP', 692);
+('2016-04-21 17:35:28.0','RR','GBP', 692),
+('2017-12-07 16:35:28.0','BTC','USD', 16949),
+('2017-12-07 16:35:28.0','FAKE','EUR', 1);
 
 INSERT INTO RATES(DATE,FROMCUR,TOCUR,VALUE) VALUES 
 ('2016-04-04 13:08:00.0','GFT','EUR',7.45),
 ('2016-04-04 13:08:00.0','UBI','EUR',27.860001),
-('2016-04-12 00:00:00.0','BRE','USD',42.7),
+('2016-04-12 00:00:00.0','BZ=F','USD',42.7),
 ('2016-04-19 11:37:44.0','USD','EUR',0.882106),
 ('2016-04-22 08:16:45.0','USD','GBP', 0.6965),
 ('2016-04-21 17:35:28.0','RR','GBP', 692),
@@ -61,4 +73,6 @@ INSERT INTO RATES(DATE,FROMCUR,TOCUR,VALUE) VALUES
 ('2016-03-29 07:01:43','GFT','EUR',7.42126582278481),
 ('2016-04-04 07:00:15','GFT','EUR',7.39904191616766),
 ('2016-04-11 07:00:10','GFT','EUR',7.48019841269841),
-('2016-04-18 07:00:29','GFT','EUR',7.47171875);
+('2016-04-18 07:00:29','GFT','EUR',7.47171875),
+('2017-12-07 16:35:28.0','BTC','USD', 16949),
+('2017-12-07 16:35:28.0','FAKE','EUR', 1);

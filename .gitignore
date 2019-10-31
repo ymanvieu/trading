@@ -1,0 +1,12 @@
+**/.classpath
+**/.project
+**/.settings
+**/.factorypath
+**/.sts4-cache
+target/
+**/node_modules
+**/node
+**/dist
+**/.vscode
+**/.npmrc
+**/.apt_generated

@@ -26,11 +26,11 @@ public class OrderException extends BusinessException {
 		super(key, args);
 	}
 
-	public static OrderException NOT_ENOUGH_FUND(String code, float quantity, String curCode, float available, float needed) {
+	public static OrderException NOT_ENOUGH_FUND(String code, double quantity, String curCode, double available, double needed) {
 		return new OrderException("order.error.not_enough_fund", quantity, code, curCode, available, needed);
 	}
 
-	public static OrderException NOT_ENOUGH_OWNED(String code, float owned, float toSell) {
+	public static OrderException NOT_ENOUGH_OWNED(String code, double owned, double toSell) {
 		return new OrderException("order.error.not_enough_owned", code, owned, toSell);
 	}
 

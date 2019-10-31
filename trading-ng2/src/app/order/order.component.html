@@ -1,0 +1,70 @@
+<clr-modal [(clrModalOpen)]="opened" [clrModalStaticBackdrop]="false">
+	
+	<h5 class="modal-title">
+		{{orderInfo?.selectedCurrency.symbol.name}} <clr-icon shape="caret right"></clr-icon> {{orderInfo?.selected.symbol.name}}
+	</h5>
+
+	<div class="modal-body">
+		<form class="clr-form clr-form-compact">
+			<p-spinner name="input" (input)="getData()" (onChange)="getData()" [(ngModel)]="selectQuantity" [min]="0"></p-spinner>
+
+			<clr-combobox *ngIf="availableSymbols" class="clr-col-12 clr-row combobox" 
+				(clrSelectedOption)="selectSymbol = $event?.value" [clrAllowUserEntry]="false"
+				[clrPreselectedValue]="selectSymbol">
+				<clr-options>
+					<clr-option *ngFor="let s of availableSymbols" [clrValue]="s">{{s.code}} - {{s.name}}</clr-option>
+					<div class="clr-no-results">{{ 'order.error.no-result' | translate }}</div>
+				</clr-options>
+			</clr-combobox>
+		</form>
+	
+		<div class="row">
+			<div class="col-md-8 offset-md-2">
+				<table class="table table-striped table-hover" *ngIf="orderInfo?.selected as selected">
+					<tbody>
+						<tr *ngIf="selected.quantity">
+							<td>{{ 'asset.owned' | translate }}</td>
+							<td>{{selected.quantity | number}}</td>
+						</tr>
+						<tr *ngIf="asset?.currentValue">
+							<td>{{ 'asset.current-value' | translate }}</td>
+							<td>{{asset.currentValue | number}}</td>
+						</tr>
+						<tr *ngIf="selected.currentRate">
+							<td>{{ 'asset.current-rate' | translate }}</td>
+							<td>{{selected.currentRate | number}}</td>
+						</tr>
+						<tr *ngIf="asset?.percentChange">
+							<td>{{ 'percent-change' | translate }}</td>
+							<td [appBalancedColor]="asset.percentChange">{{asset.percentChange | number}}</td>
+						</tr>
+						<tr *ngIf="selected.valueChange">
+							<td>{{ 'value-change' | translate }}</td>
+							<td [appBalancedColor]="selected.valueChange">{{selected.valueChange | number}} {{orderInfo.selectedCurrency?.symbol.code}}</td>
+						</tr>
+						<tr *ngIf="orderInfo.selectedCurrency as sc">
+							<td>{{ 'order-info.currency-available' | translate }}</td>
+							<td><span>{{sc.quantity | number}} {{sc.symbol.code}}</span></td>
+						</tr>
+						<tr *ngIf="orderInfo.gainCost">
+							<td>{{ 'order-info.gain-cost' | translate }}</td>
+							<td [appBalancedColor]="orderInfo.gainCost">{{orderInfo.gainCost | number}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="resetError()"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
+	</div>
+	<div class="modal-footer">
+    	<button type="button" (click)="order()" [className]="orderType === 'BUY' ? 'btn btn-success' : 'btn btn-danger'">{{orderType}}</button> 
+	</div>
+</clr-modal>
+
+<div class="btn-group" *ngIf="asset">
+	<button type="button" class="btn btn-success" (click)="open('BUY')">{{ 'order.buy' | translate }}</button>
+	<button type="button" class="btn btn-danger" (click)="open('SELL')">{{ 'order.sell' | translate }}</button>
+</div>
+
+<button *ngIf="!asset" type="button" class="btn btn-success" (click)="open('BUY')">{{ 'order.buy-new-asset' | translate }}</button>

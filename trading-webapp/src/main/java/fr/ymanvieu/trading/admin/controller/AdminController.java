@@ -17,60 +17,41 @@
 package fr.ymanvieu.trading.admin.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
 import fr.ymanvieu.trading.admin.AdminService;
+import fr.ymanvieu.trading.admin.SearchResult;
 import fr.ymanvieu.trading.admin.SymbolInfo;
-import fr.ymanvieu.trading.controller.BusinessExceptionHandler;
 import fr.ymanvieu.trading.controller.Response;
-import fr.ymanvieu.trading.provider.PairService;
-import fr.ymanvieu.trading.provider.PairsResult;
-import fr.ymanvieu.trading.provider.ProviderException;
-import fr.ymanvieu.trading.provider.dto.PairMapper;
-import fr.ymanvieu.trading.provider.dto.PairDTO;
-import fr.ymanvieu.trading.symbol.SymbolException;
 
-@Controller
-@RequestMapping("/admin")
+@RestController
+@RequestMapping("/api/admin")
 @PreAuthorize("hasAuthority('ADMIN')")
-public class AdminController extends BusinessExceptionHandler {
+public class AdminController {
 
 	@Autowired
 	private MessageSource messageSource;
 
 	@Autowired
-	private PairService pairService;
-
-	@Autowired
 	private AdminService adminService;
 
-	@RequestMapping(method = RequestMethod.GET)
-	public String symbols(Model model, String code) throws IOException {
-
-		PairsResult result = pairService.search(code);
-
-		List<PairDTO> existingPairs = PairMapper.MAPPER.toPairDto(result.getExistingPairs());
-		
-		model.addAttribute("existingSymbols", existingPairs);
-		model.addAttribute("availableSymbols", result.getAvailableSymbols());
-
-		return "admin";
+	@GetMapping
+	public SearchResult symbols(String code) throws IOException {
+		return adminService.search(code);
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
-	public String add(RedirectAttributes redirectAttributes, Locale l, @RequestParam String code, @RequestParam String provider)
-			throws SymbolException, ProviderException, IOException {
+	@PostMapping("/{provider}/{code}")
+	public Response add(Locale l, @PathVariable String code, @PathVariable String provider) throws IOException {
 
 		Response response = new Response();
 
@@ -83,23 +64,19 @@ public class AdminController extends BusinessExceptionHandler {
 		if (!si.isHistoryFound()) {
 			response.setWarningMessage(messageSource.getMessage("symbols.warning.no_historical_data", new Object[] { si.getCode() }, l));
 		}
-
-		redirectAttributes.addFlashAttribute("response", response);
-
-		return "redirect:admin";
+		
+		return response;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE)
-	public String delete(RedirectAttributes redirectAttributes, Locale l, @RequestParam String code) throws SymbolException {
+	@DeleteMapping("/{provider}/{symbol}")
+	public Response delete(Locale l, @PathVariable String symbol, @PathVariable String provider) {
 		Response response = new Response();
 
-		adminService.delete(code);
+		adminService.delete(symbol, provider);
 
-		response.setMessage(messageSource.getMessage("symbols.success.delete", new Object[] { code }, l));
+		response.setMessage(messageSource.getMessage("symbols.success.delete", new Object[] { symbol }, l));
 		response.setMessageTitle(messageSource.getMessage("success", null, l));
 
-		redirectAttributes.addFlashAttribute("response", response);
-
-		return "redirect:admin";
+		return response;
 	}
 }

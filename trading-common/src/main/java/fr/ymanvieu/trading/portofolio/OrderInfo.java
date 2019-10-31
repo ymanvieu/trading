@@ -18,28 +18,13 @@ package fr.ymanvieu.trading.portofolio;
 
 import java.math.BigDecimal;
 
+import lombok.Value;
+
+@Value
 public class OrderInfo {
 
-	private AssetInfo selected;
-	private AssetInfo selectedCurrency;
+	AssetInfo selected;
+	AssetInfo selectedCurrency;
 
-	private BigDecimal gainCost;
-
-	public OrderInfo(AssetInfo selected, AssetInfo selectedCurrency, BigDecimal gainCost) {
-		this.selected = selected;
-		this.selectedCurrency = selectedCurrency;
-		this.gainCost = gainCost;
-	}
-
-	public AssetInfo getSelected() {
-		return selected;
-	}
-
-	public AssetInfo getSelectedCurrency() {
-		return selectedCurrency;
-	}
-
-	public BigDecimal getGainCost() {
-		return gainCost;
-	}
+	BigDecimal gainCost;
 }

@@ -18,21 +18,44 @@ package fr.ymanvieu.trading.provider.entity;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.Instant;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 @Entity
-@Table(name = "pair")
+@Table(name = "pair", uniqueConstraints = @UniqueConstraint(columnNames = { "symbol", "provider_code" }))
+@EntityListeners(AuditingEntityListener.class)
 public class PairEntity {
 
 	@Id
-	@Column(length = 16)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+	
+	@Column(nullable = false, length = 16)
 	private String symbol;
 
 	@Column(nullable = false, length = 255)
@@ -45,38 +68,27 @@ public class PairEntity {
 	@ManyToOne
 	@JoinColumn(name = "target", nullable = false)
 	private SymbolEntity target;
+	
+	@Column(name = "exchange")
+	private String exchange;
 
 	@Column(name = "provider_code", length = 8, nullable = false)
 	private String providerCode;
+	
+	@CreatedBy
+	@Column(name = "created_by")
+	private String createdBy;
 
-	protected PairEntity() {
-	}
+	@CreatedDate
+	@Column(name = "created_date")
+	private Instant createdDate;
 
-	public PairEntity(String symbol, String name, String source, String target, String providerCode) {
+	public PairEntity(String symbol, String name, SymbolEntity source, SymbolEntity target, String exchange, String providerCode) {
 		this.symbol = requireNonNull(symbol, "symbol is null");
 		this.name = requireNonNull(name, "name is null");
-		this.source = new SymbolEntity(requireNonNull(source, "source is null"));
-		this.target = new SymbolEntity(requireNonNull(target, "target is null"));
+		this.source = source;
+		this.target = target;
+		this.exchange = exchange;
 		this.providerCode = requireNonNull(providerCode, "providerCode is null");
-	}
-
-	public String getSymbol() {
-		return symbol;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public SymbolEntity getSource() {
-		return source;
-	}
-
-	public SymbolEntity getTarget() {
-		return target;
-	}
-
-	public String getProviderCode() {
-		return providerCode;
 	}
 }

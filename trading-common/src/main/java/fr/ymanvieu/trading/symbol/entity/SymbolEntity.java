@@ -16,23 +16,38 @@
  */
 package fr.ymanvieu.trading.symbol.entity;
 
-import java.util.Objects;
+import java.time.Instant;
 
+import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Table(name = "symbols")
+@Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = "code")
+@EntityListeners(AuditingEntityListener.class)
 public class SymbolEntity {
 
 	@Id
+	@Nonnull
 	@Column(length = 8)
 	private String code;
 
@@ -44,79 +59,19 @@ public class SymbolEntity {
 	@ManyToOne
 	@JoinColumn(name = "currency", referencedColumnName = "code")
 	private SymbolEntity currency;
-
-	protected SymbolEntity() {
-	}
-
-	public SymbolEntity(String code) {
-		Objects.requireNonNull(code, "code is null");
-		Preconditions.checkArgument(code.length() <= 8, "code size is more than 8: ", code);
-
-		this.code = code;
-	}
+	
+	@CreatedBy
+	@Column(name = "created_by")
+	private String createdBy;
+	
+	@CreatedDate
+	@Column(name = "created_date")
+	private Instant createdDate;
 
 	public SymbolEntity(String code, String name, String countryFlag, SymbolEntity currency) {
-		this(code);
+		this.code = code;
 		this.name = name;
 		this.countryFlag = countryFlag;
 		this.currency = currency;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getCountryFlag() {
-		return countryFlag;
-	}
-
-	public void setCountryFlag(String countryFlag) {
-		this.countryFlag = countryFlag;
-	}
-
-	public SymbolEntity getCurrency() {
-		return currency;
-	}
-
-	public void setCurrency(SymbolEntity currency) {
-		this.currency = currency;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(code, currency, name, countryFlag);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-
-		if (obj == null || !(obj instanceof SymbolEntity))
-			return false;
-
-		SymbolEntity other = (SymbolEntity) obj;
-
-		return Objects.equals(code, other.code) //
-				&& Objects.equals(currency, other.currency) //
-				&& Objects.equals(name, other.name) //
-				&& Objects.equals(countryFlag, other.countryFlag);
-	}
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this) //
-				.add("code", code) //
-				.add("currency", currency) //
-				.add("name", name) //
-				.add("countryFlag", countryFlag).toString();
 	}
 }

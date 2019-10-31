@@ -17,7 +17,7 @@
 package fr.ymanvieu.trading.rate.dto;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.Instant;
 
 import fr.ymanvieu.trading.symbol.dto.SymbolDTO;
 import lombok.Getter;
@@ -29,8 +29,9 @@ import lombok.ToString;
 @ToString
 public class RateDTO {
 
+	private Boolean favorite;
 	private SymbolDTO fromcur;
 	private SymbolDTO tocur;
 	private BigDecimal value;
-	private Date date;
+	private Instant	date;
 }

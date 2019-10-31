@@ -30,5 +30,6 @@ public class PairDTO {
 	private String name;
 	private SymbolDTO source;
 	private SymbolDTO target;
+	private String exchange;
 	private String provider;
 }

@@ -16,18 +16,62 @@
  */
 package fr.ymanvieu.trading.rate.entity;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
+import javax.annotation.Nonnull;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+
+import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "rates", uniqueConstraints = @UniqueConstraint(columnNames = { "fromcur", "tocur", "date" }))
+@Table(name = "rates")
+@IdClass(HistoricalRatePK.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HistoricalRate extends RateEntity {
-
-	public HistoricalRate(RateEntity re) {
-		super(re.getFromcur(), re.getTocur(), re.getValue(), re.getDate());
+	
+	public HistoricalRate(SymbolEntity fromcur, SymbolEntity tocur, BigDecimal value, Instant date) {
+		super(fromcur, tocur, value, date);
+	}
+	
+	public HistoricalRate(String fromcur, String tocur, BigDecimal value, Instant date) {
+		this(new SymbolEntity(fromcur), new SymbolEntity(tocur), value, date);
 	}
 
-	protected HistoricalRate() {
+	@Id
+	@Nonnull
+	@ManyToOne
+	@JoinColumn(name = "fromcur", referencedColumnName = "code", nullable = false)
+	public SymbolEntity getFromcur() {
+		return fromcur;
+	}
+
+	@Id
+	@Nonnull
+	@ManyToOne
+	@JoinColumn(name = "tocur", referencedColumnName = "code", nullable = false)
+	public SymbolEntity getTocur() {
+		return tocur;
+	}
+
+	@Id
+	@Nonnull
+	@Column(precision = 20, scale = 10, nullable = false)
+	public BigDecimal getValue() {
+		return value;
+	}
+
+	@Nonnull
+	@Column(nullable = false)
+	public Instant getDate() {
+		return date;
 	}
 }

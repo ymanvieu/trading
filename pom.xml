@@ -1,44 +1,35 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>fr.ymanvieu.trading</groupId>
-	<artifactId>trading-parent</artifactId>
-	<version>2.3.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
 	
+	<groupId>fr.ymanvieu.trading</groupId>
+	<artifactId>trading</artifactId>
+	<version>3.0.2-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.1.RELEASE</version>
-		<relativePath />
+		<version>2.2.0.RELEASE</version>
 	</parent>
 
 	<modules>
 		<module>trading-common</module>
 		<module>trading-test</module>
-		<module>trading-webapp</module>
 		<module>trading-data-collect</module>
+		<module>trading-ng2</module>
+		<module>trading-webapp</module>
 	</modules>
 
-
 	<properties>
-		<spring-boot.version>1.5.1.RELEASE</spring-boot.version>
+		<spring-boot.version>2.2.0.RELEASE</spring-boot.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.build.timestamp>${maven.build.timestamp}</project.build.timestamp>
 		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-		<guava.version>21.0</guava.version>
-		<java.version>1.8</java.version>
 		
-		<lombok.version>1.16.14</lombok.version>
-		<mockito.version>2.7.0</mockito.version>
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+		
+		<java.version>11</java.version>
+		<junitparams.version>1.1.0</junitparams.version>
 	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${guava.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

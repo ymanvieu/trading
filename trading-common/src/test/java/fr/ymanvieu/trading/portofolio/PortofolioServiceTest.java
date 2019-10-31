@@ -20,35 +20,32 @@ import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.EUR;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.GBP;
 import static fr.ymanvieu.trading.symbol.util.CurrencyUtils.USD;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.offset;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.util.List;
 
-import org.junit.Rule;
+import org.assertj.core.data.Offset;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.portofolio.entity.AssetEntity;
 import fr.ymanvieu.trading.portofolio.repository.PortofolioRepository;
-import fr.ymanvieu.trading.symbol.SymbolException;
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 @Sql("/sql/insert_portofolio.sql")
 public class PortofolioServiceTest {
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	
+	private static final Offset<Double> PERCENT_OFFSET = offset(0.000000000001d);
 
 	@Autowired
 	private PortofolioService portofolioService;
@@ -77,33 +74,33 @@ public class PortofolioServiceTest {
 
 		Portofolio result = portofolioService.getPortofolio(login);
 
-		assertThat(result.getPercentChange()).isEqualByComparingTo(13.479787f);
-		assertThat(result.getValueChange()).isEqualByComparingTo(922.86914f);
+		assertThat(result.getPercentChange()).isCloseTo(13.47978618287961, PERCENT_OFFSET);
+		assertThat(result.getValueChange()).isCloseTo(922.8690277999999, PERCENT_OFFSET);
 
-		assertThat(result.getAssets()).extracting("symbol.code", "percentChange", "valueChange").containsExactlyInAnyOrder( //
-				tuple("UBI", -6.1499968f, -184.4999f), //
-				tuple("BRE", 39.33333333333333f, 1180f), //
-				tuple("GBP", 5.540321f, 66.48385f));
+		assertThat(result.getAssets()).extracting("symbol.code", "percentChange", "valueChange")
+				.containsExactlyInAnyOrder( //
+						tuple("UBI", -6.14999667, -184.4999), //
+						tuple("BRE", 39.33333333, 1180d), //
+						tuple("GBP", 5.54032065, 66.4838478));
 	}
 
-	@Transactional
 	@Test
 	public void testGetAsset() {
 		String login = "toto";
 		String symbol = GBP;
 		int amount = 5000;
 
-		AssetEntity ae = portofolioRepo.findByUserLogin(login).getAsset(symbol);
+		AssetEntity ae = portofolioRepo.findByUserUsername(login).getAsset(symbol);
 
 		AssetInfo a = portofolioService.getAsset(ae);
 
 		assertThat(a.getSymbol().getCode()).isEqualTo(symbol);
 		assertThat(a.getQuantity()).isEqualTo(amount);
 		assertThat(a.getValue()).isEqualTo(6000);
-		assertThat(a.getCurrentValue()).isEqualTo(6332.419239052405f);
-		assertThat(a.getValueChange()).isEqualTo(332.419239052405f);
-		assertThat(a.getPercentChange()).isEqualTo(5.540320650873417f);
-		assertThat(a.getCurrentRate()).isEqualTo(1.266483847810481f);
+		assertThat(a.getCurrentValue()).isEqualTo(6332.419239);
+		assertThat(a.getValueChange()).isEqualTo(332.419239);
+		assertThat(a.getPercentChange()).isEqualTo(5.54032065);
+		assertThat(a.getCurrentRate()).isEqualTo(1.2664838478);
 	}
 
 	@Test
@@ -116,21 +113,20 @@ public class PortofolioServiceTest {
 	}
 
 	@Test
-	public void testGetInfo_NullSymbol() throws SymbolException {
+	public void testGetOrderInfo_NullSymbol() {
 		String login = "seller";
 
-		exception.expect(NullPointerException.class);
-		exception.expectMessage("symbolCode");
-
-		portofolioService.getInfo(login, null, 0);
+		assertThatThrownBy(() -> portofolioService.getOrderInfo(login, null, 0))
+				.isInstanceOf(NullPointerException.class)
+				.hasMessageContaining("symbolCode");
 	}
 
 	@Test
-	public void testGetInfo_withSymbolOwned() throws SymbolException {
+	public void testGetOrderInfo_withSymbolOwned() {
 		String login = "seller";
 		String symbol = "UBI";
 
-		OrderInfo info = portofolioService.getInfo(login, symbol, 1);
+		OrderInfo info = portofolioService.getOrderInfo(login, symbol, 1);
 
 		assertThat(info.getSelected().getSymbol().getCode()).isEqualTo(symbol);
 		assertThat(info.getSelectedCurrency().getSymbol().getCode()).isEqualTo(EUR);
@@ -138,11 +134,11 @@ public class PortofolioServiceTest {
 	}
 
 	@Test
-	public void testGetInfo_withSymbolNotOwned() throws SymbolException {
+	public void testGetOrderInfo_withSymbolNotOwned() {
 		String login = "seller";
 		String symbol = GBP;
 
-		OrderInfo info = portofolioService.getInfo(login, symbol, 1);
+		OrderInfo info = portofolioService.getOrderInfo(login, symbol, 1);
 
 		assertThat(info.getSelected().getSymbol().getCode()).isEqualTo(symbol);
 		assertThat(info.getSelectedCurrency().getSymbol().getCode()).isEqualTo(EUR);

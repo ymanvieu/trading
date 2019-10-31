@@ -43,9 +43,9 @@ public class CurrencyUtilsTest {
 	public void testNameForCurrency() {
 		assertThat(CurrencyUtils.nameForCurrency(USD)).isEqualTo("US Dollar");
 		assertThat(CurrencyUtils.nameForCurrency(EUR)).isEqualTo("Euro");
-		assertThat(CurrencyUtils.nameForCurrency(GBP)).isEqualTo("British Pound Sterling");
+		assertThat(CurrencyUtils.nameForCurrency(GBP)).isEqualTo("British Pound");
 		assertThat(CurrencyUtils.nameForCurrency("XAU")).isEqualTo("Gold");
-		assertThat(CurrencyUtils.nameForCurrency("XAF")).isEqualTo("CFA Franc BEAC");
+		assertThat(CurrencyUtils.nameForCurrency("XAF")).isEqualTo("Central African CFA Franc");
 		assertThat(CurrencyUtils.nameForCurrency("XAG")).isEqualTo("Silver");
 		assertThat(CurrencyUtils.nameForCurrency("TOTO")).isNull();
 	}

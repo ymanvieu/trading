@@ -23,32 +23,35 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.provider.entity.PairEntity;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DataJpaTest(properties = "spring.flyway.enabled=false")
+@Import(PairService.class)
+@Transactional
 @Sql("/sql/insert_data.sql")
 public class PairServiceTest {
+
+	private static final String YAHOO = "YAHOO";
 
 	@Autowired
 	private PairService pairService;
 
 	@Test
-	public void testGetForCode() {
-		PairEntity result = pairService.getForCode("UBI.PA");
+	public void testGetForCodeAndProvider() {
+		PairEntity result = pairService.getForCodeAndProvider("UBI.PA", YAHOO);
 
 		assertThat(result.getSymbol()).isEqualTo("UBI.PA");
 		assertThat(result.getName()).isEqualTo("Ubisoft Entertainment SA");
 		assertThat(result.getSource().getCode()).isEqualTo("UBI");
 		assertThat(result.getTarget().getCode()).isEqualTo("EUR");
-		assertThat(result.getProviderCode()).isEqualTo("YAHOO");
+		assertThat(result.getProviderCode()).isEqualTo(YAHOO);
 	}
 
 	@Test
@@ -57,32 +60,30 @@ public class PairServiceTest {
 		String name = "XAU/USD";
 		String source = "XAU";
 		String target = "USD";
-		String providerCode = "YAHOO";
 
-		PairEntity returnedResult = pairService.create(code, name, source, target, providerCode);
+		pairService.create(code, name, source, target, null, YAHOO);
 
-		PairEntity result = pairService.getForCode(code);
-
-		assertThat(returnedResult).isEqualToComparingFieldByFieldRecursively(result);
+		PairEntity result = pairService.getForCodeAndProvider(code, YAHOO);
 
 		assertThat(result).extracting("symbol", "name", "source.code", "target.code", "providerCode") //
-				.containsExactly(code, name, source, target, providerCode);
+				.containsExactly(code, name, source, target, YAHOO);
 	}
 
 	@Test
 	public void testRemove() {
 		String code = "UBI.PA";
 
-		assertThat(pairService.getForCode(code)).isNotNull();
+		PairEntity pe = pairService.getForCodeAndProvider(code, YAHOO);
+		assertThat(pe).isNotNull();
 
-		pairService.remove(code);
+		pairService.remove(pe);
 
-		assertThat(pairService.getForCode(code)).isNull();
+		assertThat(pairService.getForCodeAndProvider(code, YAHOO)).isNull();
 	}
 
 	@Test
-	public void testGetAll() {
-		List<PairEntity> result = pairService.getAll();
+	public void testGetAllFromProvider() {
+		List<PairEntity> result = pairService.getAllFromProvider(YAHOO);
 
 		assertThat(result).extracting("symbol").containsExactlyInAnyOrder("UBI.PA", "GFT.PA", "RR.L");
 	}

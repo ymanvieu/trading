@@ -16,18 +16,84 @@
  */
 package fr.ymanvieu.trading.rate.entity;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
+import javax.annotation.Nonnull;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "latestrates", uniqueConstraints = @UniqueConstraint(columnNames = { "fromcur", "tocur" }))
+@Table(name = "latestrates")
+@EntityListeners(AuditingEntityListener.class)
+@IdClass(LatestRatePK.class)
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LatestRate extends RateEntity {
-
-	public LatestRate(RateEntity re) {
-		super(re.getFromcur(), re.getTocur(), re.getValue(), re.getDate());
+	
+    private Instant createdDate;
+    private Instant lastModifiedDate;
+   
+	public LatestRate(SymbolEntity fromcur, SymbolEntity tocur, BigDecimal value, Instant date) {
+		super(fromcur, tocur, value, date);
 	}
 
-	protected LatestRate() {
+	public LatestRate(String fromcur, String tocur, BigDecimal value, Instant date) {
+		this(new SymbolEntity(fromcur), new SymbolEntity(tocur), value, date);
 	}
+	
+	@Id
+	@Nonnull
+	@ManyToOne
+	@JoinColumn(name = "fromcur", referencedColumnName = "code", nullable = false)
+	public SymbolEntity getFromcur() {
+		return fromcur;
+	}
+
+	@Id
+	@Nonnull
+	@ManyToOne
+	@JoinColumn(name = "tocur", referencedColumnName = "code", nullable = false)
+	public SymbolEntity getTocur() {
+		return tocur;
+	}
+
+	@Nonnull
+	@Column(precision = 20, scale = 10, nullable = false)
+	public BigDecimal getValue() {
+		return value;
+	}
+
+	@Nonnull
+	@Column(nullable = false)
+	public Instant getDate() {
+		return date;
+	}
+	
+    @CreatedDate 
+    @Column(name = "created_date")
+	public Instant getCreatedDate() {
+		return createdDate;
+	}
+	
+    @LastModifiedDate
+    @Column(name = "last_modified_date")
+	public Instant getLastModifiedDate() {
+		return lastModifiedDate;
+	}	
 }

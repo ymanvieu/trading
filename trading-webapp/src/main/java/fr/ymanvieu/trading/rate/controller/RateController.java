@@ -16,50 +16,40 @@
  */
 package fr.ymanvieu.trading.rate.controller;
 
-import java.util.Date;
+import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.ymanvieu.trading.rate.DateValue;
 import fr.ymanvieu.trading.rate.RateService;
 import fr.ymanvieu.trading.rate.dto.DateValueDTO;
-import fr.ymanvieu.trading.rate.dto.RateMapper;
+import fr.ymanvieu.trading.rate.dto.DateValueMapper;
 import fr.ymanvieu.trading.rate.dto.RateDTO;
-import fr.ymanvieu.trading.rate.entity.LatestRate;
+import fr.ymanvieu.trading.rate.dto.RateMapper;
 
 @RestController
-@RequestMapping("/rate")
+@RequestMapping("/api/rate")
 public class RateController {
-
-	private static final String CRITERIA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-	private static final String RAW_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
 	@Autowired
 	private RateService rateService;
 
-	@RequestMapping("/latest")
-	public Page<RateDTO> findLatestByCriteria(String fromcur, String tocur, @DateTimeFormat(pattern = CRITERIA_DATE_PATTERN) Date date,
-			Integer pageNumber, String sortDir, String sortedBy) {
-
-		Page<LatestRate> page = rateService.getLatest(fromcur, tocur, date, pageNumber, sortDir, sortedBy);
-
-		PageRequest pr = new PageRequest(page.getNumber(), page.getSize(), page.getSort());
-
-		List<RateDTO> dtos = RateMapper.MAPPER.toRateDto(page.getContent());
-
-		return new PageImpl<>(dtos, pr, page.getTotalElements());
+	@GetMapping
+	public List<RateDTO> findAllLatest(Principal p) {
+		return RateMapper.MAPPER.favoriteRatesToRateDtos(rateService.getAllLatestWithFavorites(p != null ? p.getName() : null));
 	}
 
-	@RequestMapping("/raw")
-	public List<DateValueDTO> findRawValues(String fromcur, String tocur, @DateTimeFormat(pattern = RAW_DATE_PATTERN) Date startDate,
-			@DateTimeFormat(pattern = RAW_DATE_PATTERN) Date endDate) {
+	@GetMapping("/raw")
+	public List<DateValueDTO> findRawValues(String fromcur, String tocur, 
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) Instant startDate,
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) Instant endDate) {
 
 		if (fromcur == null || tocur == null) {
 			return null;
@@ -73,10 +63,11 @@ public class RateController {
 			endDate = rateService.getNewestRateDate(fromcur, tocur);
 		}
 
-		List<DateValue> values = rateService.getHistoricalValues(fromcur, tocur, startDate, endDate);
-
-		List<DateValueDTO> dtos = RateMapper.MAPPER.toDateValueDto(values);
-
-		return dtos;
+		return DateValueMapper.MAPPER.toDateValueDto(rateService.getHistoricalValues(fromcur, tocur, startDate, endDate));
+	}
+	
+	@GetMapping("/latest")
+	public RateDTO findLatestRate(String fromcur, String tocur) {
+		return RateMapper.MAPPER.toRateDto(rateService.getLatest(fromcur, tocur));
 	}
 }

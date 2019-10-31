@@ -19,65 +19,59 @@ package fr.ymanvieu.trading.admin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
 
 import fr.ymanvieu.trading.provider.LookupDetails;
+import fr.ymanvieu.trading.provider.LookupInfo;
 import fr.ymanvieu.trading.provider.LookupService;
+import fr.ymanvieu.trading.provider.PairException;
 import fr.ymanvieu.trading.provider.PairService;
-import fr.ymanvieu.trading.provider.ProviderException;
+import fr.ymanvieu.trading.provider.ProviderType;
+import fr.ymanvieu.trading.provider.RateProviderService;
 import fr.ymanvieu.trading.provider.entity.PairEntity;
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.provider.rate.HistoricalRateProvider;
+import fr.ymanvieu.trading.provider.rate.LatestRateProvider;
+import fr.ymanvieu.trading.rate.Rate;
 import fr.ymanvieu.trading.rate.RateService;
-import fr.ymanvieu.trading.rate.StockService;
-import fr.ymanvieu.trading.symbol.CurrencyInfo;
 import fr.ymanvieu.trading.symbol.SymbolException;
 import fr.ymanvieu.trading.symbol.SymbolService;
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
-import fr.ymanvieu.trading.symbol.util.CurrencyUtils;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class AdminService {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
-
+	@Autowired
 	private SymbolService symbolService;
-
+	
+	@Autowired
 	private PairService pairService;
-
+	
+	@Autowired
 	private RateService rateService;
-
-	private StockService stock;
-
+	
+	@Autowired
+	private RateProviderService rateProviderService;
+	
+	@Autowired
 	private LookupService lookupService;
 
-	@Autowired
-	public AdminService(SymbolService symbolService, PairService pairService, RateService rateService, StockService stock,
-			LookupService lookupService) {
-		this.symbolService = symbolService;
-		this.pairService = pairService;
-		this.rateService = rateService;
-		this.stock = stock;
-		this.lookupService = lookupService;
-	}
-
-	@Transactional(rollbackFor = Exception.class)
-	public SymbolInfo add(String code, String provider) throws IOException, SymbolException, ProviderException {
+	public SymbolInfo add(String code, String provider) throws IOException {
 		Stopwatch sw = Stopwatch.createStarted();
 
-		boolean hasHistory = false;
-
-		PairEntity pair = pairService.getForCode(code);
+		PairEntity pair = pairService.getForCodeAndProvider(code, provider);
 
 		if (pair != null) {
-			throw SymbolException.ALREADY_EXISTS(pair.getSymbol());
+			throw PairException.alreadyExists(pair.getSymbol(), provider);
 		}
 
 		LookupDetails details = lookupService.getDetails(code, provider);
@@ -85,38 +79,28 @@ public class AdminService {
 		String source = details.getSource();
 		String currency = details.getCurrency();
 		String name = details.getName();
+		String exchange = details.getExchange();
 
-		// FIXME SEKAMD=X (armenian diram) O_o -> Advanced Micro...
-
-		SymbolEntity targetSymbol = symbolService.getForCode(currency);
-
-		if (targetSymbol == null) {
-			// TODO refactor
-			CurrencyInfo ci = symbolService.getCurrencyInfo(currency);
-			String countryFlag = ci.getCountryFlag();
-			String currencyName = ci.getName();
-
-			currencyName = (countryFlag != null && currencyName != null) ? currencyName : name;
-
-			symbolService.addSymbol(currency, currencyName, countryFlag, null);
+		// check if currency exists
+		if (!symbolService.getForCodeWithNoCurrency(currency).isPresent()) {
+			throw PairException.currencyNotFound(currency);
 		}
 
-		SymbolEntity sourceSymbol = symbolService.getForCode(source);
-		String sourceName = null;
+		Optional<SymbolEntity> sourceSymbol = symbolService.getForCode(source);
 
-		if (sourceSymbol == null) {
-			// TODO refactor
-			String countryFlag = CurrencyUtils.countryFlagForCurrency(source);
-			String currencyName = CurrencyUtils.nameForCurrency(source);
-
-			sourceName = (countryFlag != null && currencyName != null) ? currencyName : name;
-
-			symbolService.addSymbol(source, sourceName, countryFlag, currency);
+		if(sourceSymbol.isPresent()) {
+			if(sourceSymbol.get().getCurrency() == null) {
+				throw AdminException.currencyAlreadyExists(source);
+			}
+		} else {
+			symbolService.addSymbol(source, name, null, currency);
 		}
 
-		pair = pairService.create(code, name, source, currency, provider);
+		pair = pairService.create(code, name, source, currency, exchange, provider);
 
-		Quote latestQuote = stock.getLatestRate(code);
+		final LatestRateProvider rProvider = rateProviderService.getLatestProvider(ProviderType.STOCK);
+
+		Rate latestQuote = rProvider.getLatestRate(code);
 
 		if (latestQuote == null) {
 			throw SymbolException.UNAVAILABLE(code);
@@ -126,43 +110,65 @@ public class AdminService {
 		latestQuote.setCode(source);
 		latestQuote.setCurrency(currency);
 
-		List<Quote> historicalQuotes = new ArrayList<>();
+		List<Rate> historicalQuotes = new ArrayList<>();
+
+		final HistoricalRateProvider hRProvider = rateProviderService.getHistoricalProvider(ProviderType.STOCK);
 
 		try {
-			historicalQuotes.addAll(stock.getHistoricalRates(code));
-
-			for (Quote q : historicalQuotes) {
-				q.setCode(source);
-				q.setCurrency(currency);
-			}
-
-			hasHistory = true;
-		} catch (RuntimeException e) {
-			log.warn("No history for code: {}", code);
+			historicalQuotes.addAll(hRProvider.getHistoricalRates(code));
+		} catch (IOException | RuntimeException e) {
+			// generally, if provider cannot get historical data, it throws exception
+			log.warn("Cannot get historical data for: {} (provider: {})", code, provider);
 		}
 
+		for (Rate q : historicalQuotes) {
+			q.setCode(source);
+			q.setCurrency(currency);
+		}
+
+		historicalQuotes.removeIf(q -> q.getTime().compareTo(latestQuote.getTime()) == 0);
+		
 		historicalQuotes.add(latestQuote);
 
 		rateService.addHistoricalRates(historicalQuotes);
 		rateService.addLatestRate(latestQuote);
 
-		log.info("{} created in: {}", pair.getSymbol(), sw);
+		log.info("{} created in: {}", pair, sw);
 
-		return new SymbolInfo(pair.getSymbol(), pair.getName(), hasHistory, latestQuote);
+		return new SymbolInfo(pair.getSymbol(), pair.getName(), !historicalQuotes.isEmpty(), latestQuote);
 	}
 
-	@Transactional(rollbackFor = SymbolException.class)
-	public void delete(String code) throws SymbolException {
+	public void delete(String code, String provider) {
 		Stopwatch sw = Stopwatch.createStarted();
 
-		PairEntity pair = pairService.getForCode(code);
+		PairEntity pair = pairService.getForCodeAndProvider(code, provider);
 
 		if (pair == null) {
 			throw SymbolException.UNKNOWN(code);
 		}
 
-		pairService.remove(code);
+		pairService.remove(pair);
 
-		log.info("{} deleted in: {}", pair.getSymbol(), sw);
+		log.info("{} deleted in: {}", pair, sw);
+	}
+	
+	public SearchResult search(String symbolOrName) throws IOException {
+		final List<PairEntity> existingSymbols;
+		final List<LookupInfo> availableSymbols;
+
+		if (Strings.isNullOrEmpty(symbolOrName)) {
+			existingSymbols = pairService.getAll();
+			availableSymbols = new ArrayList<>();
+		} else {
+			existingSymbols = pairService.getAllWithSymbolOrNameContaining(symbolOrName);
+			availableSymbols = lookupService.search(symbolOrName);
+			removeDuplicates(availableSymbols, existingSymbols);
+		}
+		
+		return new SearchResult(existingSymbols, availableSymbols);
+	}
+
+	private void removeDuplicates(List<LookupInfo> availableSymbols, List<PairEntity> existingSymbols) {
+		availableSymbols.removeIf(as -> existingSymbols.stream().map(s -> s.getSymbol()).anyMatch(s -> s.equals(as.getCode())));
 	}
 }

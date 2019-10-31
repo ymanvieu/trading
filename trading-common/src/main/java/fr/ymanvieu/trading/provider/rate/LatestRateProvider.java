@@ -19,7 +19,7 @@ package fr.ymanvieu.trading.provider.rate;
 import java.io.IOException;
 import java.util.List;
 
-import fr.ymanvieu.trading.rate.Quote;
+import fr.ymanvieu.trading.rate.Rate;
 
 public interface LatestRateProvider {
 
@@ -29,5 +29,13 @@ public interface LatestRateProvider {
 	 * @return List of latest rates
 	 * @throws IOException
 	 */
-	List<Quote> getRates() throws IOException;
+	List<Rate> getRates() throws IOException;
+
+	/**
+	 * @param code  
+	 * @throws IOException 
+	 */
+	default Rate getLatestRate(String code) throws IOException {
+		throw new RuntimeException("not implemented");
+	}
 }

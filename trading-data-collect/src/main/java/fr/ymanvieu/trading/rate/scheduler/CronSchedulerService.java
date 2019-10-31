@@ -32,12 +32,6 @@ public class CronSchedulerService extends SchedulerService {
 		super.updateForex();
 	}
 
-	@Scheduled(zone = "UTC", cron = "${scheduler.interval.cron.oil}")
-	@Override
-	public void updateOil() throws IOException {
-		super.updateOil();
-	}
-
 	@Scheduled(zone = "UTC", cron = "${scheduler.interval.cron.stock}")
 	@Override
 	public void updateStock() throws IOException {

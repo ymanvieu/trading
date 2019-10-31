@@ -1,0 +1,31 @@
+<clr-datagrid class="datagrid-compact">
+	<clr-dg-column class="favorite-col-width" [clrDgSortOrder]="descSort" [clrDgSortBy]="sortFavoriteAndDate" *ngIf="isAuthorised"><clr-icon shape="pin"></clr-icon></clr-dg-column>
+	<clr-dg-column [clrDgField]="'fromcur.name'">{{ 'rate.from' | translate }}</clr-dg-column>
+	<clr-dg-column class="clr-hidden-xs-down" [clrDgField]="'tocur.name'">{{ 'rate.to' | translate }}</clr-dg-column>
+	<clr-dg-column [clrDgSortBy]="'value'">{{ 'rate.value' | translate }}</clr-dg-column>
+	<clr-dg-column [clrDgSortBy]="'date'" [clrDgSortOrder]="descSort">{{ 'rate.date' | translate }}</clr-dg-column>
+
+	<clr-dg-row *clrDgItems="let r of rates">
+		<clr-dg-cell *ngIf="isAuthorised">
+			<input type="checkbox" clrCheckbox [checked]="r.favorite" (change)="switchFavorite(r)" name="favorite">
+		</clr-dg-cell>
+		<clr-dg-cell title="{{r.fromcur.name}}">
+			<a class="m-align clr-hidden-md-up" routerLink="/chart/{{r.fromcur.code}}/{{r.tocur.code}}">{{r.fromcur.code}}</a>&nbsp;
+			<a class="m-align clr-hidden-sm-down" routerLink="/chart/{{r.fromcur.code}}/{{r.tocur.code}}">{{r.fromcur.name}}</a>&nbsp;
+			<img *ngIf="r.fromcur.countryFlag" class="m-align clr-hidden-xs-down" src="../assets/img/flag/{{r.fromcur.countryFlag}}.gif"/>
+		</clr-dg-cell>
+		<clr-dg-cell class="clr-hidden-xs-down" title="{{r.tocur.name}}">
+			<a class="m-align clr-hidden-md-up" routerLink="/chart/{{r.fromcur.code}}/{{r.tocur.code}}">{{r.tocur.code}}</a>&nbsp;
+			<a class="m-align clr-hidden-sm-down" routerLink="/chart/{{r.fromcur.code}}/{{r.tocur.code}}">{{r.tocur.name}}</a>&nbsp;
+			<img class="m-align clr-hidden-xs-down" src="../assets/img/flag/{{r.tocur.countryFlag}}.gif"/>
+		</clr-dg-cell>
+		<clr-dg-cell>{{ r.value | number }}</clr-dg-cell>
+		<clr-dg-cell>{{ r.date | date:'dd/MM/yy HH:mm:ss' }}</clr-dg-cell>
+	</clr-dg-row>
+	<clr-dg-footer>
+		<clr-dg-pagination #pagination>
+			<clr-dg-page-size [clrPageSizeOptions]="[10,20,50,100]"></clr-dg-page-size>
+			{{ 'pagination.text' | translate: {first: pagination.firstItem + 1, last: pagination.lastItem + 1, total: pagination.totalItems} }}
+		</clr-dg-pagination>
+	</clr-dg-footer>
+</clr-datagrid>

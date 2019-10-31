@@ -18,7 +18,6 @@ package fr.ymanvieu.trading.rate;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,22 +25,21 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import fr.ymanvieu.trading.rate.Quote;
-import fr.ymanvieu.trading.rate.RateService;
 import fr.ymanvieu.trading.rate.entity.LatestRate;
-import fr.ymanvieu.trading.rate.entity.RateEntity;
 import fr.ymanvieu.trading.rate.event.RatesUpdatedEvent;
 import fr.ymanvieu.trading.rate.repository.LatestRateRepository;
 import fr.ymanvieu.trading.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.symbol.repository.SymbolRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class RateUpdaterService {
 
 	private LatestRateRepository latestRepo;
-	
+
 	private SymbolRepository symbolRepo;
-	
+
 	private RateService rateService;
 
 	private ApplicationEventPublisher bus;
@@ -61,41 +59,48 @@ public class RateUpdaterService {
 	 * "rates" table -> if doesn't exist
 	 * <p>
 	 * Quotes order doesn't matter.
+	 * 
 	 * @see RateService#addHistoricalRates(List)
 	 */
 	@Transactional
-	public void updateRates(List<Quote> quotes) {
+	public void updateRates(List<Rate> quotes) {
 
-		List<Quote> quotesList = new ArrayList<>(quotes);
+		List<Rate> quotesList = new ArrayList<>(quotes);
 
-		Collections.sort(quotesList, new Comparator<Quote>() {
-			@Override
-			public int compare(Quote o1, Quote o2) {
-				return o1.getTime().compareTo(o2.getTime());
-			}
-		});
+		Collections.sort(quotesList, (o1, o2) -> o1.getTime().compareTo(o2.getTime()));
 
 		List<LatestRate> existingLatestRates = latestRepo.findAll();
 
 		List<LatestRate> newLatestRates = new ArrayList<>();
+		List<Rate> newHistoricalRates = new ArrayList<>();
 
 		List<SymbolEntity> symbols = symbolRepo.findAll();
 
-		for (Quote quote : quotesList) {
+		for (Rate quote : quotesList) {
 			LatestRate existingLatestRate = getFromList(existingLatestRates, quote);
-			
-			if (existingLatestRate == null) {
-				
-				//TODO skip and log if not exist
-				getFromList(symbols, quote.getCurrency());
-				getFromList(symbols, quote.getCode());
 
-				LatestRate newLatestRate = new LatestRate(convertToRateEntity(quote, symbols));
+			if (existingLatestRate == null) {
+
+				SymbolEntity fromcur = getFromList(symbols, quote.getCode());
+				
+				if(fromcur == null) {
+					log.warn("Cannot find symbol '{}' in DB, skipping it.", quote.getCode());
+					continue;
+				}
+
+				SymbolEntity tocur = getFromList(symbols, quote.getCurrency());
+
+				if(tocur == null) {
+					log.warn("Cannot find symbol '{}' in DB, skipping it.", quote.getCurrency());
+					continue;
+				}
+				
+				LatestRate newLatestRate = new LatestRate(fromcur, tocur, quote.getPrice(), quote.getTime());
 
 				newLatestRates.add(newLatestRate);
 				existingLatestRates.add(newLatestRate);
 
-			} else if (quote.getTime().after(existingLatestRate.getDate())) {
+			} else if (quote.getTime().isAfter(existingLatestRate.getDate())) {
 				existingLatestRate.setDate(quote.getTime());
 				existingLatestRate.setValue(quote.getPrice());
 
@@ -103,22 +108,22 @@ public class RateUpdaterService {
 					newLatestRates.add(existingLatestRate);
 				}
 			}
+			
+			newHistoricalRates.add(quote);
 		}
 
-		latestRepo.save(newLatestRates);
+		latestRepo.saveAll(newLatestRates);
 
-		// add all quotes (filtered in addHistoricalRates())
-		rateService.addHistoricalRates(quotesList);
+		rateService.addHistoricalRates(newHistoricalRates);
 
 		if (!newLatestRates.isEmpty()) {
-			bus.publishEvent(new RatesUpdatedEvent(newLatestRates));
+			bus.publishEvent(new RatesUpdatedEvent().setRates(newLatestRates));
 		}
 	}
 
-	private <T extends RateEntity> T getFromList(List<T> ratesList, Quote q) {
-		for (T r : ratesList) {
-			if (r.getFromcur().getCode().equals(q.getCode())
-					&& r.getTocur().getCode().equals(q.getCurrency())) {
+	private LatestRate getFromList(List<LatestRate> ratesList, Rate q) {
+		for (LatestRate r : ratesList) {
+			if (r.getFromcur().getCode().equals(q.getCode()) && r.getTocur().getCode().equals(q.getCurrency())) {
 				return r;
 			}
 		}
@@ -128,12 +133,5 @@ public class RateUpdaterService {
 
 	private SymbolEntity getFromList(List<SymbolEntity> symbols, String code) {
 		return symbols.stream().filter(s -> s.getCode().equals(code)).findFirst().orElse(null);
-	}
-
-	private RateEntity convertToRateEntity(Quote q, List<SymbolEntity> availableSymbols) {
-		SymbolEntity fromcur = getFromList(availableSymbols, q.getCode());
-		SymbolEntity tocur = getFromList(availableSymbols, q.getCurrency());
-
-		return new RateEntity(fromcur, tocur, q.getPrice(), q.getTime());
 	}
 }
