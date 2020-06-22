@@ -1,0 +1,1 @@
+delete from pair where provider_code='GOOGLE';

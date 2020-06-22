@@ -1,0 +1,1 @@
+update assets set symbol_code='BZ=F' where symbol_code='BRE';

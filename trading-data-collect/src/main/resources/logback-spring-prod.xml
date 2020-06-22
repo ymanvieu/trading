@@ -20,10 +20,7 @@
 		</triggeringPolicy>
 	</appender>
 
-	<logger name="fr.ymanvieu.trading.rate.scheduler" level="INFO" additivity="false">
-		<appender-ref ref="SCHEDULED_RATE_TASKS_FILE" />
-	</logger>
-	<logger name="fr.ymanvieu.trading.config.SchedulerConfig" level="INFO" additivity="false">
+	<logger name="fr.ymanvieu.trading.datacollect.rate.scheduler" level="INFO" additivity="false">
 		<appender-ref ref="SCHEDULED_RATE_TASKS_FILE" />
 	</logger>
 </configuration>

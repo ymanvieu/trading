@@ -6,16 +6,18 @@ insert into symbols (code,name,country_flag,currency) values
 ('XAU','Gold','gold',null),
 ('XAG','Silver','silver',null),
 ('XAF','CFA Franc BEAC',null,null),
-('RR','Rolls Royce Holdings plc',null,'GBP'),
+('RR','Rolls Royce',null,'GBP'),
 ('UBI','Ubisoft Entertainment SA',null,'EUR'),
 ('GFT','GameLoft S.E.',null,'EUR');
 
-INSERT INTO PAIR (symbol,name,source,target,provider_code) VALUES
-('UBI.PA','Ubisoft Entertainment SA','UBI','EUR','YAHOO'),
-('GFT.PA','GameLoft S.E.','GFT','EUR','YAHOO'),
-('RR.L','Rolls Royce Holdings plc','RR','GBP','YAHOO');
+INSERT INTO PAIR (symbol,name,source,target,exchange,provider_code) VALUES
+('UBI.PA','Ubisoft Entertainment SA','UBI','EUR','Paris','YAHOO'),
+('GFT.PA','GameLoft S.E.','GFT','EUR',null,'YAHOO'),
+('RR.L','Rolls Royce Holdings plc','RR','GBP','London', 'YAHOO');
 
 INSERT INTO LATESTRATES(DATE, FROMCUR, TOCUR, VALUE) VALUES 
+(TIMESTAMP '2020-03-12 15:10:00.0', 'RR', 'GBP', 150),
+(TIMESTAMP '2020-03-12 16:35:00.0', 'UBI', 'EUR', 22.5),
 (TIMESTAMP '2015-01-30 13:55:00.0', 'USD', 'EUR', 0.88),
 (TIMESTAMP '2015-04-06 02:00:00.0', 'BRE', 'USD', 55.18),
 (TIMESTAMP '2015-02-02 08:42:50.0', 'USD', 'GBP', 0.664982);
