@@ -17,25 +17,15 @@
 package fr.ymanvieu.trading.test.assertions;
 
 import static fr.ymanvieu.trading.test.assertions.ObjectAssertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.assertj.core.util.Maps;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class ObjectAssertionsTest {
-
-	@Rule
-	public ExpectedException expect = ExpectedException.none();
-
-	private void expectAssertionErrorWithMessage(String message) {
-		expect.expect(AssertionError.class);
-		expect.expectMessage(message);
-	}
 
 	private static SuperObjet createFilledObject() {
 		SuperObjet object = new SuperObjet();
@@ -48,7 +38,7 @@ public class ObjectAssertionsTest {
 		object.setFieldDouble(1.8);
 
 		object.setFieldList(Arrays.asList(""));
-		object.setFieldMap(Maps.newHashMap(5, 0.8));
+		object.setFieldMap(Map.of(5, 0.8));
 		object.setFieldObject(new Object());
 
 		return object;
@@ -66,10 +56,10 @@ public class ObjectAssertionsTest {
 		SuperObjet object = createFilledObject();
 		object.fieldDouble = 0;
 
-		expectAssertionErrorWithMessage("fieldDouble");
-
 		// fieldDouble unset
-		assertThat(object).hasAllFieldsSet();
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> assertThat(object).hasAllFieldsSet())
+			.withMessageContaining("fieldDouble");
 	}
 
 	@Test
@@ -85,11 +75,10 @@ public class ObjectAssertionsTest {
 	public void testIgnoringFieldsKO_WithUnknownField() {
 		SuperObjet object = createFilledObject();
 
-		expect.expect(IllegalArgumentException.class);
-		expect.expectMessage("fieldUnknown");
-
 		// fieldUnknown doesn't exist
-		assertThat(object).ignoringFields("fieldUnknown");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+			.isThrownBy(() -> assertThat(object).ignoringFields("fieldUnknown"))
+			.withMessageContaining("fieldUnknown");
 	}
 
 	@Test
@@ -104,10 +93,10 @@ public class ObjectAssertionsTest {
 		SuperObjet object = new SuperObjet();
 		object.fieldBoolean = true;
 
-		expectAssertionErrorWithMessage("fieldBoolean");
-
 		// fieldBoolean set
-		assertThat(object).hasNoFieldSet();
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> assertThat(object).hasNoFieldSet())
+			.withMessageContaining("fieldBoolean");
 	}
 
 	@Test

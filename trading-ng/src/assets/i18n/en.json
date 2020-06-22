@@ -1,0 +1,70 @@
+{
+    "admin": {
+        "add": "Add",
+        "remove": "Remove",
+        "search-placeholder": "ex: AAPL, Google",
+        "title": "Admin",
+        "error": {
+            "currency-already-exists": "Currency already exists: {{0}}"
+        }
+    },
+    "app.name": "Trading",
+    "asset": {
+        "currency": "Currency",
+        "current-rate": "Current rate",
+        "current-value": "Current value",
+        "name": "Name",
+        "owned": "Owned",
+        "quantity": "Quantity"
+    },
+    "login": {
+        "title": "Log in",
+        "login": "Login",
+        "password": "Password",
+        "error": {
+            "bad-credentials": "Login attempt failed. Bad credentials"
+        }
+    },
+    "logout.title": "Log out",
+    "order": {
+        "buy": "Buy",
+        "buy-new-asset": "Buy new asset",
+        "sell": "Sell"
+    },
+    "order-info": {
+        "currency-available": "Currency available",
+        "gain-cost": "Gain/Cost"
+    },
+    "pair": {
+        "exchange": "Exchange",
+        "name": "Name",
+        "provider": "Provider",
+        "symbol": "Symbol",
+        "lastUpdate": "Last update",
+        "type": "Type",
+        "error": {
+            "currency-not-found": "Currency not found for symbol: {{0}}",
+            "not-found": "Pair not found: symbol: {{0}}, provider: {{1}}"
+        }
+    },
+    "percent-change": "% change",
+    "portofolio": {
+        "title": "Portofolio",
+        "total": "Total"
+    },
+    "pagination.text": "{{first}} - {{last}} ({{total}})",
+    "rate": {
+        "updated": "Updated",
+        "from": "From",
+        "latest": "Latest {{0}}/{{1}} - {{2}}: {{3}}",
+        "to": "To",
+        "value": "Value"
+    },
+    "signup": {
+        "title": "Sign up",
+        "username": "Username",
+        "password": "Password",
+        "confirmation": "Confirmation"
+    },
+    "value-change": "Value change"
+}
