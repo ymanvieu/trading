@@ -5,7 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from 'ngx-auth';
 import { TokenStorage } from './token-storage.service';
 import { NgxPermissionsService } from 'ngx-permissions';
-import * as jwt_decode from 'jwt-decode';
+import jwt_decode from 'jwt-decode';
 
 interface AccessData {
   accessToken: string;
@@ -57,7 +57,7 @@ export class AuthenticationService implements AuthService {
    * Function, that should perform refresh token verifyTokenRequest
    * @description Should be successfully completed so interceptor
    * can execute pending requests or retry original one
-   * @returns {Observable<any>}
+   * @returns {Observable<AccessData>}
    */
   public refreshToken(): Observable<AccessData> {
     return this.tokenStorage
@@ -67,8 +67,8 @@ export class AuthenticationService implements AuthService {
         switchMap((refreshToken: string) => {
           return this.http.post<AccessData>(this.REFRESH_URL, {refreshToken});
         }),
-        tap(this.saveAccessData.bind(this)),
-        tap(data => this.refreshUser()),
+        tap(accessData => this.saveAccessData(accessData)),
+        tap(() => this.refreshUser()),
         catchError((err) => {
           this.logout();
 
@@ -88,14 +88,14 @@ export class AuthenticationService implements AuthService {
     return response.status === 401 || response.status === 403;
   }
 
-  private refreshUser(): void {
+  public refreshUser(): void {
     this.getAccessToken()
     .pipe(
       filter(token => !!token))
     .subscribe(token => {
       try {
-        const tokenInfo = jwt_decode(token);
-        this.setUser(tokenInfo.sub);
+        const tokenInfo : any = jwt_decode(token);
+        this.setUser(tokenInfo.username);
         this.permissionsService.loadPermissions([tokenInfo.roles]);
       } catch (error) {
         console.error(error);

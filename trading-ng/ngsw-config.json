@@ -10,15 +10,6 @@
         "maxAge": "0u",
         "strategy": "freshness"
       }
-    },
-    {
-      "name": "auchan-slot",
-      "urls": ["/auchan-slot"],
-      "cacheConfig": {
-        "maxSize": 0,
-        "maxAge": "0u",
-        "strategy": "freshness"
-      }
     }
   ],
   "assetGroups": [

@@ -17,6 +17,7 @@
 package fr.ymanvieu.trading.webapp.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.ymanvieu.trading.common.rate.event.RatesUpdatedEvent;
 import lombok.extern.slf4j.Slf4j;
 
+@ConditionalOnProperty("spring.activemq.broker-url")
 @Configuration
 @Slf4j
 public class JmsConfig {

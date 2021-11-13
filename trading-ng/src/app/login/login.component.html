@@ -1,6 +1,11 @@
 <form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="loginForm" id="loginForm" role="form" novalidate>
-		
-	<clr-alert clrAlertType="danger" *ngIf="!!hasError"><clr-alert-item><span class="alert-text">{{ 'login.error.bad-credentials' | translate }}</span></clr-alert-item></clr-alert>
+
+	<a href="{{ googleURL }}" class="btn google"><i class="pi pi-google"></i>Log in with Google</a>
+	<a href="{{ githubURL }}" class="btn btn-primary github"><i class="pi pi-github"></i>Log in with Github</a>
+
+	<hr/>
+
+	<clr-alert clrAlertType="danger" *ngIf="!!hasError" (clrAlertClosedChange)="hasError = false"><clr-alert-item><span class="alert-text">{{ 'login.error.bad-credentials' | translate }}</span></clr-alert-item></clr-alert>
 
 	<clr-input-container>
 		<label>{{ 'login.login' | translate }}</label> 

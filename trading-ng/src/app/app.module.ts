@@ -1,6 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { angleIcon, loginIcon, searchIcon, starIcon, timesIcon } from '@cds/core/icon';
 import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
 import { ProtectedGuard, PublicGuard } from 'ngx-auth';
 import { AdminComponent } from './admin/admin.component';
@@ -23,12 +24,18 @@ import { BrowserModule } from '@angular/platform-browser';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { LoginModule } from './login/login.module';
+import {LoginGuard} from "./login/login.guard";
+
+import { ClarityIcons } from '@cds/core/icon';
+import '@cds/core/icon/register.js';
+
+ClarityIcons.addIcons(starIcon, loginIcon, angleIcon, timesIcon, searchIcon);
 
 const routes: Routes = [
   {path: '', redirectTo: 'latest', pathMatch: 'full'},
   {path: 'chart/:fromcur/:tocur', component: ChartRateComponent},
   {path: 'latest', component: LatestListComponent},
-  {path: 'login', component: LoginComponent, canActivate: [PublicGuard]},
+  {path: 'login', component: LoginComponent, canActivate: [PublicGuard, LoginGuard]},
   {path: 'portofolio', component: PortofolioComponent, canActivate: [ProtectedGuard]},
   {path: 'admin', component: AdminComponent, canActivate: [ProtectedGuard]},
   {path: 'signup', component: SignupComponent, canActivate: [PublicGuard]}
@@ -46,7 +53,7 @@ const routes: Routes = [
       LatestListModule,
       PortofolioModule,
       AuthenticationModule,
-      RouterModule.forRoot(routes),
+      RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' }),
       ChartRateModule,
       AdminModule,
       SignupModule,
@@ -65,7 +72,8 @@ const routes: Routes = [
          provide: RxStompService,
          useFactory: rxStompServiceFactory,
          deps: [InjectableRxStompConfig]
-       }
+       },
+       LoginGuard
    ]
 })
 export class AppModule {}

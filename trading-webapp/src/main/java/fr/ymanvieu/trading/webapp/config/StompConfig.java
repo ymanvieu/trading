@@ -65,7 +65,8 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/stomp").setAllowedOrigins("*").withSockJS();
+		// https://docs.spring.io/spring-framework/docs/4.2.4.RELEASE/spring-framework-reference/html/websocket.html#websocket-fallback-cors
+		registry.addEndpoint("/stomp").setAllowedOrigins("*").withSockJS().setSessionCookieNeeded(false).setSupressCors(true);
 	}
 
 	@PostConstruct
@@ -97,7 +98,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
 
 		String username = null;
 		try {
-			username = jwtTokenUtil.getUsernameFromToken(authToken);
+			username = jwtTokenUtil.getSubjectFromToken(authToken);
 		} catch (IllegalArgumentException e) {
 			log.error("an error occured during getting username from token", e);
 		} catch (JwtException e) {

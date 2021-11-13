@@ -1,14 +1,18 @@
-import { AuthenticationService } from '../authentication/authentication.service';
+import {AuthenticationService} from '../authentication/authentication.service';
 import {Component, OnInit} from '@angular/core';
-import {FormGroup, FormBuilder, Validators} from '@angular/forms';
-import { Router } from '@angular/router';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Router} from '@angular/router';
+import {AppConstants} from "./app.constants";
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+
+  googleURL = AppConstants.GOOGLE_AUTH_URL;
+  githubURL = AppConstants.GITHUB_AUTH_URL;
 
   loginForm: FormGroup;
 

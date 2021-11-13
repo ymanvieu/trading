@@ -12,7 +12,7 @@ import { RxjsComponent } from 'app/shared/rxjs.component';
 @Component({
   selector: 'app-portofolio',
   templateUrl: './portofolio.component.html',
-  styleUrls: ['./portofolio.component.css']
+  styleUrls: ['./portofolio.component.scss']
 })
 export class PortofolioComponent extends RxjsComponent implements OnInit {
 

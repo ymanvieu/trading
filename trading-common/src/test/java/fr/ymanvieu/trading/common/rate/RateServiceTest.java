@@ -27,18 +27,19 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import fr.ymanvieu.trading.common.config.MapperTestConfig;
 import fr.ymanvieu.trading.common.provider.Quote;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
-import fr.ymanvieu.trading.common.config.MapperTestConfig;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
 @Import({RateService.class, MapperTestConfig.class})
 @Sql("/sql/insert_data.sql")

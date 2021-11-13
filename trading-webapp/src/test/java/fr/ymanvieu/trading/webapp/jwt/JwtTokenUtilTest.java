@@ -22,18 +22,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.time.Instant;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import fr.ymanvieu.trading.webapp.config.TradingWebAppConfig;
-import fr.ymanvieu.trading.webapp.jwt.JwtTokenUtil;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import( {JwtTokenUtil.class, TradingWebAppConfig.class})
 public class JwtTokenUtilTest {
 
@@ -41,29 +40,32 @@ public class JwtTokenUtilTest {
 	private JwtTokenUtil jwtTokenUtil;
 
 	@Test
-	public void testGenerateToken() throws Exception {
+	public void testGenerateToken() {
 		// GIVEN
 		Instant start = Instant.now().minusSeconds(1);
-		User userDetails = new User("username", "", asList(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ADMIN")));
+		User userDetails = new User("userId", "", asList(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ADMIN")));
 		Duration expiration = Duration.ofMinutes(30);
 		
 		// WHEN
-		String token = jwtTokenUtil.generateToken(userDetails);
-		
-		
+		String token = jwtTokenUtil.generateToken(userDetails.getUsername(),"username", userDetails.getAuthorities());
+
+
 		// THEN
-		assertThat(jwtTokenUtil.getUsernameFromToken(token)).isEqualTo("username");
+		assertThat(jwtTokenUtil.getSubjectFromToken(token)).isEqualTo("userId");
+		String username = jwtTokenUtil.getClaimFromToken(token, c -> c.get(JwtTokenUtil.CLAIM_KEY_USERNAME, String.class));
+		assertThat(username).isEqualTo("username");
+
 		assertThat(jwtTokenUtil.getIssuedAtDateFromToken(token)).isBetween(start, Instant.now());
 		assertThat(jwtTokenUtil.getExpirationDateFromToken(token)).isBetween(start.plus(expiration), Instant.now().plus(expiration));
 	
 
 		String[] roles = jwtTokenUtil.getClaimFromToken(token, c -> c.get(JwtTokenUtil.CLAIM_KEY_ROLES, String.class)).split(JwtTokenUtil.ROLES_CLAIM_DELIMITER);
 		
-		assertThat(roles).containsExactlyInAnyOrder("ADMIN", "USER");	
+		assertThat(roles).containsExactlyInAnyOrder("ADMIN", "USER");
 	}
 
 	@Test
-	public void testGenerateRefreshToken() throws Exception {
+	public void testGenerateRefreshToken() {
 		// GIVEN
 		Instant start = Instant.now().minusSeconds(1);
 		Duration expiration = Duration.ofDays(90);
@@ -73,7 +75,7 @@ public class JwtTokenUtilTest {
 		
 		
 		// THEN
-		assertThat(jwtTokenUtil.getUsernameFromToken(token)).isEqualTo("username");
+		assertThat(jwtTokenUtil.getSubjectFromToken(token)).isEqualTo("username");
 		assertThat(jwtTokenUtil.getIssuedAtDateFromToken(token)).isBetween(start, Instant.now());
 		assertThat(jwtTokenUtil.getExpirationDateFromToken(token)).isBetween(start.plus(expiration), Instant.now().plus(expiration));
 	}

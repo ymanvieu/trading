@@ -11,3 +11,5 @@ target/
 **/.npmrc
 **/.yarnrc
 **/.apt_generated
+**/.idea
+**/*.iml

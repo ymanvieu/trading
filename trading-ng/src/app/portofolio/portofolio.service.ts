@@ -41,7 +41,7 @@ export class PortofolioService {
   }
 
   private getHttpPortofolio(): Observable<Portofolio> {
-    return this.http.get<Portofolio>(`${this.url}/portofolio`);
+    return this.http.get<Portofolio>(`${this.url}`);
   }
 
   private getHttpAvailableSymbols(): Observable<Symbol[]> {
@@ -58,11 +58,11 @@ export class PortofolioService {
   }
 
   refreshPortofolioAndAvailableSymbols() {
-    combineLatest(this.getHttpPortofolio(), this.getHttpAvailableSymbols())
+    combineLatest([this.getHttpPortofolio(), this.getHttpAvailableSymbols()])
     .subscribe(([p, s]) => {
       this.setPortofolio(p);
       this.setAvailableSymbols(s);
-    }, (error) => {
+    }, () => {
       this.setPortofolio(null);
       this.setAvailableSymbols(null);
     });
@@ -72,7 +72,7 @@ export class PortofolioService {
     this.getHttpAvailableSymbols()
     .subscribe(symbols => {
       this.setAvailableSymbols(symbols);
-    }, (error) => {
+    }, () => {
       this.setAvailableSymbols(null);
     });
   }
@@ -81,7 +81,7 @@ export class PortofolioService {
     this.getHttpPortofolio()
     .subscribe(p => {
       this.setPortofolio(p);
-    }, (error) => {
+    }, () => {
       this.setPortofolio(null);
     });
   }

@@ -25,28 +25,31 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 @Entity
 @Table(name = "authorities")
 @Getter
 @ToString
 @EqualsAndHashCode
+@AllArgsConstructor
 public class AuthorityEntity implements Serializable {
 
 	private static final long serialVersionUID = 6237201323904853508L;
 
 	@Id
 	@ManyToOne
-	@JoinColumn(name = "username", referencedColumnName="username", nullable = false)
 	private UserEntity user;
 
 	@Id
 	@Column(name = "authority", length = 64, nullable = false)
 	private String authority;
-	
+
 	protected AuthorityEntity() {
 	}
 }

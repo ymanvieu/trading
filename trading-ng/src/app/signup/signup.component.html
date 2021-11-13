@@ -1,26 +1,34 @@
-<form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="signupForm" id="signupForm" role="form" novalidate>
+<form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="form" id="signupForm" role="form" novalidate>
 	
 	<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="error = null"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
 
 	<clr-input-container>
 		<label>{{ 'signup.username' | translate }}</label> 
-		<input clrInput type="text" formControlName="username" /> 
+		<input clrInput type="text" formControlName="username" />
+		<clr-control-error *ngIf="f.username.errors?.required">{{ 'form.validation.required' | translate }}</clr-control-error>
+		<clr-control-error *ngIf="f.username.errors?.minlength">{{ 'form.validation.length.min' | translate: {'length':usernameMinLength} }}</clr-control-error>
+		<clr-control-error *ngIf="f.username.errors?.maxlength">{{ 'form.validation.length.max' | translate: {'length':usernameMaxLength} }}</clr-control-error>
 	</clr-input-container>
 	<p></p>
 	<clr-password-container>
 		<label>{{ 'signup.password' | translate }}</label> 
 		<input clrPassword formControlName="password" /> 
+		<clr-control-error *ngIf="f.password.errors?.required">{{ 'form.validation.required' | translate }}</clr-control-error>
+		<clr-control-error *ngIf="f.password.errors?.minlength">{{ 'form.validation.length.min' | translate: {'length':passwordMinLength} }}</clr-control-error>
+		<clr-control-error *ngIf="f.password.errors?.maxlength">{{ 'form.validation.length.max' | translate: {'length':passwordMaxLength} }}</clr-control-error>
 	</clr-password-container>
 	<clr-password-container>
 		<label>{{ 'signup.confirmation' | translate }}</label> 
 		<input clrPassword formControlName="confirmation" /> 
+		<clr-control-error *ngIf="f.confirmation.errors?.required">{{ 'form.validation.required' | translate }}</clr-control-error>
+		<clr-control-error *ngIf="f.confirmation.errors?.mustMatch">{{ 'form.validation.password-mismatch' | translate }}</clr-control-error>
 	</clr-password-container>
-	
+    
 	<div id="recaptcha" *ngIf="recaptcha">
-		<p-captcha #recaptcha siteKey="[add site-key here]" (onResponse)="showResponse($event)" (onExpire)="expireRecaptcha()"></p-captcha>
+        <p-captcha #recaptcha [siteKey]="recaptchaSiteKey" (onResponse)="showResponse($event)" (onExpire)="expireRecaptcha()"></p-captcha>
 	</div>
 
-  <p></p>
+	<p></p>
 		
-	<button class="btn btn-success btn-block clr-col-sm-6" [disabled]="!signupForm.valid" (click)="signup()">{{ 'signup.title' | translate }}</button>
+	<button class="btn btn-success btn-block clr-col-sm-6" (click)="signup()">{{ 'signup.title' | translate }}</button>
 </form>

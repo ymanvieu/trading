@@ -24,17 +24,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import fr.ymanvieu.trading.common.provider.LookupDetails;
@@ -52,7 +52,7 @@ import fr.ymanvieu.trading.common.rate.RateService;
 import fr.ymanvieu.trading.common.rate.entity.HistoricalRate;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
 public class AdminServiceTest {
@@ -89,7 +89,7 @@ public class AdminServiceTest {
 		String name = "Ubi";
 		String provider = "Provider";
 
-		when(lookupService.search(provider)).thenReturn(asList(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
+		when(lookupService.search(provider)).thenReturn(List.of(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
 		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", "EPA", provider));
 
 		Quote histoQuote = new Quote(symbol, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
@@ -98,7 +98,7 @@ public class AdminServiceTest {
 		when(rateProviderService.getHistoricalProvider(ProviderType.STOCK)).thenReturn(hrp);
 		when(rateProviderService.getLatestProvider(ProviderType.STOCK)).thenReturn(lrp);
 		
-		when(hrp.getHistoricalRates(symbol)).thenReturn(asList(histoQuote));
+		when(hrp.getHistoricalRates(symbol)).thenReturn(List.of(histoQuote));
 		when(lrp.getLatestRate(symbol)).thenReturn(latestQuote);
 
 		// when
@@ -129,7 +129,7 @@ public class AdminServiceTest {
 		String name = "Ubi";
 		String provider = "Provider";
 
-		when(lookupService.search(provider)).thenReturn(asList(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
+		when(lookupService.search(provider)).thenReturn(List.of(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
 		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", "EPA", provider));
 
 		Quote histoQuote = new Quote(symbol, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
@@ -231,7 +231,7 @@ public class AdminServiceTest {
 		String name = "Ubi";
 		String provider = "Provider";
 				
-		when(lookupService.search(provider)).thenReturn(asList(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
+		when(lookupService.search(provider)).thenReturn(List.of(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
 		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", "EPA", provider));
 
 		// when

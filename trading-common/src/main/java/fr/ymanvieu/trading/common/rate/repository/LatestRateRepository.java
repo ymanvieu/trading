@@ -23,21 +23,18 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.rate.FavoriteRate;
 import fr.ymanvieu.trading.common.rate.entity.LatestRate;
 
-@Transactional(readOnly = true)
 public interface LatestRateRepository extends JpaRepository<LatestRate, Integer>, QuerydslPredicateExecutor<LatestRate> {
 
-	@Transactional
 	@Modifying
-	@Query("delete FROM #{#entityName} where fromcur.code=:code or tocur.code=:code")
+	@Query("delete FROM #{#entityName} lr where lr.fromcur.code=:code or lr.tocur.code=:code")
 	int deleteByFromcurCodeOrTocurCode(@Param("code") String code);
 
 	LatestRate findByFromcurCodeAndTocurCode(String fromcur, String tocur);
 
-	@Query("SELECT (fs.username is not null) as favorite, lr.fromcur as fromcur, lr.tocur as tocur, lr.value as value, lr.date as date FROM #{#entityName} lr LEFT JOIN FavoriteSymbolEntity fs ON lr.fromcur=fs.fromSymbolCode AND lr.tocur=fs.toSymbolCode AND fs.username=:username")
-	List<FavoriteRate> findAllWithFavorites(@Param("username") String username);
+	@Query("SELECT (fs.userId is not null) as favorite, lr.fromcur as fromcur, lr.tocur as tocur, lr.value as value, lr.date as date FROM #{#entityName} lr LEFT JOIN FavoriteSymbolEntity fs ON lr.fromcur=fs.fromSymbolCode AND lr.tocur=fs.toSymbolCode AND fs.userId=:userId")
+	List<FavoriteRate> findAllWithFavorites(@Param("userId") Integer userId);
 }

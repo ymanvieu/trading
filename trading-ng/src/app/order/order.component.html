@@ -1,16 +1,24 @@
 <clr-modal [(clrModalOpen)]="opened" [clrModalStaticBackdrop]="false">
 	
 	<h5 class="modal-title">
-		{{orderInfo?.selectedCurrency.symbol.name}} <clr-icon shape="caret right"></clr-icon> {{orderInfo?.selected.symbol.name}}
+		{{orderInfo?.selectedCurrency.symbol.name}} <cds-icon shape="angle" direction="right"></cds-icon> {{orderInfo?.selected.symbol.name}}
 	</h5>
 
 	<div class="modal-body">
 		<form class="clr-form clr-form-compact">
-			<p-spinner name="input" pKeyFilter="pnum" (input)="getData()" (onChange)="getData()" [(ngModel)]="selectQuantity" [min]="0"></p-spinner>
-			
-			<select clrSelect [(ngModel)]="selectSymbol" *ngIf="availableSymbols" name="selectSymbol">
+			<p-inputNumber [disabled]="sellAll" class="order" name="input" inputId="input" [ngModel]="selectedQuantity" (onInput)="selectedQuantity = $event.value" [showButtons]="true" [min]="0"></p-inputNumber>
+
+			<clr-toggle-container *ngIf="orderType === 'SELL'">
+				<clr-toggle-wrapper>
+					<input type="checkbox" clrToggle name="options" value="option1" [(ngModel)]="sellAll" />
+					<label>{{'order.sell-all' | translate}}</label>
+				</clr-toggle-wrapper>
+			</clr-toggle-container>
+
+			<select clrSelect [(ngModel)]="selectedSymbol" *ngIf="availableSymbols" name="selectedSymbol">
 				<option *ngFor="let s of availableSymbols" [ngValue]="s">{{s.code}} - {{s.name}}</option>
 			</select>
+
 		</form>
 	
 		<div class="row">
@@ -42,8 +50,22 @@
 							<td><span>{{sc.quantity | number}} {{sc.symbol.code}}</span></td>
 						</tr>
 						<tr *ngIf="orderInfo.gainCost">
-							<td>{{ 'order-info.gain-cost' | translate }}</td>
-							<td [appBalancedColor]="orderInfo.gainCost">{{orderInfo.gainCost | number}}</td>
+							<ng-template [ngIf]="orderType === 'BUY'" [ngIfElse]="gainSell">
+								<td>
+									<b>{{ 'order-info.cost' | translate }}</b>
+								</td>
+								<td [appBalancedColor]="-1*orderInfo.gainCost">
+									<b>{{-1*orderInfo.gainCost | number}} {{orderInfo.selectedCurrency?.symbol.code}}</b>
+								</td>
+							</ng-template>
+							<ng-template #gainSell>
+								<td>
+									<b>{{ 'order-info.gain' | translate }}</b>
+								</td>
+								<td [appBalancedColor]="orderInfo.gainCost">
+									<b>{{orderInfo.gainCost | number}} {{orderInfo.selectedCurrency?.symbol.code}}</b>
+								</td>
+							</ng-template>
 						</tr>
 					</tbody>
 				</table>
@@ -53,7 +75,7 @@
 		<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="resetError()"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
 	</div>
 	<div class="modal-footer">
-    	<button type="button" (click)="order()" [className]="orderType === 'BUY' ? 'btn btn-success' : 'btn btn-danger'">{{orderType}}</button> 
+    	<button type="button" (click)="order()" [className]="orderType === 'BUY' ? 'btn btn-success' : 'btn btn-danger'">{{orderType}}</button>
 	</div>
 </clr-modal>
 
