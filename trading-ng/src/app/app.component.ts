@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
 
@@ -34,7 +34,12 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.portofolioService.getPortofolio().subscribe(p => this.baseCurrency = !!p ? p.baseCurrency : null);
 
-    this.authService.getAccessToken().pipe(first(), filter(token => !!token), switchMap(() => this.authService.refreshToken())).subscribe();
+    this.authService.getAccessToken()
+        .pipe(
+            first(),
+            filter(token => !!token),
+            switchMap(() => this.authService.refreshToken()))
+        .subscribe();
 
     this.authService.getUser()
       .pipe(

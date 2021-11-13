@@ -74,13 +74,13 @@ public class SymbolService {
 		return symbolRepo.findOneByCodeAndCurrencyIsNull(code).map(symbolMapper::mapToSymbol);
 	}
 
-	public void addFavoriteSymbol(String fromSymbolCode, String toSymbolCode, String username) {
-		favoriteSymbolRepository.save(new FavoriteSymbolEntity(fromSymbolCode, toSymbolCode, username));
-		log.info("Favorite symbol added:{}/{} user:{}", fromSymbolCode, toSymbolCode, username);
+	public void addFavoriteSymbol(String fromSymbolCode, String toSymbolCode, Integer userId) {
+		favoriteSymbolRepository.save(new FavoriteSymbolEntity(userId, fromSymbolCode, toSymbolCode));
+		log.info("Favorite symbol added:{}/{} user:{}", fromSymbolCode, toSymbolCode, userId);
 	}
 	
-	public void deleteFavoriteSymbol(String fromSymbolCode, String toSymbolCode, String username) {
-		favoriteSymbolRepository.deleteByFromSymbolCodeAndToSymbolCodeAndUsername(fromSymbolCode, toSymbolCode, username);
-		log.info("Favorite symbol removed:{}/{} user:{}", fromSymbolCode, toSymbolCode, username);
+	public void deleteFavoriteSymbol(String fromSymbolCode, String toSymbolCode, Integer userId) {
+		favoriteSymbolRepository.deleteByFromSymbolCodeAndToSymbolCodeAndUserId(fromSymbolCode, toSymbolCode, userId);
+		log.info("Favorite symbol removed:{}/{} user:{}", fromSymbolCode, toSymbolCode, userId);
 	}
 }

@@ -69,7 +69,7 @@ public class CurrencyUtils {
 
 	public static String countryFlagForCurrency(String c) {
 		if (EUR.equals(c)) {
-			return "europeanunion";
+			return "eu";
 		} else if (USD.equals(c)) {
 			return "us";
 		}

@@ -8,29 +8,25 @@
 	<parent>
 		<groupId>fr.ymanvieu.trading</groupId>
 		<artifactId>trading</artifactId>
-		<version>3.0.2-SNAPSHOT</version>
+		<version>3.3.0-SNAPSHOT</version>
 	</parent>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>dist</directory>
-				<includes>
-					<include>**/*</include>
-				</includes>
-				<targetPath>static</targetPath>
-			</resource>
-		</resources>
+	<properties>
+		<frontend-maven-plugin.version>1.12.0</frontend-maven-plugin.version>
+		<node.version>v16.13.0</node.version>
+		<yarn.version>v1.22.15</yarn.version>
+	</properties>
 
+	<build>
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>com.github.eirslett</groupId>
 					<artifactId>frontend-maven-plugin</artifactId>
-					<version>1.7.6</version>
+					<version>${frontend-maven-plugin.version}</version>
 					<configuration>
-						<nodeVersion>v10.13.0</nodeVersion>
-						<yarnVersion>v1.19.1</yarnVersion>
+						<nodeVersion>${node.version}</nodeVersion>
+						<yarnVersion>${yarn.version}</yarnVersion>
 						<yarnInheritsProxyConfigFromMaven>false</yarnInheritsProxyConfigFromMaven>
 					</configuration>
 				</plugin>

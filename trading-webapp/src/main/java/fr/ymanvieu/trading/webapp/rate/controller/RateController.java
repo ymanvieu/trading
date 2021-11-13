@@ -49,7 +49,7 @@ public class RateController {
 
 	@GetMapping("/latest")
 	public List<RateDTO> findAllLatest(Principal p) {
-		return rateMapper.favoriteRatesToRateDtos(rateService.getAllLatestWithFavorites(p != null ? p.getName() : null));
+		return rateMapper.favoriteRatesToRateDtos(rateService.getAllLatestWithFavorites(p != null ? Integer.valueOf(p.getName()) : null));
 	}
 	
 	@GetMapping(path = "/latest", params = { "fromcur", "tocur" })

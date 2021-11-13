@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @ConditionalOnProperty(name = "trading.scheduler.type", havingValue = "cron")
-public class CronSchedulerService extends SchedulerService {
+public class CronSchedulerService extends FixedRateSchedulerService {
 
 	@Scheduled(zone = "UTC", cron = "${scheduler.interval.cron.forex}")
 	@Override

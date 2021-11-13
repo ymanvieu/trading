@@ -27,19 +27,19 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.util.List;
 
 import org.assertj.core.data.Offset;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.portofolio.entity.AssetEntity;
 import fr.ymanvieu.trading.common.portofolio.repository.PortofolioRepository;
 import fr.ymanvieu.trading.common.symbol.Symbol;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
 @Sql("/sql/insert_portofolio.sql")
@@ -56,7 +56,7 @@ public class PortofolioServiceTest {
 	@Sql("/sql/insert_user_symbol.sql")
 	@Test
 	public void testCreatePortofolio() {
-		String login = "user";
+		Integer login = 2;
 		String baseCurrency = EUR;
 		int amount = 1000;
 
@@ -68,7 +68,7 @@ public class PortofolioServiceTest {
 
 	@Test
 	public void testGetPortofolio() {
-		String login = "user";
+		Integer login = 2;
 
 		// FIXME add asserts
 
@@ -86,11 +86,11 @@ public class PortofolioServiceTest {
 
 	@Test
 	public void testGetAsset() {
-		String login = "toto";
+		Integer login = 0;
 		String symbol = GBP;
 		int amount = 5000;
 
-		AssetEntity ae = portofolioRepo.findByUserUsername(login).getAsset(symbol);
+		AssetEntity ae = portofolioRepo.findByUserId(login).getAsset(symbol);
 
 		AssetInfo a = portofolioService.getAsset(ae);
 
@@ -105,7 +105,7 @@ public class PortofolioServiceTest {
 
 	@Test
 	public void testGetAvailableSymbols_Toto() {
-		String login = "toto";
+		Integer login = 0;
 
 		List<Symbol> symbols = portofolioService.getAvailableSymbols(login);
 
@@ -114,7 +114,7 @@ public class PortofolioServiceTest {
 
 	@Test
 	public void testGetOrderInfo_NullSymbol() {
-		String login = "seller";
+		Integer login = 1;
 
 		assertThatThrownBy(() -> portofolioService.getOrderInfo(login, null, 0))
 				.isInstanceOf(NullPointerException.class)
@@ -123,7 +123,7 @@ public class PortofolioServiceTest {
 
 	@Test
 	public void testGetOrderInfo_withSymbolOwned() {
-		String login = "seller";
+		Integer login = 1;
 		String symbol = "UBI";
 
 		OrderInfo info = portofolioService.getOrderInfo(login, symbol, 1);
@@ -135,7 +135,7 @@ public class PortofolioServiceTest {
 
 	@Test
 	public void testGetOrderInfo_withSymbolNotOwned() {
-		String login = "seller";
+		Integer login = 1;
 		String symbol = GBP;
 
 		OrderInfo info = portofolioService.getOrderInfo(login, symbol, 1);

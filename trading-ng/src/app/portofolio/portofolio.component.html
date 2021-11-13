@@ -4,8 +4,7 @@
     <clr-stack-block *ngIf="portofolio as p" >
         <clr-stack-label>{{ 'portofolio.total' | translate }}</clr-stack-label>
         <clr-stack-content>
-					{{p.currentValue | number}}&nbsp;
-					{{p.baseCurrency.symbol.name}}&nbsp;
+					{{p.currentValue | currency:p.baseCurrency.symbol.code}}
 					<img *ngIf="p.baseCurrency.symbol.countryFlag" src="../assets/img/flag/{{p.baseCurrency.symbol.countryFlag}}.gif" />
 				</clr-stack-content>
         <clr-stack-block>
@@ -23,10 +22,9 @@
 
 <clr-datagrid class="datagrid-compact">
 	<clr-dg-column [clrDgField]="'symbol.name'">{{ 'asset.name' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-md-down" [clrDgField]="'currency.name'">{{ 'asset.currency' | translate }}</clr-dg-column>
 	<clr-dg-column class="clr-hidden-md-down" [clrDgSortBy]="'quantity'">{{ 'asset.quantity' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-lg-down" [clrDgSortBy]="'currentValue'">{{ 'asset.current-value' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-md-down" [clrDgSortBy]="'currentRate'">{{ 'asset.current-rate' | translate }}</clr-dg-column>
+	<clr-dg-column class="clr-hidden-md-down">{{ 'asset.current-rate' | translate }}</clr-dg-column>
+	<clr-dg-column class="clr-hidden-lg-down">{{ 'asset.current-value' | translate }}</clr-dg-column>
 	<clr-dg-column class="clr-hidden-xs-down" [clrDgSortBy]="'percentChange'">{{ 'percent-change' | translate }}</clr-dg-column>
 	<clr-dg-column class="clr-hidden-sm-down" [clrDgSortBy]="'valueChange'" [clrDgSortOrder]="descSort">{{ 'value-change' | translate }}</clr-dg-column>
 	<clr-dg-column></clr-dg-column>
@@ -34,16 +32,14 @@
 	<clr-dg-row *clrDgItems="let a of portofolio?.assets">
 		<clr-dg-cell title="{{a.symbol.code}}">
 			<span class="m-align">{{a.symbol.name}}<span class="clr-hidden-lg-down"> ({{a.symbol.code}})</span></span>&nbsp;
-			<img *ngIf="a.symbol.countryFlag" class="m-align clr-hidden-md-down" src="../assets/img/flag/{{a.symbol.countryFlag}}.gif" />
-		</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-md-down" title="{{a.currency.code}}">
-			<span class="m-align clr-hidden-lg-down">{{a.currency.name}}&nbsp;</span>
-			<span class="m-align clr-hidden-xl-up">{{a.currency.code}}&nbsp;</span>
-			<img *ngIf="a.currency.countryFlag" class="m-align" src="../assets/img/flag/{{a.currency.countryFlag}}.gif" /> 
+			<img *ngIf="a.symbol.countryFlag" class="clr-hidden-md-down" src="../assets/img/flag/{{a.symbol.countryFlag}}.gif" />
 		</clr-dg-cell>
 		<clr-dg-cell class="clr-hidden-md-down">{{ a.quantity | number }}</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-lg-down">{{ a.currentValue | number }}</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-md-down">{{ a.currentRate | number }}</clr-dg-cell>
+		<clr-dg-cell class="clr-hidden-md-down">
+			{{ a.currentRate | currency:a.currency.code }}
+			<img class="clr-hidden-xs-down" src="../assets/img/flag/{{a.currency.countryFlag}}.gif" />
+		</clr-dg-cell>
+		<clr-dg-cell class="clr-hidden-lg-down">{{ a.currentValue | currency:a.currency.code }}</clr-dg-cell>
 		<clr-dg-cell class="clr-hidden-xs-down" [style.color]="a.percentChange | balancedColor">{{ a.percentChange | number }}</clr-dg-cell>
 		<clr-dg-cell class="clr-hidden-sm-down" [style.color]="a.valueChange | balancedColor">{{ a.valueChange | number }}</clr-dg-cell>
 		<clr-dg-cell>

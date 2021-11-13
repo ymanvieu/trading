@@ -21,29 +21,17 @@ import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.broker.region.policy.SimpleDispatchPolicy;
 import org.apache.activemq.broker.region.policy.TimedSubscriptionRecoveryPolicy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.ymanvieu.trading.common.rate.event.RatesUpdatedEvent;
-
-@EnableAsync
 @Configuration
 public class ActiveMQConfig {
-
-	@Autowired
-	private JmsTemplate jms;
 
 	@ConditionalOnProperty("spring.activemq.broker-url")
 	@Bean(initMethod = "start", destroyMethod = "stop")
@@ -75,11 +63,5 @@ public class ActiveMQConfig {
 		converter.setTargetType(MessageType.TEXT);
 		converter.setTypeIdPropertyName("_type");
 		return converter;
-	}
-
-	@Async
-	@EventListener
-	public void send(RatesUpdatedEvent event) {
-		jms.convertAndSend("trading.rate.latest", event);
 	}
 }

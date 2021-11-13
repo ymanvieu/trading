@@ -17,12 +17,16 @@
 package fr.ymanvieu.trading.common.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.user.entity.UserEntity;
 
-@Transactional(readOnly = true)
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
-	UserEntity findByUsername(String name);
+    boolean existsByUsernameAndProviderEquals(String username, String provider);
+
+	UserEntity findByEmail(String email);
+
+	boolean existsByEmail(String email);
+
+	boolean existsByProviderUserIdAndProvider(String providerUserId, String provider);
 }

@@ -18,7 +18,6 @@ package fr.ymanvieu.trading.common.provider.rate.yahoo;
 
 import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.EUR;
 import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.USD;
-import static fr.ymanvieu.trading.test.io.ClasspathFileReader.readFile;
 import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
@@ -27,27 +26,30 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import fr.ymanvieu.trading.common.provider.Quote;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith({SpringExtension.class})
 public class YahooCurrencyProviderTest {
 
-	private static final String LATEST = readFile("/provider/rate/yahoo/latest_currencies.json");
+	@Value("classpath:provider/rate/yahoo/latest_currencies.json")
+	Resource lastest;
 
 	private MockRestServiceServer server;
 
-	private YahooCurrencyProvider yahooCurrencyProvider = new YahooCurrencyProvider();
+	private final YahooCurrencyProvider yahooCurrencyProvider = new YahooCurrencyProvider();
 
-	@Before
+	@BeforeEach
 	public void setUpBefore() {
 		RestTemplate rt = (RestTemplate) ReflectionTestUtils.getField(yahooCurrencyProvider, "rt");
 
@@ -58,7 +60,7 @@ public class YahooCurrencyProviderTest {
 
 	@Test
 	public void testGetRates() throws Exception {
-		server.expect(anything()).andRespond(withSuccess(LATEST, MediaType.APPLICATION_JSON));
+		server.expect(anything()).andRespond(withSuccess(lastest, MediaType.APPLICATION_JSON));
 
 		Quote expectedUsdEurRate = new Quote(USD, EUR, new BigDecimal("0.8322"), parse("2017-09-11T10:01:00+02:00"));
 

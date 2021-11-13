@@ -24,17 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import fr.ymanvieu.trading.common.rate.AverageRangeType;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
-@RunWith(JUnitParamsRunner.class)
 public class AverageRangeTypeTest {
 
-	protected static Object[][] parametersForTestGetRange() {
+	private static Object[][] testGetRange() {
 		return new Object[][] {
 				{ null, null, WEEK },
 				{ "2013-08-01T00:05:00Z", "2015-08-01T00:05:00Z", WEEK },
@@ -45,9 +40,9 @@ public class AverageRangeTypeTest {
 		};
 	}
 
-	@Test
-	@Parameters
-	public void testGetRange(@DateParam Instant start, @DateParam Instant end, AverageRangeType expected) {
+	@ParameterizedTest
+	@MethodSource
+	public void testGetRange(Instant start, Instant end, AverageRangeType expected) {
 		assertThat(AverageRangeType.getRange(start, end)).isEqualTo(expected);
 	}
 }

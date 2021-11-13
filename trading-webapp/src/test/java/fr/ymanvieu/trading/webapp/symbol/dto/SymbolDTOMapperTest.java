@@ -18,16 +18,16 @@ package fr.ymanvieu.trading.webapp.symbol.dto;
 
 import static fr.ymanvieu.trading.test.assertions.ObjectAssertions.assertThat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import fr.ymanvieu.trading.common.symbol.Symbol;
 import fr.ymanvieu.trading.webapp.config.MapperTestConfig;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import(MapperTestConfig.class)
 public class SymbolDTOMapperTest {
 	

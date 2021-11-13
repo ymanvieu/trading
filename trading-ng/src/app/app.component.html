@@ -12,14 +12,14 @@
 		<div class="header-actions">
 			<ng-container *ngIf="login">
 				<a class="nav-link">
-					<span class="nav-text" [style.color]="baseCurrency?.quantity | balancedColor">
-						<strong>{{baseCurrency?.quantity | number}} {{baseCurrency?.symbol.code}}</strong>
+					<span *ngIf="baseCurrency" class="nav-text" [style.color]="baseCurrency.quantity | balancedColor">
+						<strong>{{baseCurrency.quantity | currency:baseCurrency.symbol.code}}</strong>
 					</span>
 				</a>
 				<clr-dropdown>
 					<button class="nav-text" clrDropdownTrigger>
 						{{login}}
-						<clr-icon shape="caret down"></clr-icon>
+						<cds-icon shape="angle" direction="down"></cds-icon>
 					</button>
 					<clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
 						<a (click)="logout()" clrDropdownItem>{{ 'logout.title' | translate }}</a>
@@ -30,7 +30,7 @@
 			<ng-container *ngIf="!login">
 				<div class="clr-row clr-align-items-center">
 					<div class="clr-col">
-						<a routerLink="/login" class="btn btn-primary-outline"><clr-icon shape="login"></clr-icon> {{ 'login.title' | translate }}</a>
+						<a routerLink="/login" class="btn btn-primary-outline"><cds-icon shape="login"></cds-icon> {{ 'login.title' | translate }}</a>
 						<a routerLink="/signup" class="btn btn-success-outline">{{ 'signup.title' | translate }}</a>
 					</div>
 				</div>

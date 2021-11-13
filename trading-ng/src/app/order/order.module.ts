@@ -1,15 +1,13 @@
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { SharedModule } from 'app/shared.module';
-import { SpinnerModule } from 'primeng/spinner';
-import { OrderComponent } from './order.component';
-import { KeyFilterModule } from 'primeng/keyfilter';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {SharedModule} from 'app/shared.module';
+import {OrderComponent} from './order.component';
+import {InputNumberModule} from "primeng/inputnumber";
 
 @NgModule({
   imports: [
     FormsModule,
-    SpinnerModule,
-    KeyFilterModule,
+    InputNumberModule,
     SharedModule
   ],
   declarations: [

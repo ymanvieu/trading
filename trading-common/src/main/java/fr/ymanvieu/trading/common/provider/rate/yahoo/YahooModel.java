@@ -38,64 +38,16 @@ public class YahooModel {
 		@JsonIgnoreProperties(ignoreUnknown = true)
 		public static class Result {
 
-			private String language;
-			private String quoteType;
 			private String currency;
-			private Double ask;
-			private Double regularMarketChangePercent;
-			private Double regularMarketPreviousClose;
-			private Double bid;
 			private Double regularMarketPrice;
-			private Double regularMarketChange;
-			private Double regularMarketOpen;
-			private Double regularMarketDayHigh;
-			private Double regularMarketDayLow;
-			private Long priceHLong;
 			private String exchangeTimezoneName;
-			private Long askSize;
 			private String fullExchangeName;
-			private Long bidSize;
-			private String marketState;
-			private Long sourceLongerval;
 			private String exchangeTimezoneShortName;
-			private String market;
 			private Long regularMarketTime;
-			private Long regularMarketVolume;
 			private Long gmtOffSetMilliseconds;
 			private String exchange;
-			private Boolean tradeable;
 			private String symbol;
 			private String shortName;
-			private String messageBoardId;
-			private Long openLongerest;
-			private String underlyingSymbol;
-			private String underlyingExchangeSymbol;
-			private Long expireDate;
-			private Boolean contractSymbol;
-			private String headSymbolAsString;
-			private Double twoHundredDayAverage;
-			private Double twoHundredDayAverageChangePercent;
-			private Double fiftyTwoWeekHighChange;
-			private Double fiftyDayAverage;
-			private Double fiftyTwoWeekHighChangePercent;
-			private Double fiftyTwoWeekLowChange;
-			private Double fiftyDayAverageChange;
-			private Double twoHundredDayAverageChange;
-			private Double fiftyTwoWeekLow;
-			private Long averageDailyVolume3Month;
-			private Double fiftyDayAverageChangePercent;
-			private Long averageDailyVolume10Day;
-			private Double fiftyTwoWeekHigh;
-			private String financialCurrency;
-			private Double fiftyTwoWeekLowChangePercent;
-			private Double priceToBook;
-			private Double trailingPE;
-			private Double bookValue;
-			private Long earningsTimestampEnd;
-			private Double epsTrailingTwelveMonths;
-			private Long marketCap;
-			private Long earningsTimestampStart;
-			private Long sharesOutstanding;
 			private String longName;
 		}
 	}

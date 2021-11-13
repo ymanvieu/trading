@@ -77,7 +77,7 @@ public class ObjectAssertions {
 				try {
 					actual.getClass().getDeclaredField(ignoredField);
 					ignoredFieldsToSearch.remove(ignoredField);
-				} catch (NoSuchFieldException e) {
+				} catch (NoSuchFieldException ignored) {
 				}
 			}
 

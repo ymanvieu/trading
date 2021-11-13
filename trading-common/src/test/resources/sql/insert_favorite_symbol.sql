@@ -1,5 +1,5 @@
-insert into users (id,username,password) values 
-(2,'user','');
+insert into users (id,username,provider) values
+(2,'user','local');
 
-insert into favorite_symbol (username,from_symbol_code,to_symbol_code) values
-('user', 'BRE','USD');
+insert into favorite_symbol (user_id,from_symbol_code,to_symbol_code) values
+(2, 'BRE','USD');

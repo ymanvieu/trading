@@ -22,18 +22,17 @@ import static org.assertj.core.api.Assertions.atIndex;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.rate.FavoriteRate;
-import fr.ymanvieu.trading.common.rate.repository.LatestRateRepository;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
 public class LatestRateRepositoryTest {
@@ -58,7 +57,7 @@ public class LatestRateRepositoryTest {
 	@Test
 	public void testFindAllWithFavorites() throws Exception {
 		
-		List<FavoriteRate> result = repo.findAllWithFavorites("user");
+		List<FavoriteRate> result = repo.findAllWithFavorites(2);
 		assertThat(result).hasSize(5)
 		.satisfies(fr -> {
 			assertThat(fr.getFromcur().getCode()).isEqualTo("BRE");

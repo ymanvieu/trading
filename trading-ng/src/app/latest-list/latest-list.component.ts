@@ -1,6 +1,6 @@
 import { RateService } from '../rate/rate.service';
 import { Rate } from '../rate/model/rate';
-import { Component, OnInit } from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import { AuthenticationService } from '../authentication';
 import { SymbolService } from '../symbol/symbol.service';
 import { ClrDatagridSortOrder, ClrDatagridComparatorInterface } from '@clr/angular';
@@ -20,7 +20,7 @@ class FavoriteAndDateComparator implements ClrDatagridComparatorInterface<Rate> 
 @Component({
   selector: 'app-latest-list',
   templateUrl: './latest-list.component.html',
-  styleUrls: ['./latest-list.component.css']
+  styleUrls: ['./latest-list.component.scss']
 })
 export class LatestListComponent extends RxjsComponent implements OnInit {
   rates: Rate[];
@@ -36,12 +36,16 @@ export class LatestListComponent extends RxjsComponent implements OnInit {
     private rateService: RateService,
     private authService: AuthenticationService,
     private symbolService: SymbolService,
-    private rxStompService: RxStompService
+    private rxStompService: RxStompService,
+    private ngZone: NgZone
   ) { super(); }
 
   ngOnInit(): void {
 
-    timer(5000, 5000).subscribe(() => this.now = new Date());
+    this.ngZone.runOutsideAngular(() => {
+      timer(5000, 5000)
+          .subscribe(() => this.ngZone.run(() => this.now = new Date()));
+    });
 
     this.register(
       this.rxStompService.watch('/topic/latest/')

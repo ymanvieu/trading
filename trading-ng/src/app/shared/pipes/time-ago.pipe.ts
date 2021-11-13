@@ -6,7 +6,7 @@ import { format } from 'timeago.js';
 })
 export class TimeAgoPipe implements PipeTransform {
 
-  transform(value: any, args?: any[]): any {
+  transform(value: Date, args?: any) {
     return format(value);
   }
 
