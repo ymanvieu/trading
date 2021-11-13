@@ -22,12 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import fr.ymanvieu.trading.common.exception.BusinessException;
+import fr.ymanvieu.trading.common.user.UserAlreadyExistsException;
 import fr.ymanvieu.trading.webapp.recaptcha.exception.RecaptchaException;
-import fr.ymanvieu.trading.webapp.user.exception.UserAlreadyExistsException;
 import io.jsonwebtoken.JwtException;
 
 @RestControllerAdvice
@@ -70,5 +71,10 @@ public class ExceptionRestHandler {
 		response.setMessage(messageSource.getMessage("user.error.login.exists", new Object[] {ex.getLogin()}, l));
 		
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<Response> handleBadCredentialsExceptionException(BadCredentialsException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response().setMessage(ex.getMessage()));
 	}
 }

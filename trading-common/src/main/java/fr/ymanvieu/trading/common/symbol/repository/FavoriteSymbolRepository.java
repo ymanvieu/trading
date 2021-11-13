@@ -23,5 +23,5 @@ import fr.ymanvieu.trading.common.symbol.entity.FavoriteSymbolPK;
 
 public interface FavoriteSymbolRepository  extends JpaRepository<FavoriteSymbolEntity, FavoriteSymbolPK> {
 
-	void deleteByFromSymbolCodeAndToSymbolCodeAndUsername(String fromSymbolCode, String toSymbolCode, String username);
+	void deleteByFromSymbolCodeAndToSymbolCodeAndUserId(String fromSymbolCode, String toSymbolCode, Integer userId);
 }

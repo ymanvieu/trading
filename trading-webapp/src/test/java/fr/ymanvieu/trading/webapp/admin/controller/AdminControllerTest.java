@@ -16,7 +16,6 @@
  */
 package fr.ymanvieu.trading.webapp.admin.controller;
 
-import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,25 +24,27 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import fr.ymanvieu.trading.common.admin.AdminService;
 import fr.ymanvieu.trading.common.admin.SearchResult;
 import fr.ymanvieu.trading.common.admin.SymbolInfo;
-import fr.ymanvieu.trading.webapp.config.WebSecurityTestConfig;
-import fr.ymanvieu.trading.webapp.admin.controller.AdminController;
+import fr.ymanvieu.trading.common.provider.Quote;
 import fr.ymanvieu.trading.webapp.config.TradingWebAppConfig;
+import fr.ymanvieu.trading.webapp.config.WebSecurityTestConfig;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebMvcTest
 @Import(AdminController.class)
 @WithMockUser(authorities = "ADMIN")
@@ -59,7 +60,7 @@ public class AdminControllerTest {
 	@Test
 	public void testSymbols() throws Exception {
 		// GIVEN
-		SearchResult result = new SearchResult(asList(), asList());
+		SearchResult result = new SearchResult(List.of(), List.of());
 
 		when(adminService.search(eq("volks"))).thenReturn(result);
 
@@ -82,7 +83,7 @@ public class AdminControllerTest {
 	@Test
 	public void testAdd() throws Exception {
 		// GIVEN
-		SymbolInfo si = new SymbolInfo("code", "name", true, new fr.ymanvieu.trading.common.provider.Quote("code", null, null));
+		SymbolInfo si = new SymbolInfo("code", "name", true, new Quote("code", null, null));
 
 		when(adminService.add(eq("UBI.PA"), eq("YAHOO"))).thenReturn(si);
 

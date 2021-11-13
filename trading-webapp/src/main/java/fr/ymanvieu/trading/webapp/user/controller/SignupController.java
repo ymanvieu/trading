@@ -16,76 +16,50 @@
  */
 package fr.ymanvieu.trading.webapp.user.controller;
 
-import static java.util.Arrays.asList;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.ymanvieu.trading.common.portofolio.PortofolioService;
-import fr.ymanvieu.trading.common.symbol.util.CurrencyUtils;
+import fr.ymanvieu.trading.common.user.UserService;
 import fr.ymanvieu.trading.webapp.jwt.JwtAuthenticationResponse;
 import fr.ymanvieu.trading.webapp.jwt.JwtTokenUtil;
 import fr.ymanvieu.trading.webapp.recaptcha.RecaptchaService;
 import fr.ymanvieu.trading.webapp.recaptcha.exception.RecaptchaException;
-import fr.ymanvieu.trading.webapp.user.exception.UserAlreadyExistsException;
 
 @RestController
 @RequestMapping("/api/signup")
 public class SignupController {
 
-	@Autowired
-	private PortofolioService portofolioService;
+    @Autowired
+    private UserService userService;
 
-	@Autowired(required = false)
-	private RecaptchaService recaptchaService;
-	
-	@Autowired
-	private UserDetailsManager userDetailsManager;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
+    @Autowired(required = false)
+    private RecaptchaService recaptchaService;
 
-	// TODO in service
-	@Transactional
-	@PostMapping
-	public ResponseEntity<JwtAuthenticationResponse> signup(@Valid @RequestBody SignupForm form, HttpServletRequest httpServletRequest) {
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
-		if(recaptchaService != null) {
-			if(!recaptchaService.isValidRecaptcha(form.getRecaptchaResponse(), httpServletRequest)) {
-				throw new RecaptchaException("Invalid recaptchaResponse");
-			}
-		}
+    @PostMapping
+    public ResponseEntity<JwtAuthenticationResponse> signup(@Valid @RequestBody SignupForm form, HttpServletRequest httpServletRequest) {
 
-		if(userDetailsManager.userExists(form.getLogin())) {
-			throw new UserAlreadyExistsException(form.getLogin());
-		}
-		
-		UserDetails userDetails = new User(form.getLogin(), passwordEncoder.encode(form.getPassword()), asList(new SimpleGrantedAuthority(Role.USER.name())));
-		
-		userDetailsManager.createUser(userDetails);
-		
-		portofolioService.createPortofolio(form.getLogin(), CurrencyUtils.EUR, 100_000);
-		
-		String accessToken = jwtTokenUtil.generateToken(userDetails);
-        String refreshToken = jwtTokenUtil.generateRefreshToken(accessToken);
+        if (recaptchaService != null) {
+            if (!recaptchaService.isValidRecaptcha(form.getRecaptchaResponse(), httpServletRequest)) {
+                throw new RecaptchaException("Invalid recaptchaResponse");
+            }
+        }
+
+        var userDetails = userService.createLocalUser(form.getLogin(), form.getPassword());
+
+        String accessToken = jwtTokenUtil.generateToken(userDetails.getUsername(), form.getLogin(), userDetails.getAuthorities());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername());
 
         // Return the token
         return ResponseEntity.ok(new JwtAuthenticationResponse(accessToken, refreshToken));
-	}
+    }
 }

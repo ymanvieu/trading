@@ -1,6 +1,6 @@
 INSERT INTO symbols (code,currency,name,country_flag) VALUES ('USD',NULL,'US Dollar','us');
 INSERT INTO symbols (code,currency,name,country_flag) VALUES ('BTC','USD','Bitcoin',NULL);
-INSERT INTO symbols (code,currency,name,country_flag) VALUES ('EUR',NULL,'Euro','europeanunion');
+INSERT INTO symbols (code,currency,name,country_flag) VALUES ('EUR',NULL,'Euro','eu');
 INSERT INTO symbols (code,currency,name,country_flag) VALUES ('GBP',NULL,'British Pound Sterling','gb');
 
 insert into symbols (code,name,country_flag,currency) values 

@@ -46,12 +46,13 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtTokenUtil {
 
 	static final String CLAIM_KEY_ROLES = "roles";
+	public static final String CLAIM_KEY_USERNAME = "username";
 	static final String ROLES_CLAIM_DELIMITER = ",";
 
     @Autowired
-    private JwtProperties jwtConfig;
+    private JwtProperties jwtProperties;
 
-    public String getUsernameFromToken(String token) {
+    public String getSubjectFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
@@ -70,7 +71,7 @@ public class JwtTokenUtil {
 
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(jwtConfig.getSecret())
+                .setSigningKey(jwtProperties.getSecret())
                 .parseClaimsJws(token)
                 .getBody();
     }
@@ -80,41 +81,32 @@ public class JwtTokenUtil {
         return expiration.isBefore(Instant.now());
     }
 
-    private Boolean isCreatedBeforeLastPasswordReset(Instant created, Instant lastPasswordReset) {
-        return (lastPasswordReset != null && created.isBefore(lastPasswordReset));
-    }
-
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(String subject, String username, Collection<? extends GrantedAuthority> grantedAuthorities) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_KEY_ROLES, userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(joining(ROLES_CLAIM_DELIMITER)));
-        
+        claims.put(CLAIM_KEY_ROLES, grantedAuthorities.stream().map(GrantedAuthority::getAuthority).collect(joining(ROLES_CLAIM_DELIMITER)));
+        claims.put(CLAIM_KEY_USERNAME, username);
+
         log.info("generateToken()");
         
-        return doGenerateToken(userDetails.getUsername(), claims);
+        return doGenerateToken(subject, claims);
     }
 
     private String doGenerateToken(String subject, Map<String, Object> claims) {
         final Instant createdDate = Instant.now();
-        final Instant expirationDate = createdDate.plus(jwtConfig.getExpiration());
+        final Instant expirationDate = createdDate.plus(jwtProperties.getExpiration());
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(Date.from(createdDate))
                 .setExpiration(Date.from(expirationDate))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtConfig.getSecret())), SignatureAlgorithm.HS512)
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())), SignatureAlgorithm.HS512)
                 .compact();
-    }
-
-    public Boolean canTokenBeRefreshed(String token, Instant lastPasswordReset) {
-        final Instant created = getIssuedAtDateFromToken(token);
-        return !isCreatedBeforeLastPasswordReset(created, lastPasswordReset)
-                && (!isTokenExpired(token));
     }
 
     public String generateRefreshToken(String subject) {
     	final Instant createdDate = Instant.now();
-    	final Instant expirationDate = createdDate.plus(jwtConfig.getRefreshExpiration());
+    	final Instant expirationDate = createdDate.plus(jwtProperties.getRefreshExpiration());
     	
     	log.info("generateRefreshToken()");
         
@@ -122,12 +114,12 @@ public class JwtTokenUtil {
         		.setSubject(subject)
                 .setIssuedAt(Date.from(createdDate))
                 .setExpiration(Date.from(expirationDate))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtConfig.getSecret())), SignatureAlgorithm.HS512)
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
+        final String username = getSubjectFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
     

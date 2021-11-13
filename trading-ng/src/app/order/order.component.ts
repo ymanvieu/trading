@@ -1,14 +1,14 @@
-import { Asset } from '../portofolio/model/asset';
-import { PortofolioService } from '../portofolio/portofolio.service';
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { Symbol } from '../symbol/model/symbol';
-import { Order } from './model/order';
-import { OrderInfo } from './model/order-info';
+import {Asset} from '../portofolio/model/asset';
+import {PortofolioService} from '../portofolio/portofolio.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Symbol} from '../symbol/model/symbol';
+import {Order} from './model/order';
+import {OrderInfo} from './model/order-info';
 
 @Component({
   selector: 'app-order',
   templateUrl: './order.component.html',
-  styleUrls: ['./order.component.css']
+  styleUrls: ['./order.component.scss']
 })
 export class OrderComponent implements OnInit {
 
@@ -28,11 +28,13 @@ export class OrderComponent implements OnInit {
 
   private _selectedSymbol: Symbol;
 
-  selectQuantity = 1;
+  private _selectedQuantity = 1;
 
   error: string;
 
   opened = false;
+
+  private _sellAll = false;
 
   @Output()
   orderCompleted: EventEmitter<Order> = new EventEmitter();
@@ -53,6 +55,8 @@ export class OrderComponent implements OnInit {
 
   open(type: string) {
     this.orderType = type;
+    this._selectedQuantity = 1;
+    this._sellAll = false;
     this.initSelectedSymbol();
     this.getData();
     this.opened = true;
@@ -62,26 +66,44 @@ export class OrderComponent implements OnInit {
     this.opened = false;
   }
 
-  get selectSymbol() {
+  get selectedSymbol() {
     return this._selectedSymbol;
   }
 
-  set selectSymbol(val: Symbol) {
+  set selectedSymbol(val: Symbol) {
     this._selectedSymbol = val;
     this.getData();
+  }
+
+  get selectedQuantity() {
+    return this._selectedQuantity;
+  }
+
+  set selectedQuantity(val: number) {
+    this._selectedQuantity = val;
+    this.getData();
+  }
+
+  get sellAll() {
+    return this._sellAll
+  }
+
+  set sellAll(val: boolean) {
+    this._sellAll = val;
+    this.selectedQuantity = this.asset.quantity;
   }
 
   getData() {
     this.resetError();
 
-    this.portofolioService.getOrderInfo(this._selectedSymbol.code, this.selectQuantity).subscribe(orderInfo => this.orderInfo = orderInfo);
+    this.portofolioService.getOrderInfo(this._selectedSymbol.code, this._selectedQuantity).subscribe(orderInfo => this.orderInfo = orderInfo);
   }
 
   order() {
     this.resetError();
 
     this.portofolioService
-      .order(this._selectedSymbol.code, this.selectQuantity, this.orderType)
+      .order(this._selectedSymbol.code, this._selectedQuantity, this.orderType)
       .subscribe(order => {
         this.close();
         this.orderCompleted.emit(order);

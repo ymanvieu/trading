@@ -46,11 +46,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PortofolioController {
 
-	public enum Type {
-		BUY, 
-		SELL
-	}
-
 	@Autowired
 	private PortofolioService portofolioService;
 	
@@ -60,21 +55,21 @@ public class PortofolioController {
 	@Autowired
 	private SymbolDTOMapper symbolMapper;
 
-	@GetMapping("/portofolio")
+	@GetMapping
 	public PortofolioDTO getPortofolio(Principal p) {
-		return portofolioMapper.toPortofolioDto(portofolioService.getPortofolio(p.getName()));
+		return portofolioMapper.toPortofolioDto(portofolioService.getPortofolio(Integer.valueOf(p.getName())));
 	}
 
 	@GetMapping("/available-symbols")
 	public List<SymbolDTO> getAvailableSymbols(Principal p) {
-		return symbolMapper.toDto(portofolioService.getAvailableSymbols(p.getName()));
+		return symbolMapper.toDto(portofolioService.getAvailableSymbols(Integer.valueOf(p.getName())));
 	}
 
 	@GetMapping("/order-info")
 	public OrderInfoDTO getOrderInfo(Principal p, String selected, Double quantity) throws SymbolException {
 		log.debug("selected code: {}, quantity: {}", selected, quantity);
 
-		OrderInfo oi = portofolioService.getOrderInfo(p.getName(), selected, (quantity == null ? 0 : quantity));
+		OrderInfo oi = portofolioService.getOrderInfo(Integer.valueOf(p.getName()), selected, (quantity == null ? 0 : quantity));
 
 		return portofolioMapper.toOrderInfoDto(oi);
 	}
@@ -86,10 +81,10 @@ public class PortofolioController {
 
 		switch (or.getType()) {
 		case BUY:
-			order = portofolioService.buy(p.getName(), or.getCode(), or.getQuantity());
+			order = portofolioService.buy(Integer.valueOf(p.getName()), or.getCode(), or.getQuantity());
 			break;
 		case SELL:
-			order = portofolioService.sell(p.getName(), or.getCode(), or.getQuantity());
+			order = portofolioService.sell(Integer.valueOf(p.getName()), or.getCode(), or.getQuantity());
 			break;
 		default:
 		}

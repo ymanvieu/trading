@@ -68,8 +68,15 @@ public class YahooStockProvider implements LatestRateProvider, HistoricalRatePro
 		YahooModel result = rt.getForObject(format(url, createPairsString(symbols)), YahooModel.class);
 
 		return result.getQuoteResponse().getResult().stream()
-				.map(yf -> new Quote(getSource(symbols, yf.getSymbol()), getCurrency(symbols, yf.getSymbol()),
-						BigDecimal.valueOf(yf.getRegularMarketPrice()), toInstant(yf.getRegularMarketTime())))
+				.filter(r -> {
+					if(r.getRegularMarketPrice() == null || r.getRegularMarketTime() == null) {
+						log.warn("invalid result for: {}", r);
+						return false;
+					}
+					return true;
+				})
+				.map(r -> new Quote(getSource(symbols, r.getSymbol()), getCurrency(symbols, r.getSymbol()),
+						BigDecimal.valueOf(r.getRegularMarketPrice()), toInstant(r.getRegularMarketTime())))
 				.collect(Collectors.toList());
 	}
 	

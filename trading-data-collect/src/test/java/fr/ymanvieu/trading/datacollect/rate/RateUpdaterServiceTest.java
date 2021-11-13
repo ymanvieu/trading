@@ -26,25 +26,25 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import fr.ymanvieu.trading.common.provider.Quote;
 import fr.ymanvieu.trading.common.rate.RateService;
 import fr.ymanvieu.trading.common.rate.entity.HistoricalRate;
 import fr.ymanvieu.trading.common.rate.entity.LatestRate;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
 import fr.ymanvieu.trading.common.rate.repository.LatestRateRepository;
-import fr.ymanvieu.trading.datacollect.config.ActiveMQConfig;
 import fr.ymanvieu.trading.datacollect.config.MapperTestConfig;
 import fr.ymanvieu.trading.datacollect.config.RepositoryTestConfig;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
 @Import({RateUpdaterService.class, RateService.class, MapperTestConfig.class, RepositoryTestConfig.class})
 @Sql("/sql/insert_symbols_bre_usd.sql")
@@ -62,7 +62,7 @@ public class RateUpdaterServiceTest {
 	private HistoricalRateRepository histoRepo;
 	
 	@MockBean
-	private ActiveMQConfig activeMQConfig;
+	private RatesUpdatedEventListener ratesUpdatedEventListener;
 
 	private List<Quote> getBrentQuotes() {
 		List<Quote> quotes = new ArrayList<>();
@@ -99,7 +99,7 @@ public class RateUpdaterServiceTest {
 
 		assertThat(lRates).containsExactly(expected6);
 
-		verify(activeMQConfig).send(any());
+		verify(ratesUpdatedEventListener).send(any());
 	}
 
 	@Sql("/sql/insert_symbols_bre_usd.sql")
@@ -128,6 +128,6 @@ public class RateUpdaterServiceTest {
 		assertThat(lRates).hasSize(1);
 		assertThat(lRates).containsOnly(expectedNewLatest1);
 
-		verify(activeMQConfig).send(any());
+		verify(ratesUpdatedEventListener).send(any());
 	}
 }

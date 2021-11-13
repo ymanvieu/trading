@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>fr.ymanvieu.trading</groupId>
 		<artifactId>trading</artifactId>
-		<version>3.0.2-SNAPSHOT</version>
+		<version>3.3.0-SNAPSHOT</version>
 	</parent>
 
 	<properties>
@@ -29,8 +29,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

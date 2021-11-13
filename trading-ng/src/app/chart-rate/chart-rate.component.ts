@@ -1,22 +1,22 @@
-import { map, first } from 'rxjs/operators';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { RxStompService } from '@stomp/ng2-stompjs';
 import { RateService } from 'app/rate/rate.service';
-import { Observable, zip } from 'rxjs';
+import { RxjsComponent } from 'app/shared/rxjs.component';
 import * as Highcharts from 'highcharts';
 import Stock from 'highcharts/modules/stock';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { Observable, zip } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { Rate } from '../rate/model/rate';
-import { RxStompService } from '@stomp/ng2-stompjs';
-import { TranslateService } from '@ngx-translate/core';
-import { RxjsComponent } from 'app/shared/rxjs.component';
 
 Stock(Highcharts);
 
 @Component({
   selector: 'app-chart-rate',
   templateUrl: './chart-rate.component.html',
-  styleUrls: ['./chart-rate.component.css']
+  styleUrls: ['./chart-rate.component.scss']
 })
 export class ChartRateComponent extends RxjsComponent implements OnInit {
 
@@ -27,7 +27,6 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
   Highcharts = Highcharts;
   chartOptions: Highcharts.Options;
   updateFlag = false;
-  private lastEvent: Highcharts.AxisSetExtremesEventObject;
 
   constructor(
     private rateService: RateService,
@@ -67,7 +66,7 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
     });
   }
 
-  private initChart(data: any[]): void {
+  private initChart(data: any[][]): void {
     this.chartOptions = {
       time: {
         useUTC: false
@@ -83,7 +82,7 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
       },
       chart: {
         zoomType: 'x',
-        backgroundColor: null
+        backgroundColor: null,
       },
       navigator: {
         adaptToUpdatedData: false
@@ -112,15 +111,6 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
 
   setExtremes(event: Highcharts.AxisSetExtremesEventObject): void {
 
-    if (this.lastEvent === event) {
-      console.log('same event, skip!');
-      return;
-    }
-
-    console.log('event:', event);
-
-    this.lastEvent = event;
-
     this.getData(this.fromcur, this.tocur, new Date(event.min), new Date(event.max))
       .subscribe(data => {
         this.chartOptions.series[0] = { type: 'line', data: data };
@@ -128,7 +118,7 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
       });
   }
 
-  getData(fromcur: string, tocur: string, startDate?: Date, endDate?: Date): Observable<any[]> {
+  getData(fromcur: string, tocur: string, startDate?: Date, endDate?: Date): Observable<number[][]> {
     return this.rateService.getHistoryFrom(fromcur, tocur, startDate, endDate);
   }
 }

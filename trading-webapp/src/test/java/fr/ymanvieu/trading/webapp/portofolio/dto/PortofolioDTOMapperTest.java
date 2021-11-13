@@ -18,20 +18,20 @@ package fr.ymanvieu.trading.webapp.portofolio.dto;
 
 import static fr.ymanvieu.trading.test.assertions.ObjectAssertions.assertThat;
 
-import java.util.Arrays;
+import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import fr.ymanvieu.trading.common.portofolio.AssetInfo;
 import fr.ymanvieu.trading.common.portofolio.Portofolio;
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.webapp.config.MapperTestConfig;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import(MapperTestConfig.class)
 public class PortofolioDTOMapperTest {
 	
@@ -59,7 +59,7 @@ public class PortofolioDTOMapperTest {
 		AssetInfo baseCurrency = new AssetInfo(new SymbolEntity("EUR", "euro", "eu", null), null);
 		AssetInfo ai = new AssetInfo(new SymbolEntity("FROM", "from", "fcountry", null), new SymbolEntity("TO", "to", "tcountry", null));
 
-		Portofolio p = new Portofolio(baseCurrency, Arrays.asList(ai), 1500f, 10.94f, 145f);
+		Portofolio p = new Portofolio(baseCurrency, List.of(ai), 1500f, 10.94f, 145f);
 
 		PortofolioDTO result = mapper.toPortofolioDto(p);
 		

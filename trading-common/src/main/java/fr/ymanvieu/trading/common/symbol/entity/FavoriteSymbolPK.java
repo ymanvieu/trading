@@ -24,8 +24,8 @@ import lombok.Data;
 public class FavoriteSymbolPK implements Serializable {
 
 	private static final long serialVersionUID = 6658378738799786817L;
-	
+
+	private Integer userId;
 	private String fromSymbolCode;
 	private String toSymbolCode;
-	private String username;
 }

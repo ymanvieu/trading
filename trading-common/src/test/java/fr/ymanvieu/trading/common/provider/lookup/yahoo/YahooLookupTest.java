@@ -16,36 +16,41 @@
  */
 package fr.ymanvieu.trading.common.provider.lookup.yahoo;
 
-import static fr.ymanvieu.trading.test.io.ClasspathFileReader.readFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import fr.ymanvieu.trading.common.provider.LookupInfo;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
-@RunWith(JUnitParamsRunner.class)
+@ExtendWith(SpringExtension.class)
 public class YahooLookupTest {
 
-	private static final String SEARCH_RESULT = readFile("/provider/lookup/yahoo/search_ubi.json");
-	private static final String LATEST_UBI = readFile("/provider/rate/yahoo/latest_ubi.json");
+	@Value("classpath:provider/lookup/yahoo/search_ubi.json")
+	private Resource searchResult;
+
+	@Value("classpath:provider/rate/yahoo/latest_ubi.json")
+	private Resource latestUbi;
 	
-	private YahooLookup yahooLookup = new YahooLookup();
+	private final YahooLookup yahooLookup = new YahooLookup();
 
 	private MockRestServiceServer server;
 
-	@Before
+	@BeforeEach
 	public void setUpBefore() {
 		RestTemplate rt = (RestTemplate) ReflectionTestUtils.getField(yahooLookup, "rt");
 
@@ -57,7 +62,7 @@ public class YahooLookupTest {
 
 	@Test
 	public void testSearch() throws Exception {
-		server.expect(anything()).andRespond(withSuccess(SEARCH_RESULT, MediaType.APPLICATION_JSON));
+		server.expect(anything()).andRespond(withSuccess(searchResult, MediaType.APPLICATION_JSON));
 
 		List<LookupInfo> result = yahooLookup.search("ubi");
 
@@ -66,14 +71,13 @@ public class YahooLookupTest {
 
 	@Test
 	public void testGetDetails() throws Exception {
-		server.expect(anything()).andRespond(withSuccess(SEARCH_RESULT, MediaType.APPLICATION_JSON));
-		server.expect(anything()).andRespond(withSuccess(LATEST_UBI, MediaType.APPLICATION_JSON));
+		server.expect(anything()).andRespond(withSuccess(searchResult, MediaType.APPLICATION_JSON));
+		server.expect(anything()).andRespond(withSuccess(latestUbi, MediaType.APPLICATION_JSON));
 
 		assertThat(yahooLookup.getDetails("UBI.PA").getCurrency()).isEqualTo("EUR");
 	}
-	
 
-	protected static Object[][] parametersForTestParseSource() {
+	private static Object[][] testParseSource() {
 		return new Object[][] {
 				{ "BTCUSD=X", "BTC" },
 				{ "XAU=X", "USD" },
@@ -88,13 +92,13 @@ public class YahooLookupTest {
 		};
 	}
 
-	@Test
-	@Parameters
+	@ParameterizedTest
+	@MethodSource
 	public void testParseSource(String code, String expectedResult) {
 		assertThat(YahooLookup.parseSource(code)).isEqualTo(expectedResult);
 	}
-	
-	protected static Object[][] parametersForTestParseTarget() {
+
+	private static Object[][] testParseTarget() {
 		return new Object[][] {
 				{ "BTCUSD=X", "USD" },
 				{ "XAU=X", "XAU" },
@@ -108,9 +112,9 @@ public class YahooLookupTest {
 				{ "005930.KS", null },
 		};
 	}
-	
-	@Test
-	@Parameters
+
+	@ParameterizedTest
+	@MethodSource
 	public void testParseTarget(String code, String expectedResult) {
 		assertThat(YahooLookup.parseTarget(code)).isEqualTo(expectedResult);
 	}

@@ -16,40 +16,74 @@
  */
 package fr.ymanvieu.trading.common.user.entity;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 @Entity
 @Table(name = "users")
 @ToString(exclude="password")
 @Getter
+@Accessors(chain = true)
 @RequiredArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class UserEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
+	@Setter
 	@Nonnull
-	@Column(nullable = false, unique = true, length = 50)
+	@Column(nullable = false, unique = true, length = 255)
 	private String username;
 
-	@Nonnull
-	@Column(nullable = false, length = 64)
+	@Setter
+	@Column(length = 64)
 	private String password;
 
-	@Column(nullable = false, columnDefinition = "INT(1) DEFAULT 1")
+	@Nonnull
+	@Column(nullable = false, columnDefinition = "bool default true")
 	private boolean enabled;
+
+	@OneToMany(cascade = CascadeType.PERSIST, mappedBy = "user")
+	private List<AuthorityEntity> authorities = new ArrayList<>();
+
+	@LastModifiedDate
+	@Column(name = "last_modified_date")
+	private Instant lastModifiedDate;
+
+	@Nonnull
+	@Column(nullable = false, length = 255)
+	private String provider;
+
+	@Setter
+	@Column(length = 255)
+	private String providerUserId;
+
+	@Setter
+	@Column(length = 255)
+	private String email;
 }

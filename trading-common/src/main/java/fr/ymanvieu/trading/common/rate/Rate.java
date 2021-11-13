@@ -20,6 +20,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import fr.ymanvieu.trading.common.symbol.Symbol;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,7 +53,7 @@ public class Rate {
 		if (this == obj)
 			return true;
 
-		if (obj == null || !(obj instanceof Rate))
+		if (!(obj instanceof Rate))
 			return false;
 
 		Rate other = (Rate) obj;

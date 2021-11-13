@@ -39,12 +39,12 @@ import fr.ymanvieu.trading.common.provider.rate.LatestRateProvider;
  */
 @Service
 @ConditionalOnProperty(name = "trading.scheduler.type", havingValue = "random")
-public class RandomSchedulerService extends SchedulerService implements LatestRateProvider {
+public class RandomSchedulerService extends FixedRateSchedulerService implements LatestRateProvider {
 
 	private static final Random RANDOM = new Random();
 	
 	@Autowired
-	private SchedulerService service;
+	private FixedRateSchedulerService service;
 
 	@Scheduled(fixedRate = 5000)
 	public void updateRates() throws IOException {
