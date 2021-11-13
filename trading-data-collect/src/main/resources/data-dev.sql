@@ -4,7 +4,7 @@ INSERT INTO symbols (code,currency,name,country_flag,created_by,created_date) VA
 ,('CAD',NULL,'Canadian Dollar','ca',NULL,NULL)
 ,('CHF',NULL,'Swiss Franc','ch',NULL,NULL)
 ,('CNY',NULL,'Chinese Yuan','cn',NULL,NULL)
-,('EUR',NULL,'Euro','europeanunion',NULL,NULL)
+,('EUR',NULL,'Euro','eu',NULL,NULL)
 ,('GBP',NULL,'British Pound Sterling','gb',NULL,NULL)
 ,('HKD',NULL,'Hong Kong Dollar','hk',NULL,NULL)
 ,('INR',NULL,'Indian Rupee','in',NULL,NULL)

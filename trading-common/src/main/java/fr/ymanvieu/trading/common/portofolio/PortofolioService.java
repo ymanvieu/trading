@@ -17,10 +17,10 @@
 package fr.ymanvieu.trading.common.portofolio;
 
 import static com.querydsl.jpa.JPAExpressions.select;
-import static fr.ymanvieu.trading.common.util.MathUtils.equalsByComparingTo;
-import static fr.ymanvieu.trading.common.util.MathUtils.percentChange;
 import static fr.ymanvieu.trading.common.provider.entity.QPairEntity.pairEntity;
 import static fr.ymanvieu.trading.common.symbol.entity.QSymbolEntity.symbolEntity;
+import static fr.ymanvieu.trading.common.util.MathUtils.equalsByComparingTo;
+import static fr.ymanvieu.trading.common.util.MathUtils.percentChange;
 import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toList;
 
@@ -32,7 +32,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import fr.ymanvieu.trading.common.portofolio.entity.AssetEntity;
@@ -67,8 +66,8 @@ public class PortofolioService {
 	@Autowired
 	private SymbolMapper symbolMapper;
 
-	public Portofolio createPortofolio(String login, String baseCurrencyCode, int baseCurrencyAmount) {
-		UserEntity ue = userRepo.findByUsername(login);
+	public Portofolio createPortofolio(Integer userId, String baseCurrencyCode, int baseCurrencyAmount) {
+		UserEntity ue = userRepo.findById(userId).orElseThrow();
 		SymbolEntity se = symbolRepo.findById(baseCurrencyCode).get();
 
 		// FIXME add checks
@@ -77,17 +76,11 @@ public class PortofolioService {
 
 		portofolioRepo.save(pe);
 
-		return getPortofolio(login);
-	}
-	
-	public AssetInfo getBaseCurrency(String login) {
-		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
-
-		return new AssetInfo(portofolio.getBaseCurrency(), null, portofolio.getAmount().doubleValue());
+		return getPortofolio(userId);
 	}
 
-	public Portofolio getPortofolio(String login) {
-		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+	public Portofolio getPortofolio(Integer userId) {
+		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 
 		AssetInfo baseCurrencyAsset = new AssetInfo(portofolio.getBaseCurrency(), null, portofolio.getAmount().doubleValue());
 		
@@ -145,17 +138,14 @@ public class PortofolioService {
 		return asset;
 	}
 
-	public OrderInfo getOrderInfo(String login, String symbolCode, double quantity) {
+	public OrderInfo getOrderInfo(Integer userId, String symbolCode, double quantity) {
 
 		Objects.requireNonNull(symbolCode, "symbolCode is null");
 
-		SymbolEntity selectedSymbol = symbolRepo.findById(symbolCode).get();
+		SymbolEntity selectedSymbol = symbolRepo.findById(symbolCode)
+			.orElseThrow(() -> SymbolException.UNKNOWN(symbolCode));
 
-		if (selectedSymbol == null) {
-			throw SymbolException.UNKNOWN(symbolCode);
-		}
-
-		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 
 		AssetEntity selectedAssetEntity = portofolio.getAsset(selectedSymbol.getCode());
 
@@ -195,12 +185,12 @@ public class PortofolioService {
 	 * - currencies not already owned and still collected <br>
 	 * - symbols which can be bought with owned currencies <br>
 	 */
-	public List<Symbol> getAvailableSymbols(String login) {
+	public List<Symbol> getAvailableSymbols(Integer userId) {
 
-		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 
 		List<SymbolEntity> ownedCurrencies = portofolio.getCurrencies();
-		List<SymbolEntity> ownedAssets = portofolio.getAssets().stream().map(a -> a.getSymbol()).collect(toList());
+		List<SymbolEntity> ownedAssets = portofolio.getAssets().stream().map(AssetEntity::getSymbol).collect(toList());
 
 		BooleanExpression exp = symbolEntity.notIn(ownedAssets) //
 				.and(symbolEntity.notIn(ownedCurrencies)) //
@@ -211,19 +201,16 @@ public class PortofolioService {
 		return symbolMapper.mapToSymbols(symbolRepo.findAll(exp, symbolEntity.code.asc()));
 	}
 
-	public Order buy(String login, String code, double quantity) {
+	public Order buy(Integer userId, String code, double quantity) {
 
 		if (quantity <= 0) {
 			throw new IllegalArgumentException("quantity must be positive: " + quantity);
 		}
 
-		SymbolEntity fromSymbol = symbolRepo.findById(code).get();
+		SymbolEntity fromSymbol = symbolRepo.findById(code)
+			.orElseThrow(() -> SymbolException.UNKNOWN(code));
 
-		if (fromSymbol == null) {
-			throw SymbolException.UNKNOWN(code);
-		}
-
-		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 		Order order = portofolio.buy(fromSymbol, quantity, rateService);
 
 		portofolioRepo.save(portofolio);
@@ -231,19 +218,16 @@ public class PortofolioService {
 		return order;
 	}
 
-	public Order sell(String login, String code, double quantity) {
+	public Order sell(Integer userId, String code, double quantity) {
 
 		if (quantity <= 0) {
 			throw new IllegalArgumentException("quantity must be positive: " + quantity);
 		}
 
-		final SymbolEntity fromSymbol = symbolRepo.findById(code).get();
+		final SymbolEntity fromSymbol = symbolRepo.findById(code)
+			.orElseThrow(() -> SymbolException.UNKNOWN(code));
 
-		if (fromSymbol == null) {
-			throw SymbolException.UNKNOWN(code);
-		}
-
-		PortofolioEntity portofolio = portofolioRepo.findByUserUsername(login);
+		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 		Order order = portofolio.sell(fromSymbol, quantity, rateService);
 
 		portofolioRepo.save(portofolio);

@@ -4,7 +4,12 @@
 			"fromcur": {
 				"code": "FROM",
 				"name": "from",
-				"countryFlag": "fcountry"
+				"countryFlag": null,
+				"currency": {
+					"code": "TO",
+					"name": "to",
+					"countryFlag": "tcountry"
+				}
 			},
 			"tocur": {
 				"code": "TO",

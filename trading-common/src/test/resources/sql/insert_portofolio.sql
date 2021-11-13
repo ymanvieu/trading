@@ -1,10 +1,10 @@
-insert into users (id,username,password) values 
-(0,'toto',''),
-(1,'seller',''),
-(2,'user','');
+insert into users (id,username,provider) values
+(0,'toto','local'),
+(1,'seller','local'),
+(2,'user','local');
 
 insert into symbols (code,name,country_flag,currency) values 
-('EUR','Euro','europeanunion',null),
+('EUR','Euro','eu',null),
 ('USD','US Dollar','us',null),
 ('UBI','Ubisoft Entertainment SA',null,'EUR'),
 ('BRE','Brent Crude Futures','oil','USD'),

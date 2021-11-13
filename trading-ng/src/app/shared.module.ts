@@ -6,7 +6,6 @@ import { NgxPermissionsModule } from 'ngx-permissions';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClient } from '@angular/common/http';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { ClrAddonsModule } from '@porscheinformatik/clr-addons';
 import { PipesModule } from './shared/pipes/pipes.module';
 import { DirectivesModule } from './shared/directives/directives.module';
 
@@ -16,7 +15,6 @@ import { DirectivesModule } from './shared/directives/directives.module';
     RouterModule,
     NgxPermissionsModule,
     BrowserAnimationsModule,
-    ClrAddonsModule,
     TranslateModule.forRoot({
       loader: {
           provide: TranslateLoader,

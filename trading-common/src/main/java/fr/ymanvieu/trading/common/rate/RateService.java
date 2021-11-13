@@ -67,8 +67,8 @@ public class RateService {
 	@Autowired
 	private RateMapper rateMapper;
 	
-	public List<FavoriteRate> getAllLatestWithFavorites(String username) {
-		return latestRateRepository.findAllWithFavorites(username);
+	public List<FavoriteRate> getAllLatestWithFavorites(Integer userId) {
+		return latestRateRepository.findAllWithFavorites(userId);
 	}
 
 	public Instant getOldestRateDate(String fromcur, String tocur) {

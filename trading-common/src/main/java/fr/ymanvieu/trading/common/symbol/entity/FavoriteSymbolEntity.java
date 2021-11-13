@@ -17,7 +17,6 @@
 package fr.ymanvieu.trading.common.symbol.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -33,13 +32,17 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "favorite_symbol")
 @Data
-@EqualsAndHashCode(of = {"username", "fromSymbolCode", "toSymbolCode"})
+@EqualsAndHashCode(of = {"userId", "fromSymbolCode", "toSymbolCode"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @IdClass(FavoriteSymbolPK.class)
 public class FavoriteSymbolEntity implements Serializable {
 
 	private static final long serialVersionUID = 3912360548486565703L;
+
+	@Id
+	@Column(name = "user_id")
+	private Integer userId;
 
 	@Id
 	@Column(name = "from_symbol_code", length = 8)
@@ -49,7 +52,4 @@ public class FavoriteSymbolEntity implements Serializable {
 	@Column(name = "to_symbol_code", length = 8)
 	private String toSymbolCode;
 
-	@Id
-	@Column(length = 50)
-	private String username;
 }

@@ -26,7 +26,7 @@ class Result {
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.css']
+  styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit {
 
@@ -71,6 +71,14 @@ export class AdminComponent implements OnInit {
         this.result = [...result.existingPairs.map(i => Result.create(i)), ...result.availableSymbols ];
       })
     );
+  }
+
+  get searchCode() {
+    return this.formGroup.get('searchCode').value;
+  }
+
+  set searchCode(searchCode: string) {
+    this.formGroup.get('searchCode').setValue('');
   }
 
   resetMessage() {

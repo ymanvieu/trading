@@ -40,11 +40,11 @@ public class SymbolController {
 	
 	@PostMapping("/favorite")
 	public void addFavoriteSymbol(@RequestBody Map<String, String> symbolCode, Principal p) {
-		symbolService.addFavoriteSymbol(symbolCode.get("fromSymbolCode"), symbolCode.get("toSymbolCode"), p.getName());
+		symbolService.addFavoriteSymbol(symbolCode.get("fromSymbolCode"), symbolCode.get("toSymbolCode"), Integer.valueOf(p.getName()));
 	}
 	
 	@DeleteMapping("/favorite/{fromSymbolCode}/{toSymbolCode}")
 	public void deleteFavoriteSymbol(@PathVariable String fromSymbolCode, @PathVariable String toSymbolCode, Principal p) {
-		symbolService.deleteFavoriteSymbol(fromSymbolCode, toSymbolCode, p.getName());
+		symbolService.deleteFavoriteSymbol(fromSymbolCode, toSymbolCode, Integer.valueOf(p.getName()));
 	}
 }

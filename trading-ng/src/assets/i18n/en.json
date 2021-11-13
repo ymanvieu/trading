@@ -17,6 +17,14 @@
         "owned": "Owned",
         "quantity": "Quantity"
     },
+    "form.validation": {
+        "length": {
+            "min": "Min length is {{length}}",
+            "max": "Max length is {{length}}"
+        },
+        "password-mismatch": "Mismatched password confirmation",
+        "required": "Required"
+    },
     "login": {
         "title": "Log in",
         "login": "Login",
@@ -29,12 +37,15 @@
     "order": {
         "buy": "Buy",
         "buy-new-asset": "Buy new asset",
-        "sell": "Sell"
+        "sell": "Sell",
+        "sell-all": "Sell all"
     },
     "order-info": {
         "currency-available": "Currency available",
-        "gain-cost": "Gain/Cost"
+        "cost": "Cost",
+        "gain": "Gain"
     },
+    "pagination.text": "{{first}} - {{last}} ({{total}})",
     "pair": {
         "exchange": "Exchange",
         "name": "Name",
@@ -52,7 +63,6 @@
         "title": "Portofolio",
         "total": "Total"
     },
-    "pagination.text": "{{first}} - {{last}} ({{total}})",
     "rate": {
         "updated": "Updated",
         "from": "From",

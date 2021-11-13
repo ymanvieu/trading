@@ -22,14 +22,14 @@ import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.GBP;
 import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.USD;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CurrencyUtilsTest {
 
 	@Test
 	public void testCountryFlagForCurrency() {
 		assertThat(CurrencyUtils.countryFlagForCurrency(USD)).isEqualTo("us");
-		assertThat(CurrencyUtils.countryFlagForCurrency(EUR)).isEqualTo("europeanunion");
+		assertThat(CurrencyUtils.countryFlagForCurrency(EUR)).isEqualTo("eu");
 		assertThat(CurrencyUtils.countryFlagForCurrency("RUB")).isEqualTo("ru");
 		assertThat(CurrencyUtils.countryFlagForCurrency(GBP)).isEqualTo("gb");
 		assertThat(CurrencyUtils.countryFlagForCurrency(CHF)).isEqualTo("ch");

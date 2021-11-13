@@ -18,7 +18,7 @@ export class RateService {
     return this.http.get<Rate>(`${this.url}/latest`, {params: {fromcur, tocur}});
   }
 
-  getHistoryFrom(fromcur: string, tocur: string, startDate?: Date, endDate?: Date): Observable<any[][]> {
+  getHistoryFrom(fromcur: string, tocur: string, startDate?: Date, endDate?: Date): Observable<number[][]> {
     let params = {};
 
     if (startDate && endDate) {
@@ -27,6 +27,6 @@ export class RateService {
       params = {fromcur, tocur};
     }
 
-    return this.http.get<any[][]>(`${this.url}/history`, {params: params});
+    return this.http.get<number[][]>(`${this.url}/history`, {params: params});
   }
 }

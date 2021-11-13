@@ -2,7 +2,13 @@
 <clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="resetError()"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
 
 <form class="clr-form clr-form-compact" [formGroup]="formGroup">
-	<input clrInput clrSearch type="text" name="code" formControlName="searchCode" placeholder="{{ 'admin.search-placeholder' | translate }}"/>
+	<div class="clr-form-control">
+			<div class="clr-input-wrapper">
+				<cds-icon shape="search"></cds-icon>
+				<input class="clr-input" type="text" name="code" formControlName="searchCode" placeholder="{{ 'admin.search-placeholder' | translate }}"/>
+				<button class ="btn btn-link btn-icon delete-button"><cds-icon shape="times" *ngIf="searchCode" (click)="searchCode = null"></cds-icon></button>
+			</div>
+	</div>
 </form>
 
 <clr-datagrid class="datagrid-compact">

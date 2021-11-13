@@ -16,26 +16,25 @@
  */
 package fr.ymanvieu.trading.webapp.config;
 
-import static fr.ymanvieu.trading.test.io.ClasspathFileReader.readFile;
 import static fr.ymanvieu.trading.test.time.DateParser.parse;
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.test.context.junit4.SpringRunner;
-
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.ymanvieu.trading.common.rate.Rate;
@@ -43,39 +42,41 @@ import fr.ymanvieu.trading.common.rate.event.RatesUpdatedEvent;
 import fr.ymanvieu.trading.common.symbol.Symbol;
 import fr.ymanvieu.trading.webapp.rate.messaging.RatesStompHandler;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import(JmsConfig.class)
+@TestPropertySource(properties = "spring.activemq.broker-url=test")
 @JsonTest
+@MockBean({DefaultJmsListenerContainerFactory.class})
 public class JmsConfigTest {
 	
 	@Autowired
 	private JmsConfig jmsConfig;
-	
-	@MockBean
-	private DefaultJmsListenerContainerFactory defaultJmsListenerContainerFactory;
-	
+
 	@Autowired
 	private ObjectMapper mapper;
 	
 	@MockBean
 	private RatesStompHandler ratesStompHandler;
 
-	@Test
-	public void testSerialization() throws IOException {
+	@Value("classpath:rate-update-event.json")
+	private Resource rateUpdateEvent;
 
-		Symbol from = new Symbol("FROM", "from", "fcountry", null);
+	@Test
+	public void testSerialization() throws Exception {
+
 		Symbol to = new Symbol("TO", "to", "tcountry", null);
+		Symbol from = new Symbol("FROM", "from", null, to);
 
 		RatesUpdatedEvent expected = new RatesUpdatedEvent()
-				.setRates(asList(new Rate(from, to, new BigDecimal("25.5"), parse("2017-09-23T19:11:01+02:00"))));
+				.setRates(List.of(new Rate(from, to, new BigDecimal("25.5"), parse("2017-09-23T19:11:01+02:00"))));
 
-		RatesUpdatedEvent result = mapper.readValue(readFile("/rate-update-event.json"), RatesUpdatedEvent.class);
+		RatesUpdatedEvent result = mapper.readValue(rateUpdateEvent.getFile(), RatesUpdatedEvent.class);
 
 		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
 	}
 
 	@Test
-	public void testReceiveMessage() throws Exception {
+	public void testReceiveMessage() {
 		// GIVEN
 		Symbol from = new Symbol("FROM", "from", "fcountry", null);
 		Symbol to = new Symbol("TO", "to", "tcountry", null);

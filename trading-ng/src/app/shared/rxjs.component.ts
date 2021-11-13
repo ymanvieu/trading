@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, OnDestroy, Component, Directive } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
+@Directive()
 export class RxjsComponent implements OnDestroy {
   subs: Subscription[] = [];
 

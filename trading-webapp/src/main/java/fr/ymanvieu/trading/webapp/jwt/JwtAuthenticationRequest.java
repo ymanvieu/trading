@@ -16,19 +16,19 @@
  */
 package fr.ymanvieu.trading.webapp.jwt;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class  JwtAuthenticationRequest implements Serializable {
+@Accessors(chain = true)
+public class  JwtAuthenticationRequest {
 
-    private static final long serialVersionUID = -8445943548965154778L;
-
+    @NotEmpty
     private String username;
+    @NotEmpty
     private String password;
 }

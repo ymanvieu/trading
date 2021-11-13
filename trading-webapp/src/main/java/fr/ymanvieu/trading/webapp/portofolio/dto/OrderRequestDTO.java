@@ -24,5 +24,5 @@ public class OrderRequestDTO {
 
 	OrderType type;
 	String code;
-	int quantity;
+	double quantity;
 }

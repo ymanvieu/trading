@@ -23,18 +23,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.common.symbol.repository.SymbolRepository;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
 public class SymbolServiceTest {
@@ -128,12 +128,12 @@ public class SymbolServiceTest {
 	@Sql("/sql/insert_user_symbol_favorite.sql")
 	@Test
 	public void testAddFavoriteSymbol() throws Exception {
-		symbolService.addFavoriteSymbol(USD, EUR, "user");
+		symbolService.addFavoriteSymbol(USD, EUR, 2);
 	}
 
 	@Sql("/sql/insert_user_symbol_favorite.sql")
 	@Test
 	public void testDeleteFavoriteSymbol() throws Exception {
-		symbolService.deleteFavoriteSymbol("UBI", EUR, "user");
+		symbolService.deleteFavoriteSymbol("UBI", EUR, 2);
 	}
 }
