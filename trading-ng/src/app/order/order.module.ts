@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {SharedModule} from 'app/shared.module';
+import { BalancedColorDirective } from '../shared/directives/balanced-color.directive';
 import {OrderComponent} from './order.component';
 import {InputNumberModule} from "primeng/inputnumber";
 
@@ -8,7 +9,8 @@ import {InputNumberModule} from "primeng/inputnumber";
   imports: [
     FormsModule,
     InputNumberModule,
-    SharedModule
+    SharedModule,
+    BalancedColorDirective,
   ],
   declarations: [
     OrderComponent

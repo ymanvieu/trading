@@ -1,6 +1,6 @@
 import {AuthenticationService} from '../authentication/authentication.service';
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {AppConstants} from "./app.constants";
 
@@ -14,12 +14,12 @@ export class LoginComponent implements OnInit {
   googleURL = AppConstants.GOOGLE_AUTH_URL;
   githubURL = AppConstants.GITHUB_AUTH_URL;
 
-  loginForm: FormGroup;
+  loginForm: UntypedFormGroup;
 
   hasError = false;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private authenticationService: AuthenticationService,
     private router: Router) {}
 

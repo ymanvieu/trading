@@ -9,7 +9,7 @@ trait BaseScenario {
   val AUTHORIZATION_HEADER = Map("Authorization" -> "Bearer ${accessToken}")
 
   var username = "gatling"
-  var password = "<insert password here>"
+  var password = "gatlinggatling"
 
   def login(): HttpRequestBuilder = {
     http(s"Login in as '${username}'")

@@ -1,0 +1,22 @@
+{
+  "suggestionTitleAccessor": "symbol",
+  "suggestionMeta": [
+    "symbol",
+    "name",
+    "exch",
+    "type",
+    "exchDisp",
+    "typeDisp"
+  ],
+  "hiConf": false,
+  "items": [
+    {
+      "symbol": "${symbol}",
+      "name": "${name}",
+      "exch": "NAS",
+      "type": "S",
+      "exchDisp": "NASDAQ",
+      "typeDisp": "Equity"
+    }
+  ]
+}

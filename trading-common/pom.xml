@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>fr.ymanvieu.trading</groupId>
 		<artifactId>trading</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -42,6 +42,8 @@
 		<dependency>
 			<groupId>com.querydsl</groupId>
 			<artifactId>querydsl-jpa</artifactId>
+			<version>${querydsl.version}</version>
+			<classifier>jakarta</classifier>
 		</dependency>
 
 		<!-- SpringBoot -->
@@ -56,6 +58,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${google-guava.version}</version>
 		</dependency>
 
 		<!-- Tests -->
@@ -99,6 +107,7 @@
 						<groupId>com.querydsl</groupId>
 						<artifactId>querydsl-apt</artifactId>
 						<version>${querydsl.version}</version>
+						<classifier>jakarta</classifier>
 					</dependency>
 				</dependencies>
 			</plugin>

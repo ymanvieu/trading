@@ -81,7 +81,9 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
         }
       },
       chart: {
-        zoomType: 'x',
+        zooming: {
+          type: 'x'
+        },
         backgroundColor: null,
       },
       navigator: {

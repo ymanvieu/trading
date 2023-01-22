@@ -1,11 +1,13 @@
-import { Symbol } from '../../symbol/model/symbol';
-
 export class Pair {
-    symbol: string;
-    name: string;
-    source: Symbol;
-    target: Symbol;
-    exchange: string;
-    providerCode: string;
-    lastUpdate: Date;
+  constructor(
+      public id: number,
+      public symbol: string,
+      public name: string,
+      public sourceCode: string,
+      public targetCode: string,
+      public exchange: string,
+      public providerCode: string,
+      public lastUpdate: Date) {
+  }
+
 }

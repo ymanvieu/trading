@@ -1,11 +1,18 @@
 {
     "admin": {
         "add": "Add",
-        "remove": "Remove",
+        "delete-pair": "Delete pair",
+        "delete-pair-symbol": "Delete pair/symbol",
+        "success": {
+            "add": "{{0}} ({{1}}) successfully added. Current rate: {{2}} {{3}} ({{4}})",
+            "delete": "{{0}} successfully deleted",
+            "update": "{{0}} ({{1}}) successfully updated"
+        },
         "search-placeholder": "ex: AAPL, Google",
         "title": "Admin",
         "error": {
-            "currency-already-exists": "Currency already exists: {{0}}"
+            "currency-already-exists": "Currency {{0}} already exists",
+            "already-exists-with-other-currency": "Symbol {{0}} already exists with currency {{1}}"
         }
     },
     "app.name": "Trading",

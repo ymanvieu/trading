@@ -20,11 +20,15 @@ import java.util.List;
 
 import fr.ymanvieu.trading.common.provider.LookupInfo;
 import fr.ymanvieu.trading.common.provider.UpdatedPair;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SearchResult {
 	
-	List<UpdatedPair> existingPairs;
-	List<LookupInfo> availableSymbols;
+	private List<UpdatedPair> existingPairs;
+	private List<LookupInfo> availableSymbols;
 }

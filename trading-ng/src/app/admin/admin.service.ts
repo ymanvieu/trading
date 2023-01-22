@@ -1,24 +1,30 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Pair } from './model/pair';
 import { SearchResult } from './model/search-result';
+import { PairInfo } from './model/pair-info';
 
 @Injectable({providedIn: 'root'})
 export class AdminService {
 
-  private readonly url = '/api/admin';
+  private static readonly ADMIN_URL = '/api/admin';
 
   constructor(private http: HttpClient) {}
 
   getSymbols(search?: string): Observable<SearchResult> {
-    return this.http.get<SearchResult>(this.url, {params: {code: search}});
+    return this.http.get<SearchResult>(AdminService.ADMIN_URL, {params: {code: search}});
   }
 
-  addSymbol(code: string, provider: string): Observable<any> {
-    return this.http.post(`${this.url}/${provider}/${code}`, {});
+  addPair(code: string, provider: string): Observable<PairInfo> {
+    return this.http.post<PairInfo>(`${AdminService.ADMIN_URL}/${provider}/${code}`, {});
   }
 
-  removeSymbol(symbol: string, provider: string): Observable<any> {
-    return this.http.delete(`${this.url}/${provider}/${symbol}`);
+  removePair(pairId: number, withSymbol: boolean): Observable<any> {
+    return this.http.delete(`${AdminService.ADMIN_URL}/${pairId}?withSymbol=${withSymbol}`);
+  }
+
+  updatePair(pair: Pair): Observable<PairInfo> {
+    return this.http.put<PairInfo>(`${AdminService.ADMIN_URL}`, pair);
   }
 }

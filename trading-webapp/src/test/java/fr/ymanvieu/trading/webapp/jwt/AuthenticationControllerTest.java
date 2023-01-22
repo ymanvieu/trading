@@ -15,9 +15,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import fr.ymanvieu.trading.common.user.UserService;
-import fr.ymanvieu.trading.webapp.config.RestTestConfig;
+import fr.ymanvieu.trading.test.config.RestTestConfig;
+import fr.ymanvieu.trading.test.config.WebSecurityTestConfig;
 import fr.ymanvieu.trading.webapp.config.TradingWebAppConfig;
-import fr.ymanvieu.trading.webapp.config.WebSecurityTestConfig;
 
 @WebMvcTest
 @Import({AuthenticationController.class})

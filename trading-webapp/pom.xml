@@ -3,24 +3,49 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>trading-webapp</artifactId>
-	<packaging>war</packaging>
+	<packaging>${packaging.type}</packaging>
 
 	<parent>
 		<groupId>fr.ymanvieu.trading</groupId>
 		<artifactId>trading</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 	</parent>
 
 	<properties>
-		<jjwt.version>0.11.2</jjwt.version>
+		<packaging.type>jar</packaging.type>
+
+		<apache-commons-text.version>1.10.0</apache-commons-text.version>
+		<testcontainers.version>1.17.5</testcontainers.version>
+		<test-scenario.version>0.0.3</test-scenario.version>
 	</properties>
 
 	<profiles>
 		<profile>
 			<id>prod-package</id>
+			<properties>
+				<packaging.type>war</packaging.type>
+			</properties>
 			<build>
 				<finalName>ROOT</finalName>
 			</build>
+			<dependencies>
+				<dependency>
+					<groupId>fr.ymanvieu.trading</groupId>
+					<artifactId>trading-data-collect</artifactId>
+					<version>${project.version}</version>
+					<exclusions>
+						<exclusion>
+							<groupId>org.apache.activemq</groupId>
+							<artifactId>artemis-jms-server</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-artemis</artifactId>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
 		</profile>
 		<profile>
 			<id>standalone</id>
@@ -34,6 +59,10 @@
 								<exclude>
 									<groupId>com.h2database</groupId>
 									<artifactId>h2</artifactId>
+								</exclude>
+								<exclude>
+									<groupId>org.testcontainers</groupId>
+									<artifactId>postgresql</artifactId>
 								</exclude>
 							</excludes>
 						</configuration>
@@ -49,17 +78,6 @@
 			<artifactId>trading-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-impl</artifactId>
-			<version>${jjwt.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>io.jsonwebtoken</groupId>
-		    <artifactId>jjwt-jackson</artifactId>
-		    <version>${jjwt.version}</version>
-		</dependency>
-		
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -85,6 +103,14 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+
 		<!-- SpringBoot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -103,18 +129,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jms</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>javax.jms-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-client</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-artemis</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -160,5 +182,64 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ymanvieu</groupId>
+			<artifactId>test-scenario</artifactId>
+			<version>${test-scenario.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>fr.ymanvieu.trading</groupId>
+			<artifactId>trading-data-collect</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>${apache-commons-text.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>de.skuzzle.enforcer</groupId>
+						<artifactId>restrict-imports-enforcer-rule</artifactId>
+						<version>2.0.0</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>check-scenario-imports</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<RestrictImports>
+									<reason>Scenarii are only dependent on given/when/then</reason>
+									<basePackages>
+										<!-- Every scenarii tests -->
+										<basePackage>fr.ymanvieu.**.scenario.**</basePackage>
+									</basePackages>
+									<bannedImport>fr.ymanvieu.trading.**</bannedImport>
+									<allowedImport>fr.ymanvieu.trading.**.scenario.**</allowedImport>
+
+									<!-- given/when/then and config excluded -->
+									<exclusion>fr.ymanvieu.**.scenario.framework.**</exclusion>
+								</RestrictImports>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

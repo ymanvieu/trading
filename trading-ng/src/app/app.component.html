@@ -7,7 +7,7 @@
 		</div>
 		<div class="header-nav" [clr-nav-level]="1">
 			<a routerLink="/portofolio" routerLinkActive="active" class="nav-link"><span class="nav-text">{{ 'portofolio.title' | translate }}</span></a>
-			<a routerLink="/admin" routerLinkActive="active" *ngxPermissionsOnly="['ADMIN']" class="nav-link"><span class="nav-text">{{ 'admin.title' | translate }}</span></a>
+			<a routerLink="/admin" routerLinkActive="active" *ngxPermissionsOnly="['ROLE_ADMIN']" class="nav-link"><span class="nav-text">{{ 'admin.title' | translate }}</span></a>
 		</div>
 		<div class="header-actions">
 			<ng-container *ngIf="login">

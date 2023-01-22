@@ -7,7 +7,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClient } from '@angular/common/http';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { PipesModule } from './shared/pipes/pipes.module';
-import { DirectivesModule } from './shared/directives/directives.module';
 
 @NgModule({
   imports: [
@@ -31,7 +30,6 @@ import { DirectivesModule } from './shared/directives/directives.module';
     NgxPermissionsModule,
     BrowserAnimationsModule,
     PipesModule,
-    DirectivesModule,
   ]
 })
 export class SharedModule { }

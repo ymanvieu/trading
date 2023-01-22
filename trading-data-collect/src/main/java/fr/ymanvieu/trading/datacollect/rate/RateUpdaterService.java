@@ -1,31 +1,19 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.datacollect.rate;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.common.base.Stopwatch;
 
 import fr.ymanvieu.trading.common.provider.Quote;
+import fr.ymanvieu.trading.common.provider.rate.LatestRateProvider;
 import fr.ymanvieu.trading.common.rate.RateService;
 import fr.ymanvieu.trading.common.rate.entity.LatestRate;
 import fr.ymanvieu.trading.common.rate.event.RatesUpdatedEvent;
@@ -37,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@Transactional
 public class RateUpdaterService {
 
 	@Autowired
@@ -54,6 +43,32 @@ public class RateUpdaterService {
 	@Autowired
 	private RateMapper rateMapper;
 
+	@Retryable
+	public void updateRates(LatestRateProvider provider) throws IOException {
+
+		String providerName = provider.getClass().getSimpleName();
+
+		log.debug("{}: Updating rates", providerName);
+
+		Stopwatch startWatch = Stopwatch.createStarted();
+
+		List<Quote> quotes = provider.getRates();
+
+		String downloadTimeFormatted =  startWatch.toString();
+
+		if (quotes == null || quotes.isEmpty()) {
+			log.info("{}: No rate to update", providerName);
+			return;
+		}
+
+		Stopwatch saveWatch = Stopwatch.createStarted();
+
+		updateRates(quotes);
+
+		log.debug("{}: Rates stored in {}", providerName, saveWatch);
+		log.info("{}: Update done in {} (download time: {})", providerName, startWatch, downloadTimeFormatted);
+	}
+
 	/**
 	 * Saves quotes only if they are newer than the existing corresponding rate
 	 * (same from/tocur), if any : <br>
@@ -64,12 +79,11 @@ public class RateUpdaterService {
 	 * 
 	 * @see RateService#addHistoricalRates(List)
 	 */
-	@Transactional
 	public void updateRates(List<Quote> quotes) {
 
 		List<Quote> quotesList = new ArrayList<>(quotes);
 
-		Collections.sort(quotesList, (o1, o2) -> o1.getTime().compareTo(o2.getTime()));
+		quotesList.sort(Comparator.comparing(Quote::getTime));
 
 		List<LatestRate> existingLatestRates = latestRepo.findAll();
 

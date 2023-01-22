@@ -1,9 +1,9 @@
-insert into symbols (code,name,country_flag,currency) values 
+insert into symbols (code,name,country_flag,currency) values
 ('EUR','Euro','eu',null),
 ('USD','US Dollar','us',null),
 ('BRE',null,null,null);
 
-INSERT INTO rates(DATE, FROMCUR, TOCUR, VALUE) VALUES
+INSERT INTO rates (DATE, FROMCUR, TOCUR, `VALUE`) VALUES
 (TIMESTAMP '2015-02-01 00:15:00.0', 'USD', 'EUR', 0.802),
 (TIMESTAMP '2015-02-01 23:59:10.0', 'USD', 'EUR', 0.9),
 

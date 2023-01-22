@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2017 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.provider.rate.yahoo;
 
 import static fr.ymanvieu.trading.common.util.StringUtils.format;
@@ -43,10 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class YahooStockProvider implements LatestRateProvider, HistoricalRateProvider {
 
-	private final RestTemplate rt = new RestTemplate();
+	@Autowired
+	private RestTemplate rt;
 
 	@Value("${provider.yahoo.url.latest}")
-	private String url;
+	private String urlLatest;
 
 	@Value("${provider.yahoo.url.history}")
 	private String urlHistory;
@@ -58,14 +43,14 @@ public class YahooStockProvider implements LatestRateProvider, HistoricalRatePro
 	public List<Quote> getRates() throws IOException {
 		List<Quote> rates = new ArrayList<>();
 
-		List<Pair> symbols = pairService.getAllFromProvider("YAHOO");
+		List<Pair> pairs = pairService.getAllFromProvider("YAHOO");
 
-		if (symbols.isEmpty()) {
-			log.trace("symbols list is empty");
+		if (pairs.isEmpty()) {
+			log.trace("pairs list is empty");
 			return rates;
 		}
 
-		YahooModel result = rt.getForObject(format(url, createPairsString(symbols)), YahooModel.class);
+		YahooModel result = rt.getForObject(format(urlLatest, createPairsString(pairs)), YahooModel.class);
 
 		return result.getQuoteResponse().getResult().stream()
 				.filter(r -> {
@@ -75,7 +60,7 @@ public class YahooStockProvider implements LatestRateProvider, HistoricalRatePro
 					}
 					return true;
 				})
-				.map(r -> new Quote(getSource(symbols, r.getSymbol()), getCurrency(symbols, r.getSymbol()),
+				.map(r -> new Quote(getSource(pairs, r.getSymbol()), getCurrency(pairs, r.getSymbol()),
 						BigDecimal.valueOf(r.getRegularMarketPrice()), toInstant(r.getRegularMarketTime())))
 				.collect(Collectors.toList());
 	}
@@ -86,7 +71,7 @@ public class YahooStockProvider implements LatestRateProvider, HistoricalRatePro
 
 	@Override
 	public Quote getLatestRate(String symbol) {
-		YahooModel result = rt.getForObject(format(url, symbol), YahooModel.class);
+		YahooModel result = rt.getForObject(format(urlLatest, symbol), YahooModel.class);
 
 		return result
 				.getQuoteResponse().getResult().stream().map(yf -> new Quote(yf.getSymbol(),
@@ -127,17 +112,19 @@ public class YahooStockProvider implements LatestRateProvider, HistoricalRatePro
 
 		Iterator<Long> itTimestamps = result.getTimestamp().iterator();
 		Iterator<Double> itOpens = result.getIndicators().getQuote().get(0).getOpen().iterator();
-		// Iterator<Double> itCloses = result.getIndicators().getQuote().get(0).getClose().iterator();
 
 		rates.add(new Quote(symbol, currency, BigDecimal.valueOf(itOpens.next()), firstTradeDate));
 
 		// skip first date (uses Result.Meta.FistTradeDate)
 		itTimestamps.next();
 
-		while (itTimestamps.hasNext()
-				&& itOpens.hasNext() /* && itCloses.hasNext() */) {
-			rates.add(new Quote(symbol, currency, BigDecimal.valueOf(itOpens.next()),
-					toInstant(itTimestamps.next())));
+		while (itTimestamps.hasNext() && itOpens.hasNext()) {
+			var price = itOpens.next();
+			var time = itTimestamps.next();
+
+			if (price != null && time != null) {
+				rates.add(new Quote(symbol, currency, BigDecimal.valueOf(price), toInstant(time)));
+			}
 		}
 
 		return rates;

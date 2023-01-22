@@ -1,12 +1,12 @@
 <clr-alert *ngIf="!!message" (clrAlertClosedChange)="resetMessage()"><clr-alert-item><span class="alert-text">{{message}}</span></clr-alert-item></clr-alert>
 <clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="resetError()"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
 
-<form class="clr-form clr-form-compact" [formGroup]="formGroup">
+<form class="clr-form clr-form-compact" [formGroup]="searchFormGroup">
 	<div class="clr-form-control">
 			<div class="clr-input-wrapper">
 				<cds-icon shape="search"></cds-icon>
 				<input class="clr-input" type="text" name="code" formControlName="searchCode" placeholder="{{ 'admin.search-placeholder' | translate }}"/>
-				<button class ="btn btn-link btn-icon delete-button"><cds-icon shape="times" *ngIf="searchCode" (click)="searchCode = null"></cds-icon></button>
+				<button class ="btn btn-link btn-icon delete-button"><cds-icon shape="times" *ngIf="searchCode" (click)="resetSearchCode()"></cds-icon></button>
 			</div>
 	</div>
 </form>
@@ -20,7 +20,7 @@
 	<clr-dg-column class="clr-hidden-sm-down" [clrDgSortBy]="'lastUpdate'">{{ 'pair.lastUpdate' | translate }}</clr-dg-column>
 	<clr-dg-column></clr-dg-column>
 
-	<clr-dg-row *clrDgItems="let r of result">
+	<clr-dg-row *clrDgItems="let r of result | searchResultToResult">
 		<clr-dg-cell>{{r.name}}</clr-dg-cell>
 		<clr-dg-cell>{{r.code}}</clr-dg-cell>
 		<clr-dg-cell class="clr-hidden-xs-down">{{r.exchange}}</clr-dg-cell>
@@ -30,7 +30,7 @@
 		<clr-dg-cell>
 			<div class="btn-group">
 				<button *ngIf="r.type" type="button" class="btn btn-success" (click)="add(r.code, r.providerCode)">{{ 'admin.add' | translate }}</button>
-				<button *ngIf="!r.type" type="button" class="btn btn-danger" (click)="remove(r.code, r.providerCode)">{{ 'admin.remove' | translate }}</button>
+				<app-actions-pair *ngIf="!r.type" [pair]="getPairFromResult(r.id)" (removeConfirmed)="remove(getPairFromResult(r.id), $event)" (updateConfirmed)="update($event)"></app-actions-pair>
 			</div>
 		</clr-dg-cell>
 	</clr-dg-row>
@@ -41,4 +41,4 @@
 			{{ 'pagination.text' | translate: {first: pagination.firstItem + 1, last: pagination.lastItem + 1, total: pagination.totalItems} }}
 		</clr-dg-pagination>
 	</clr-dg-footer>
-</clr-datagrid>	
+</clr-datagrid>

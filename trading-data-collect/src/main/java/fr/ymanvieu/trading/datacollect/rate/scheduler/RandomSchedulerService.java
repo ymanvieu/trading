@@ -33,39 +33,32 @@ import org.springframework.stereotype.Service;
 
 import fr.ymanvieu.trading.common.provider.Quote;
 import fr.ymanvieu.trading.common.provider.rate.LatestRateProvider;
+import fr.ymanvieu.trading.datacollect.rate.RateUpdaterService;
 
 /**
  * Fake data provider to simulate real-time data updates.
  */
 @Service
 @ConditionalOnProperty(name = "trading.scheduler.type", havingValue = "random")
-public class RandomSchedulerService extends FixedRateSchedulerService implements LatestRateProvider {
+public class RandomSchedulerService implements LatestRateProvider {
 
 	private static final Random RANDOM = new Random();
-	
+
 	@Autowired
-	private FixedRateSchedulerService service;
+	private RateUpdaterService dataUpdater;
 
 	@Scheduled(fixedRate = 5000)
 	public void updateRates() throws IOException {
-		service.updateRates(this);
+		dataUpdater.updateRates(this);
 	}
 
 	@Override
-	public void updateForex() throws IOException {
-	}
-
-	@Override
-	public void updateStock() throws IOException {
-	}
-	
-	@Override
-	public Quote getLatestRate(String code) throws IOException {
+	public Quote getLatestRate(String code) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public List<Quote> getRates() throws IOException {
+	public List<Quote> getRates() {
 		Quote usdeur = new Quote(USD, EUR, BigDecimal.valueOf(RANDOM.nextDouble()), Instant.now());
 		Quote breusd = new Quote("BZ=F", USD, BigDecimal.valueOf(10 * RANDOM.nextDouble() + 30), Instant.now());
 
