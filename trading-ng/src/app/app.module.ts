@@ -1,11 +1,10 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { angleIcon, loginIcon, searchIcon, starIcon, timesIcon } from '@cds/core/icon';
+import { angleIcon, loginIcon, searchIcon, starIcon, timesIcon, pencilIcon } from '@cds/core/icon';
 import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
 import { ProtectedGuard, PublicGuard } from 'ngx-auth';
 import { AdminComponent } from './admin/admin.component';
-import { AdminModule } from './admin/admin.module';
 import { appStompConfig } from './app-stomp.config';
 import { AppComponent } from './app.component';
 import { AuthenticationModule } from './authentication/authentication.module';
@@ -29,7 +28,7 @@ import {LoginGuard} from "./login/login.guard";
 import { ClarityIcons } from '@cds/core/icon';
 import '@cds/core/icon/register.js';
 
-ClarityIcons.addIcons(starIcon, loginIcon, angleIcon, timesIcon, searchIcon);
+ClarityIcons.addIcons(starIcon, loginIcon, angleIcon, timesIcon, searchIcon, pencilIcon);
 
 const routes: Routes = [
   {path: '', redirectTo: 'latest', pathMatch: 'full'},
@@ -53,9 +52,9 @@ const routes: Routes = [
       LatestListModule,
       PortofolioModule,
       AuthenticationModule,
-      RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' }),
+      RouterModule.forRoot(routes, {}),
       ChartRateModule,
-      AdminModule,
+      AdminComponent,
       SignupModule,
       NgxPermissionsModule.forRoot(),
       ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })

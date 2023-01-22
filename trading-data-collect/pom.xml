@@ -3,17 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>trading-data-collect</artifactId>
-	<packaging>${packaging.type}</packaging>
 
 	<parent>
 		<groupId>fr.ymanvieu.trading</groupId>
 		<artifactId>trading</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 	</parent>
-
-	<properties>
-		<packaging.type>jar</packaging.type>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -47,9 +42,18 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-activemq</artifactId>
+			<artifactId>spring-boot-starter-artemis</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>artemis-jms-server</artifactId>
+			<version>${artemis.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.jms</groupId>
+			<artifactId>jakarta.jms-api</artifactId>
+		</dependency>
+
 		<dependency>
 		    <groupId>org.springframework.retry</groupId>
 		    <artifactId>spring-retry</artifactId>
@@ -92,9 +96,24 @@
 	<profiles>
 		<profile>
 			<id>prod-package</id>
-			<properties>
-				<packaging.type>war</packaging.type>
-			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>war</goal>
+								</goals>
+								<configuration>
+									<primaryArtifact>false</primaryArtifact>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>standalone</id>

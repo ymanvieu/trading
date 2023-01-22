@@ -16,7 +16,6 @@ import fr.ymanvieu.trading.common.user.UserProvider;
 import fr.ymanvieu.trading.common.user.UserService;
 import fr.ymanvieu.trading.common.user.entity.UserEntity;
 import fr.ymanvieu.trading.common.user.repository.UserRepository;
-import fr.ymanvieu.trading.webapp.oauth2.SignUpRequest;
 import fr.ymanvieu.trading.webapp.oauth2.exception.OAuth2AuthenticationProcessingException;
 import fr.ymanvieu.trading.webapp.oauth2.user.LocalUser;
 import fr.ymanvieu.trading.webapp.oauth2.user.OAuth2UserInfo;
@@ -50,9 +49,9 @@ public class RegistrationService {
 
 	public LocalUser processUserRegistration(String registrationId, Map<String, Object> attributes, OidcIdToken idToken, OidcUserInfo userInfo) {
 		OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, attributes);
-		if (StringUtils.isEmpty(oAuth2UserInfo.getName())) {
+		if (!StringUtils.hasText(oAuth2UserInfo.getName())) {
 			throw new OAuth2AuthenticationProcessingException("Name not found from OAuth2 provider");
-		} else if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
+		} else if (!StringUtils.hasText(oAuth2UserInfo.getEmail())) {
 			throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
 		}
 		SignUpRequest signUpRequest = toUserRegistrationObject(registrationId, oAuth2UserInfo);

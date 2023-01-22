@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../authentication';
 import { Captcha } from 'primeng/captcha';
@@ -24,13 +24,13 @@ export class SignupComponent implements OnInit {
   private recaptchaComponent: Captcha;
   recaptcha: any;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   private recaptchaResponse: string;
   error: string;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private authenticationService: AuthenticationService,
     private router: Router) {}
 

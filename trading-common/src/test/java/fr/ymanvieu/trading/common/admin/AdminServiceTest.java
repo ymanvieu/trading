@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.admin;
 
 import static fr.ymanvieu.trading.common.rate.entity.QHistoricalRate.historicalRate;
@@ -27,16 +11,16 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
+import fr.ymanvieu.trading.common.portofolio.PortofolioService;
 import fr.ymanvieu.trading.common.provider.LookupDetails;
 import fr.ymanvieu.trading.common.provider.LookupInfo;
 import fr.ymanvieu.trading.common.provider.LookupService;
@@ -46,15 +30,17 @@ import fr.ymanvieu.trading.common.provider.PairService;
 import fr.ymanvieu.trading.common.provider.ProviderType;
 import fr.ymanvieu.trading.common.provider.Quote;
 import fr.ymanvieu.trading.common.provider.RateProviderService;
+import fr.ymanvieu.trading.common.provider.mapper.PairMapperImpl;
 import fr.ymanvieu.trading.common.provider.rate.HistoricalRateProvider;
 import fr.ymanvieu.trading.common.provider.rate.LatestRateProvider;
 import fr.ymanvieu.trading.common.rate.RateService;
 import fr.ymanvieu.trading.common.rate.entity.HistoricalRate;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
+import fr.ymanvieu.trading.common.symbol.SymbolService;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-@Transactional
+@DataJpaTest
+@ComponentScan(basePackageClasses = {AdminService.class, SymbolService.class, RateService.class, PortofolioService.class})
+@Import({PairService.class, PairMapperImpl.class})
 public class AdminServiceTest {
 
 	@Autowired
@@ -102,7 +88,7 @@ public class AdminServiceTest {
 		when(lrp.getLatestRate(symbol)).thenReturn(latestQuote);
 
 		// when
-		SymbolInfo result = adminService.add(symbol, provider);
+		PairInfo result = adminService.add(symbol, provider);
 
 		// then
 		Pair pairResult = pairService.getForCodeAndProvider(symbol, provider);
@@ -143,7 +129,7 @@ public class AdminServiceTest {
 		when(lrp.getLatestRate(symbol)).thenReturn(latestQuote);
 
 		// when
-		SymbolInfo result = adminService.add(symbol, provider);
+		PairInfo result = adminService.add(symbol, provider);
 
 		// then
 		Pair pairResult = pairService.getForCodeAndProvider(symbol, provider);
@@ -217,7 +203,7 @@ public class AdminServiceTest {
 		String providerCode = "RR.L";
 
 		// when
-		adminService.delete(providerCode, "YAHOO");
+		adminService.delete(-2, true);
 
 		// then
 		assertThat(pairService.getForCodeAndProvider(providerCode, "YAHOO")).isNull();

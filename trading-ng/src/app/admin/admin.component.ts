@@ -1,57 +1,56 @@
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ClarityModule } from '@clr/angular';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
+import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { PortofolioService } from '../portofolio';
+import { ActionsPairComponent } from './actions-pair/actions-pair.component';
 import { AdminService } from './admin.service';
 import { Pair } from './model/pair';
-import { TranslateService } from '@ngx-translate/core';
-import { debounceTime, tap, switchMap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import { SearchResult } from './model/search-result';
-
-class Result {
-
-  static create(pair: Pair): Result {
-      return new Result(pair.symbol, pair.name, pair.exchange, null, pair.providerCode, pair.lastUpdate);
-  }
-
-  constructor(
-    public code: string,
-    public name: string,
-    public exchange: string,
-    public type: string,
-    public providerCode: string,
-    public lastUpdate?: Date) {}
-}
+import { SearchResultToResultPipe } from './search-result-to-result.pipe';
 
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.scss']
+  styleUrls: ['./admin.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    ClarityModule,
+    TranslateModule,
+    SearchResultToResultPipe,
+    ActionsPairComponent
+  ],
+  providers: [
+    DatePipe
+  ],
 })
 export class AdminComponent implements OnInit {
 
-  result: Result[];
+  result: SearchResult;
 
   message: string;
   error: string;
 
-  formGroup: FormGroup;
+  searchFormGroup = new FormGroup({
+    searchCode: new FormControl('')
+  });
 
   constructor(
-    private formBuilder: FormBuilder,
     private adminService: AdminService,
     private portofolioService: PortofolioService,
-    private translateService: TranslateService) { }
+    private translateService: TranslateService,
+    private datePipe: DatePipe) { }
 
   ngOnInit() {
 
-    this.formGroup = this.formBuilder.group({
-      searchCode: ['']
-    });
-
     this.updateTable();
 
-    this.formGroup.get('searchCode').valueChanges
+    this.searchFormGroup.get('searchCode').valueChanges
       .pipe(
         debounceTime(100),
         switchMap(code => this.updateSearchResult(code)))
@@ -61,24 +60,28 @@ export class AdminComponent implements OnInit {
   }
 
   private updateTable(): void {
-    this.updateSearchResult(this.formGroup.get('searchCode').value).subscribe();
+    this.updateSearchResult(this.searchCode).subscribe();
   }
 
   private updateSearchResult(searchCode: string): Observable<SearchResult> {
     return this.adminService.getSymbols(searchCode)
     .pipe(
       tap(result => {
-        this.result = [...result.existingPairs.map(i => Result.create(i)), ...result.availableSymbols ];
+        this.result = result;
       })
     );
   }
 
-  get searchCode() {
-    return this.formGroup.get('searchCode').value;
+  getPairFromResult(id: number): Pair {
+    return this.result.existingPairs.find(p => p.id === id);
   }
 
-  set searchCode(searchCode: string) {
-    this.formGroup.get('searchCode').setValue('');
+  get searchCode() {
+    return this.searchFormGroup.value.searchCode;
+  }
+
+  resetSearchCode() {
+    this.searchFormGroup.get('searchCode').setValue('');
   }
 
   resetMessage() {
@@ -92,9 +95,10 @@ export class AdminComponent implements OnInit {
   add(symbol: string, providerCode: string) {
     this.resetError();
 
-    this.adminService.addSymbol(symbol, providerCode)
-    .subscribe(resp => {
-      this.message = resp.message;
+    this.adminService.addPair(symbol, providerCode)
+    .subscribe(pi => {
+      const formattedDate = this.datePipe.transform(pi.quote.time, 'dd/MM/yy HH:mm:ss')
+      this.message = this.translateService.instant('admin.success.add', [pi.name, pi.code, pi.quote.price, pi.quote.currency, formattedDate]);
       this.updateTable();
       this.portofolioService.refreshAvailableSymbols();
     }, error => {
@@ -102,16 +106,29 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  remove(symbol: string, providerCode: string) {
+  remove(pair: Pair, withSymbol: boolean) {
     this.resetError();
 
-    this.adminService.removeSymbol(symbol, providerCode)
-    .subscribe(resp => {
-      this.message = resp.message;
+    this.adminService.removePair(pair.id, withSymbol)
+    .subscribe(() => {
+      this.message = this.translateService.instant('admin.success.delete', [pair.symbol]);
       this.updateTable();
-      this.portofolioService.refreshAvailableSymbols();
+      this.portofolioService.refreshPortofolioAndAvailableSymbols()
     }, error => {
       this.error = this.translateService.instant(error.error.message, error.error.args);
     });
+  }
+
+  update(pair: Pair) {
+    this.resetError();
+
+    this.adminService.updatePair(pair)
+        .subscribe(pi => {
+          this.message = this.translateService.instant('admin.success.update', [pi.name, pi.code]);
+          this.updateTable();
+          this.portofolioService.refreshPortofolioAndAvailableSymbols();
+        }, error => {
+          this.error = this.translateService.instant(error.error.message, error.error.args);
+        });
   }
 }

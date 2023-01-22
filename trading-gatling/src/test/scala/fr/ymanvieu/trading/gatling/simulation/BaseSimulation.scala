@@ -5,5 +5,5 @@ import io.gatling.http.Predef._
 
 class BaseSimulation extends Simulation {
 
-  val httpProtocol = http.baseUrl("http://localhost:8000").enableHttp2
+  val httpProtocol = http.baseUrl("http://localhost:8000")
 }

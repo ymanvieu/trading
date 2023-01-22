@@ -1,29 +1,9 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.webapp.recaptcha;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -31,20 +11,20 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import fr.ymanvieu.trading.webapp.config.RecaptchaProperties;
 import fr.ymanvieu.trading.webapp.recaptcha.exception.RecaptchaException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @ConditionalOnBean(RecaptchaProperties.class)
 @Service
+@Slf4j
 public class RecaptchaService {
 
-	private static final Logger log = LoggerFactory.getLogger(RecaptchaService.class);
-
-	@ToString(includeFieldNames = true)
+	@ToString
 	private static class RecaptchaResponse {
 		@JsonProperty("success")
 		private boolean success;
@@ -52,7 +32,8 @@ public class RecaptchaService {
 		private Collection<String> errorCodes;
 	}
 
-	private RestTemplate restTemplate = new RestTemplate();
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Autowired
 	private RecaptchaProperties recaptchaProperties;
@@ -77,7 +58,7 @@ public class RecaptchaService {
 			throw new RecaptchaException("Recaptcha API exception", e);
 		}
 
-		if (recaptchaResponse.success) {
+		if (recaptchaResponse != null && recaptchaResponse.success) {
 			return true;
 		}
 

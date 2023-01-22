@@ -96,7 +96,7 @@ export class AuthenticationService implements AuthService {
       try {
         const tokenInfo : any = jwt_decode(token);
         this.setUser(tokenInfo.username);
-        this.permissionsService.loadPermissions([tokenInfo.roles]);
+        this.permissionsService.loadPermissions(tokenInfo.scope.split(' '));
       } catch (error) {
         console.error(error);
         this.setUser(null);

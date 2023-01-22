@@ -19,28 +19,29 @@ INSERT INTO PAIR (symbol,name,source,target,exchange,provider_code) VALUES
 ('FAKE','Fake data','FAKE','EUR',null,'YAHOO');
 
 
-insert into users (id,username,password) values 
+insert into users (id,username,password,provider) values
 -- admin/password
-(0,'admin','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG'),
+(0,'admin','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG','local'),
 -- user/password
-(1,'user','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG');
+(-1,'user','$2a$10$yCmLcG1BJWWBs64M5GTqq.COJg8opwFiE.49L1hZ/GV2bB40UEalG','local');
 
-insert into authorities (username,authority) values 
-('admin', 'ADMIN'),
-('user', 'USER');
+insert into authorities (user_id,authority) values
+(0, 'ROLE_USER'),
+(0, 'ROLE_ADMIN'),
+(-1, 'ROLE_USER');
 
-insert into portofolio (id,user_id,base_currency_code,amount,version) values 
+insert into portofolio (id,user_id,base_currency_code,amount,version) values
 (0,0,'EUR',18500,'0'),
-(1,1,'EUR',100000,'0');
+(-1,-1,'EUR',100000,'0');
 
 insert into assets (id,portofolio_id,symbol_code,quantity,currency_code,currency_amount,version) values 
-(1,0,'USD',10000,'EUR',8821.06,'0'),
-(2,0,'GBP',5000,'EUR',5000,'0'),
-(3,0,'UBI',50,'EUR',3000,'0'),
-(4,0,'GFT',100,'EUR',700,'0');
+(-1,0,'USD',10000,'EUR',8821.06,'0'),
+(-2,0,'GBP',5000,'EUR',5000,'0'),
+(-3,0,'UBI',50,'EUR',3000,'0'),
+(-4,0,'GFT',100,'EUR',700,'0');
 
 
-INSERT INTO LATESTRATES(DATE,FROMCUR,TOCUR,VALUE) VALUES 
+INSERT INTO LATESTRATES(DATE,FROMCUR,TOCUR,`VALUE`) VALUES 
 ('2016-04-04 13:08:00.0','GFT','EUR',7.45),
 ('2016-04-04 13:08:00.0','UBI','EUR',27.860001),
 ('2016-04-12 00:00:00.0','BZ=F','USD',42.7),
@@ -50,7 +51,7 @@ INSERT INTO LATESTRATES(DATE,FROMCUR,TOCUR,VALUE) VALUES
 ('2017-12-07 16:35:28.0','BTC','USD', 16949),
 ('2017-12-07 16:35:28.0','FAKE','EUR', 1);
 
-INSERT INTO RATES(DATE,FROMCUR,TOCUR,VALUE) VALUES 
+INSERT INTO RATES(DATE,FROMCUR,TOCUR,`VALUE`) VALUES 
 ('2016-04-04 13:08:00.0','GFT','EUR',7.45),
 ('2016-04-04 13:08:00.0','UBI','EUR',27.860001),
 ('2016-04-12 00:00:00.0','BZ=F','USD',42.7),

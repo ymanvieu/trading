@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.rate;
 
 import static fr.ymanvieu.trading.common.rate.entity.QHistoricalRate.historicalRate;
@@ -29,16 +13,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.google.common.base.Preconditions;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
+import fr.ymanvieu.trading.common.provider.Pair;
 import fr.ymanvieu.trading.common.provider.Quote;
 import fr.ymanvieu.trading.common.rate.entity.HistoricalRate;
 import fr.ymanvieu.trading.common.rate.entity.LatestRate;
 import fr.ymanvieu.trading.common.rate.mapper.RateMapper;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
 import fr.ymanvieu.trading.common.rate.repository.LatestRateRepository;
+import fr.ymanvieu.trading.common.symbol.Symbol;
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.common.symbol.repository.SymbolRepository;
 import fr.ymanvieu.trading.common.symbol.util.CurrencyUtils;
@@ -46,7 +31,7 @@ import fr.ymanvieu.trading.common.util.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @Slf4j
 public class RateService {
 
@@ -96,6 +81,10 @@ public class RateService {
 		final BigDecimal rate;
 		final SymbolEntity symbolFromcur;
 		final SymbolEntity symbolTocur;
+
+		if (BASE_CURRENCY.equals(tocur) && lrBaseCurrencyFromcur == null) {
+			return null;
+		}
 
 		Instant rateDate = lrBaseCurrencyFromcur.getDate();
 
@@ -164,7 +153,6 @@ public class RateService {
 		return result;
 	}
 
-	@Transactional
 	public void addHistoricalRates(List<Quote> quotes) {
 
 		List<HistoricalRate> ratesToAdd = new ArrayList<>();
@@ -186,5 +174,15 @@ public class RateService {
 		historicalRateRepository.saveAll(ratesToAdd);
 
 		log.debug("{} saved", ratesToAdd.size());
+	}
+
+	public void deleteRates(String symbolCode, String currencyCode) {
+		historicalRateRepository.deleteAllByFromcurCodeAndTocurCode(symbolCode, currencyCode);
+		latestRateRepository.deleteByFromcurCodeAndTocurCode(symbolCode, currencyCode);
+	}
+
+	public void updateRates(Pair oldPair, Symbol newSymbol) {
+		latestRateRepository.update(oldPair, newSymbol);
+		historicalRateRepository.updateAll(oldPair, newSymbol);
 	}
 }

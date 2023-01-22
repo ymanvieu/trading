@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.provider;
 
 import java.util.List;
@@ -47,14 +31,11 @@ public class PairService {
 		return pairMapper.mapToPair(pe);
 	}
 
-	public void remove(String symbol, String providerCode) {
-		var pe = pairRepo.findBySymbolAndProviderCode(symbol, providerCode);
-		
-		if(pe == null) {
-			throw PairException.notFound(symbol, providerCode);
-		}
+	public Pair remove(Integer pairId) {
+		var pe = pairRepo.findById(pairId).orElseThrow(() -> PairException.notFound(pairId));
 		
 		pairRepo.delete(pe);
+		return pairMapper.mapToPair(pe);
 	}
 
 	public List<UpdatedPair> getAllWithSymbolOrNameContaining(String symbolOrName) {
@@ -68,4 +49,12 @@ public class PairService {
 	public List<UpdatedPair> getAll() {
 		return pairRepo.findAllUpdatedPair();
 	}
+
+	public Pair getForId(Integer pairId) {
+		return pairRepo.findById(pairId).map(pairMapper::mapToPair).orElse(null);
+	}
+
+    public boolean existsAsSource(String symbolCode) {
+		return pairRepo.existsBySourceCode(symbolCode);
+    }
 }

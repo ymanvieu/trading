@@ -1,0 +1,42 @@
+<clr-modal [(clrModalOpen)]="opened" [clrModalStaticBackdrop]="false">
+
+  <h5 class="modal-title">
+    {{pair.name}}
+  </h5>
+
+  <div class="modal-body">
+    <form clrForm class="clr-form" clrLayout="vertical" [formGroup]="pairForm">
+      <clr-input-container>
+        <label>Code</label>
+        <input clrInput formControlName="symbol" />
+      </clr-input-container>
+      <clr-input-container>
+        <label>Name</label>
+        <input clrInput formControlName="name" />
+      </clr-input-container>
+      <clr-input-container>
+        <label>Symbol code</label>
+        <input clrInput formControlName="sourceCode" />
+      </clr-input-container>
+      <p></p>
+    </form>
+    <div class="btn-group btn-primary">
+      <button class="btn" [ngClass]="this.pairForm.pristine ? 'disabled' : ''" (click)="update()">Update</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-danger" (click)="delete(false)">{{ 'admin.delete-pair' | translate }}</button>
+      &nbsp;
+      <clr-dropdown>
+        <button class="btn btn-danger" clrDropdownTrigger>{{ 'admin.delete-pair-symbol' | translate }}</button>
+        <clr-dropdown-menu *clrIfOpen>
+          <button class="btn" (click)="delete(true)">Confirm</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+  </div>
+  <div class="modal-footer">
+  </div>
+</clr-modal>
+
+<button class="btn btn-primary" (click)="open()"><cds-icon shape="pencil"></cds-icon></button>

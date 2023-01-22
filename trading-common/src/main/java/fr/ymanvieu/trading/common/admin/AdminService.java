@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.admin;
 
 import java.io.IOException;
@@ -24,10 +8,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
+import fr.ymanvieu.trading.common.portofolio.PortofolioService;
+import fr.ymanvieu.trading.common.portofolio.repository.AssetRepository;
 import fr.ymanvieu.trading.common.provider.LookupDetails;
 import fr.ymanvieu.trading.common.provider.LookupInfo;
 import fr.ymanvieu.trading.common.provider.LookupService;
@@ -53,21 +38,71 @@ public class AdminService {
 
 	@Autowired
 	private SymbolService symbolService;
-	
+
 	@Autowired
 	private PairService pairService;
-	
+
 	@Autowired
 	private RateService rateService;
-	
+
 	@Autowired
 	private RateProviderService rateProviderService;
-	
+
 	@Autowired
 	private LookupService lookupService;
 
-	public SymbolInfo add(String code, String provider) throws IOException {
+	@Autowired
+	private AssetRepository assetRepository;
+
+	@Autowired
+	private PortofolioService portofolioService;
+
+	public PairInfo add(String code, String provider) throws IOException {
 		Stopwatch sw = Stopwatch.createStarted();
+
+		var pair = createPair(code, provider);
+
+		final LatestRateProvider rProvider = rateProviderService.getLatestProvider(ProviderType.STOCK);
+
+		Quote latestQuote = rProvider.getLatestRate(code);
+
+		if (latestQuote == null) {
+			throw SymbolException.UNAVAILABLE(code);
+		}
+
+		// TODO immutability ! copy data
+		latestQuote.setCode(pair.getSource().getCode());
+		latestQuote.setCurrency(pair.getTarget().getCode());
+
+		List<Quote> historicalQuotes = new ArrayList<>();
+
+		final HistoricalRateProvider hRProvider = rateProviderService.getHistoricalProvider(ProviderType.STOCK);
+
+		try {
+			historicalQuotes.addAll(hRProvider.getHistoricalRates(code));
+		} catch (IOException | RuntimeException e) {
+			// generally, if provider cannot get historical data, it throws exception
+			log.warn("Cannot get historical data for: {} (provider: {})", code, provider, e);
+		}
+
+		for (Quote q : historicalQuotes) {
+			q.setCode(pair.getSource().getCode());
+			q.setCurrency(pair.getTarget().getCode());
+		}
+
+		historicalQuotes.removeIf(q -> q.getTime().compareTo(latestQuote.getTime()) == 0);
+
+		historicalQuotes.add(latestQuote);
+
+		rateService.addHistoricalRates(historicalQuotes);
+		rateService.addLatestRate(latestQuote);
+
+		log.info("{} created in: {}", pair, sw);
+
+		return new PairInfo(pair.getId(), pair.getSymbol(), pair.getName(), latestQuote);
+	}
+
+	private Pair createPair(String code, String provider) throws IOException {
 
 		Pair pair = pairService.getForCodeAndProvider(code, provider);
 
@@ -83,70 +118,46 @@ public class AdminService {
 		String exchange = details.getExchange();
 
 		// check if currency exists
-		if (!symbolService.getForCodeWithNoCurrency(currency).isPresent()) {
+		if (symbolService.getForCodeWithNoCurrency(currency).isEmpty()) {
 			throw PairException.currencyNotFound(currency);
 		}
 
-		Optional<Symbol> sourceSymbol = symbolService.getForCode(source);
+		Optional<Symbol> existingSourceSymbol = symbolService.getForCode(source);
 
-		if(sourceSymbol.isPresent()) {
-			if(sourceSymbol.get().getCurrency() == null) {
+		if(existingSourceSymbol.isPresent()) {
+			if(existingSourceSymbol.get().getCurrency() == null) {
 				throw AdminException.currencyAlreadyExists(source);
+			} else if (!existingSourceSymbol.get().getCurrency().getCode().equals(currency)) {
+				throw AdminException.alreadyExistsWithOtherCurrency(source, existingSourceSymbol.get().getCurrency().getCode());
 			}
 		} else {
 			symbolService.addSymbol(source, name, null, currency);
 		}
 
-		pair = pairService.create(code, name, source, currency, exchange, provider);
-
-		final LatestRateProvider rProvider = rateProviderService.getLatestProvider(ProviderType.STOCK);
-
-		Quote latestQuote = rProvider.getLatestRate(code);
-
-		if (latestQuote == null) {
-			throw SymbolException.UNAVAILABLE(code);
-		}
-
-		// TODO immutability ! copy data
-		latestQuote.setCode(source);
-		latestQuote.setCurrency(currency);
-
-		List<Quote> historicalQuotes = new ArrayList<>();
-
-		final HistoricalRateProvider hRProvider = rateProviderService.getHistoricalProvider(ProviderType.STOCK);
-
-		try {
-			historicalQuotes.addAll(hRProvider.getHistoricalRates(code));
-		} catch (IOException | RuntimeException e) {
-			// generally, if provider cannot get historical data, it throws exception
-			log.warn("Cannot get historical data for: {} (provider: {})", code, provider);
-		}
-
-		for (Quote q : historicalQuotes) {
-			q.setCode(source);
-			q.setCurrency(currency);
-		}
-
-		historicalQuotes.removeIf(q -> q.getTime().compareTo(latestQuote.getTime()) == 0);
-		
-		historicalQuotes.add(latestQuote);
-
-		rateService.addHistoricalRates(historicalQuotes);
-		rateService.addLatestRate(latestQuote);
-
-		log.info("{} created in: {}", pair, sw);
-
-		return new SymbolInfo(pair.getSymbol(), pair.getName(), !historicalQuotes.isEmpty(), latestQuote);
+		return pairService.create(code, name, source, currency, exchange, provider);
 	}
 
-	public void delete(String code, String provider) {
+	public void delete(Integer pairId, boolean withSymbol) {
 		Stopwatch sw = Stopwatch.createStarted();
 
-		pairService.remove(code, provider);
+		var deletedPair = pairService.remove(pairId);
 
-		log.info("Pair [symbol: {}, provider: {}] deleted in: {}", code, provider, sw);
+        if (withSymbol) {
+            assetRepository.findAllBySymbolCodeAndCurrencyCode(deletedPair.getSource().getCode(), deletedPair.getTarget().getCode())
+                .forEach(asset -> {
+                    portofolioService.sell(asset.getPortofolio().getUser().getId(), asset.getSymbol().getCode(), asset.getQuantity().doubleValue());
+                });
+
+            rateService.deleteRates(deletedPair.getSource().getCode(), deletedPair.getTarget().getCode());
+
+			if (!pairService.existsAsSource(deletedPair.getSource().getCode())) {
+				symbolService.delete(deletedPair.getSource().getCode());
+			}
+        }
+
+		log.info("Pair [symbol: {}, provider: {}] deleted in: {}", deletedPair.getSymbol(), deletedPair.getProviderCode(), sw);
 	}
-	
+
 	public SearchResult search(String symbolOrName) throws IOException {
 		final List<UpdatedPair> existingSymbols;
 		final List<LookupInfo> availableSymbols;
@@ -159,11 +170,33 @@ public class AdminService {
 			availableSymbols = lookupService.search(symbolOrName);
 			removeDuplicates(availableSymbols, existingSymbols);
 		}
-		
+
 		return new SearchResult(existingSymbols, availableSymbols);
 	}
 
 	private void removeDuplicates(List<LookupInfo> availableSymbols, List<UpdatedPair> existingSymbols) {
-		availableSymbols.removeIf(as -> existingSymbols.stream().map(s -> s.getSymbol()).anyMatch(s -> s.equals(as.getCode())));
+		availableSymbols.removeIf(as -> existingSymbols.stream().map(UpdatedPair::getSymbol).anyMatch(s -> s.equals(as.getCode())));
+	}
+
+	public PairInfo update(UpdatedPair pair, Long connectedUserId) throws IOException {
+		Stopwatch sw = Stopwatch.createStarted();
+
+		var existingPair = pairService.getForId(pair.getId());
+
+		if (pair.getSymbol().equals(existingPair.getSymbol())) {
+			throw new IllegalArgumentException("Updating same pair code: " + pair.getSymbol());
+		}
+
+		var createdPair = createPair(pair.getSymbol(), existingPair.getProviderCode());
+		var newSymbol = new Symbol(createdPair.getSource().getCode(), null, null, createdPair.getTarget());
+
+		rateService.updateRates(existingPair, newSymbol);
+		assetRepository.update(existingPair, newSymbol, String.valueOf(connectedUserId));
+
+		delete(pair.getId(), true);
+
+		log.info("Pair [symbol: {}, provider: {}] updated in: {}", pair.getSymbol(), pair.getProviderCode(), sw);
+
+		return new PairInfo(createdPair.getId(), createdPair.getSymbol(), createdPair.getName(), null);
 	}
 }

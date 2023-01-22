@@ -7,12 +7,12 @@
   <parent>
     <groupId>fr.ymanvieu.trading</groupId>
     <artifactId>trading</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
   </parent>
 
 
   <properties>
-    <gatling.version>3.6.1</gatling.version>
+    <gatling.version>3.7.6</gatling.version>
     <gatling-maven-plugin.version>3.1.2</gatling-maven-plugin.version>
     <scala-maven-plugin.version>4.4.1</scala-maven-plugin.version>
   </properties>

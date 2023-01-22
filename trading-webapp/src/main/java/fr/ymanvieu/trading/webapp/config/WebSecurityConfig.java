@@ -1,65 +1,34 @@
-/**
- * Copyright (C) 2015 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.webapp.config;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
-import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
-import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import fr.ymanvieu.trading.common.config.SecurityConfig;
-import fr.ymanvieu.trading.webapp.jwt.JwtAuthenticationTokenFilter;
 import fr.ymanvieu.trading.webapp.jwt.JwtTokenUtil;
 import fr.ymanvieu.trading.webapp.oauth2.CustomOAuth2UserService;
 import fr.ymanvieu.trading.webapp.oauth2.CustomOidcUserService;
 import fr.ymanvieu.trading.webapp.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
-import fr.ymanvieu.trading.webapp.oauth2.OAuth2AccessTokenResponseConverterWithDefaults;
 import fr.ymanvieu.trading.webapp.oauth2.OAuth2AuthenticationFailureHandler;
 import fr.ymanvieu.trading.webapp.oauth2.OAuth2AuthenticationSuccessHandler;
 
 @Configuration
+// https://docs.spring.io/spring-security/reference/5.7.3/servlet/authorization/method-security.html#_enablemethodsecurity
+@EnableMethodSecurity
 @EnableWebSecurity
-@Order
-@Import(SecurityConfig.class)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Value("${jwt.header}")
-    private String tokenHeader;
+@Import({SecurityConfig.class, JwtConfig.class})
+public class WebSecurityConfig {
 
 	@Autowired
 	private CustomOAuth2UserService customOAuth2UserService;
@@ -72,34 +41,62 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
-	
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {		
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		.and()
-		// Custom JWT based security filter
-		.csrf().disable()
+			.and()
+			// Custom JWT based security filter
+			.csrf().disable();
 
-		// https://docs.spring.io/spring-security/site/docs/5.1.0.RELEASE/reference/htmlsingle/#oauth2login-advanced-login-page
-		.oauth2Login()
+		http.headers().frameOptions().sameOrigin(); // h2-console
+
+			// https://docs.spring.io/spring-security/site/docs/5.1.0.RELEASE/reference/htmlsingle/#oauth2login-advanced-login-page
+		http.oauth2Login()
 			.authorizationEndpoint()
-				.baseUri("/api/oauth2/authorization")
-				.authorizationRequestRepository(cookieAuthorizationRequestRepository())
-				.and()
+			.baseUri("/api/oauth2/authorization")
+			.authorizationRequestRepository(cookieAuthorizationRequestRepository())
+			.and()
 			.redirectionEndpoint()
-				.baseUri("/api/login/oauth2/code/*")
-				.and()
+			.baseUri("/api/login/oauth2/code/*")
+			.and()
 			.userInfoEndpoint()
-				.oidcUserService(customOidcUserService)
-				.userService(customOAuth2UserService)
-				.and()
-			.tokenEndpoint()
-				.accessTokenResponseClient(authorizationCodeTokenResponseClient())
-				.and()
+			.oidcUserService(customOidcUserService)
+			.userService(customOAuth2UserService)
+			.and()
 			.successHandler(oAuth2AuthenticationSuccessHandler)
-			.failureHandler(oAuth2AuthenticationFailureHandler);
+			.failureHandler(oAuth2AuthenticationFailureHandler)
+		.and()
+		.oauth2ResourceServer()
+			.jwt()
+			.jwtAuthenticationConverter(jwtAuthenticationConverter())
+			.and()
+			.accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+			.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
 
-		http.addFilterBefore(new JwtAuthenticationTokenFilter(jwtTokenUtil, tokenHeader), UsernamePasswordAuthenticationFilter.class);
+		http.authorizeHttpRequests(authorize -> authorize
+			.requestMatchers("/api/rate/**", "/api/refresh", "/api/auth", "/api/signup").permitAll()
+			.requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+			.requestMatchers("/stomp/**").permitAll()
+
+			// Since spring security 6.0, we must explicit default paths (otherwise implicitly Deny access)
+			// https://github.com/spring-projects/spring-security/issues/11967
+			.anyRequest().authenticated()
+		);
+
+		return http.build();
+	}
+
+
+	private JwtAuthenticationConverter jwtAuthenticationConverter() {
+		// create a custom JWT converter to map the roles from the token as granted authorities
+		JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+		jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(JwtTokenUtil.CLAIM_KEY_AUTHORITIES); // default is: scope, scp
+		jwtGrantedAuthoritiesConverter.setAuthorityPrefix(""); // default is: SCOPE_
+
+		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+		return jwtAuthenticationConverter;
 	}
 
 	/*
@@ -111,27 +108,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
 		return new HttpCookieOAuth2AuthorizationRequestRepository();
-	}
-
-	
-	@Override
-	public void configure(WebSecurity web) {
-		web.ignoring().antMatchers("/api/rate/.**", "/api/refresh", "/api/auth");
-	}
-	
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
-
-	private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> authorizationCodeTokenResponseClient() {
-		OAuth2AccessTokenResponseHttpMessageConverter tokenResponseHttpMessageConverter = new OAuth2AccessTokenResponseHttpMessageConverter();
-		tokenResponseHttpMessageConverter.setTokenResponseConverter(new OAuth2AccessTokenResponseConverterWithDefaults());
-		RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(), tokenResponseHttpMessageConverter));
-		restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-		DefaultAuthorizationCodeTokenResponseClient tokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
-		tokenResponseClient.setRestOperations(restTemplate);
-		return tokenResponseClient;
 	}
 }

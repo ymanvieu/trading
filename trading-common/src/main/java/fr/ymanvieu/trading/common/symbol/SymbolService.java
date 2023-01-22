@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.symbol;
 
 import static java.util.Objects.requireNonNull;
@@ -44,8 +28,6 @@ public class SymbolService {
 	
 	@Autowired
 	private SymbolMapper symbolMapper;
-
-	// TODO add tests
 
 	public Symbol addSymbol(String code, String name, String countryFlag, String currencyCode) {
 		requireNonNull(code, "code is null");
@@ -82,5 +64,10 @@ public class SymbolService {
 	public void deleteFavoriteSymbol(String fromSymbolCode, String toSymbolCode, Integer userId) {
 		favoriteSymbolRepository.deleteByFromSymbolCodeAndToSymbolCodeAndUserId(fromSymbolCode, toSymbolCode, userId);
 		log.info("Favorite symbol removed:{}/{} user:{}", fromSymbolCode, toSymbolCode, userId);
+	}
+
+	public void delete(String symbolCode) {
+		symbolRepo.deleteById(symbolCode);
+		log.info("Symbol removed:{}", symbolCode);
 	}
 }

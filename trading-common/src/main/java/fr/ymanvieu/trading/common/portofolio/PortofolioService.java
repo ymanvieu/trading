@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2016 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.common.portofolio;
 
 import static com.querydsl.jpa.JPAExpressions.select;
@@ -68,9 +52,7 @@ public class PortofolioService {
 
 	public Portofolio createPortofolio(Integer userId, String baseCurrencyCode, int baseCurrencyAmount) {
 		UserEntity ue = userRepo.findById(userId).orElseThrow();
-		SymbolEntity se = symbolRepo.findById(baseCurrencyCode).get();
-
-		// FIXME add checks
+		SymbolEntity se = symbolRepo.findById(baseCurrencyCode).orElseThrow();
 
 		PortofolioEntity pe = new PortofolioEntity(ue, se, BigDecimal.valueOf(baseCurrencyAmount));
 

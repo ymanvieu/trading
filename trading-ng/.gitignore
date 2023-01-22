@@ -1,0 +1,12 @@
+node_modules
+node
+dist
+.angular
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

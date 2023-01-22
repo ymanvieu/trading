@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2020 Yoann Manvieu
- *
- * This software is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.ymanvieu.trading.webapp.user.controller;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -80,7 +64,7 @@ public class SignupControllerTest {
         // GIVEN
         var login = "user";
         var userId = "1";
-        var grantedAuthorities = List.of(new SimpleGrantedAuthority(Role.USER.name()));
+        var grantedAuthorities = List.of(new SimpleGrantedAuthority(Role.USER));
         User ud = new User(userId, "", grantedAuthorities);
 
         when(userService.createLocalUser(eq(login), eq("password"))).thenReturn(ud);
@@ -96,11 +80,11 @@ public class SignupControllerTest {
         .andExpect(jsonPath("refreshToken").value(hasJwtTokenSubject(userId)));
     }
     
-    private Matcher<String> hasJwtTokenSubject(String expectedUserId) {
-        return new CustomMatcher<>(expectedUserId) {
+    private Matcher<String> hasJwtTokenSubject(String subject) {
+        return new CustomMatcher<>(subject) {
             @Override
             public boolean matches(Object obj) {
-                return expectedUserId.equals(jwtTokenUtil.getSubjectFromToken((String)obj));
+                return subject.equals(jwtTokenUtil.getSubjectFromToken((String)obj));
             }
             
             @Override
@@ -114,7 +98,7 @@ public class SignupControllerTest {
         return new CustomMatcher<>(expectedUsername) {
             @Override
             public boolean matches(Object obj) {
-                String username = jwtTokenUtil.getClaimFromToken((String) obj, c -> c.get(JwtTokenUtil.CLAIM_KEY_USERNAME, String.class));
+                String username = jwtTokenUtil.getUsernameFromToken((String) obj);
                 return expectedUsername.equals(username);
             }
 

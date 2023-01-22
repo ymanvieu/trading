@@ -30,12 +30,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
+@Accessors(chain = true)
 public class Rate {
 
 	private Symbol fromcur;
