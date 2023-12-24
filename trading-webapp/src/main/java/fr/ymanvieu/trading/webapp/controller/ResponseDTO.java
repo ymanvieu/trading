@@ -7,6 +7,5 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ResponseDTO {
 	private String message;
-	private String errorMessage;
 	private Object[] args;
 }

@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>trading-gatling</artifactId>
@@ -7,17 +7,22 @@
   <parent>
     <groupId>fr.ymanvieu.trading</groupId>
     <artifactId>trading</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
   </parent>
 
 
   <properties>
-    <gatling.version>3.7.6</gatling.version>
-    <gatling-maven-plugin.version>3.1.2</gatling-maven-plugin.version>
-    <scala-maven-plugin.version>4.4.1</scala-maven-plugin.version>
+    <gatling.version>3.10.2</gatling.version>
+    <gatling-maven-plugin.version>4.7.0</gatling-maven-plugin.version>
+    <scala-maven-plugin.version>4.8.1</scala-maven-plugin.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.gatling.highcharts</groupId>
       <artifactId>gatling-charts-highcharts</artifactId>
@@ -39,6 +44,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <scalaVersion>2.13.12</scalaVersion>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>io.gatling</groupId>

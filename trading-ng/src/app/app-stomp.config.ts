@@ -1,13 +1,11 @@
-import { InjectableRxStompConfig } from '@stomp/ng2-stompjs';
-
-import * as SockJS from 'sockjs-client';
-
+import { RxStompConfig } from '@stomp/rx-stomp';
+import SockJS from 'sockjs-client';
 
 export function socketProvider() {
     return new SockJS('/stomp');
   }
 
-export const appStompConfig: InjectableRxStompConfig = {
+export const appStompConfig: RxStompConfig = {
   // Which server?
   // brokerURL: 'ws://127.0.0.1:15674/ws',
   webSocketFactory: socketProvider,

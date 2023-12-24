@@ -36,10 +36,6 @@ public class LatestRate extends RateEntity {
 	public LatestRate(SymbolEntity fromcur, SymbolEntity tocur, BigDecimal value, Instant date) {
 		super(fromcur, tocur, value, date);
 	}
-
-	public LatestRate(String fromcur, String tocur, BigDecimal value, Instant date) {
-		this(new SymbolEntity(fromcur), new SymbolEntity(tocur), value, date);
-	}
 	
 	@Id
 	@Nonnull

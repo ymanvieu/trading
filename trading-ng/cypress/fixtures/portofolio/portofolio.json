@@ -1,0 +1,111 @@
+{
+  "baseCurrency": {
+    "symbol": {
+      "code": "EUR",
+      "name": "Euro",
+      "countryFlag": "eu"
+    },
+    "currency": null,
+    "quantity": 18500.0,
+    "value": null,
+    "currentValue": null,
+    "currentRate": null,
+    "percentChange": null,
+    "valueChange": null
+  },
+  "assets": [
+    {
+      "symbol": {
+        "code": "GFT",
+        "name": "GameLoft S.E.",
+        "countryFlag": null
+      },
+      "currency": {
+        "code": "EUR",
+        "name": "Euro",
+        "countryFlag": "eu"
+      },
+      "quantity": 100.0,
+      "value": 700.0,
+      "currentValue": 745.0,
+      "currentRate": 7.45,
+      "percentChange": 6.42857143,
+      "valueChange": 45.0
+    },
+    {
+      "symbol": {
+        "code": "UBI",
+        "name": "Ubisoft Entertainment SA",
+        "countryFlag": null
+      },
+      "currency": {
+        "code": "EUR",
+        "name": "Euro",
+        "countryFlag": "eu"
+      },
+      "quantity": 50.0,
+      "value": 3000.0,
+      "currentValue": 1393.00005,
+      "currentRate": 27.860001,
+      "percentChange": -53.566665,
+      "valueChange": -1606.99995
+    },
+    {
+      "symbol": {
+        "code": "GBP",
+        "name": "British Pound Sterling",
+        "countryFlag": "gb"
+      },
+      "currency": {
+        "code": "EUR",
+        "name": "Euro",
+        "countryFlag": "eu"
+      },
+      "quantity": 5000.0,
+      "value": 5000.0,
+      "currentValue": 6332.419239,
+      "currentRate": 1.2664838478,
+      "percentChange": 26.64838478,
+      "valueChange": 1332.419239
+    },
+    {
+      "symbol": {
+        "code": "USD",
+        "name": "US Dollar",
+        "countryFlag": "us"
+      },
+      "currency": {
+        "code": "EUR",
+        "name": "Euro",
+        "countryFlag": "eu"
+      },
+      "quantity": 9844.68,
+      "value": 8684.05129608,
+      "currentValue": 8684.05129608,
+      "currentRate": 0.882106,
+      "percentChange": 0.0,
+      "valueChange": 0.0
+    },
+    {
+      "symbol": {
+        "code": "TTWO",
+        "name": "Take-Two Interactive Software, Inc.",
+        "countryFlag": null
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "countryFlag": "us"
+      },
+      "quantity": 1.0,
+      "value": 155.32,
+      "currentValue": 155.32,
+      "currentRate": 155.32,
+      "percentChange": 0.0,
+      "valueChange": 0.0
+    }
+  ],
+  "currentValue": 17291.479289000003,
+  "percentChange": -1.3103129091504728,
+  "valueChange": -229.58071099999984
+}

@@ -26,7 +26,7 @@ import fr.ymanvieu.trading.common.rate.repository.LatestRateRepository;
 import fr.ymanvieu.trading.common.symbol.Symbol;
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.common.symbol.repository.SymbolRepository;
-import fr.ymanvieu.trading.common.symbol.util.CurrencyUtils;
+import fr.ymanvieu.trading.common.symbol.Currency;
 import fr.ymanvieu.trading.common.util.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RateService {
 
-	private static final String BASE_CURRENCY = CurrencyUtils.USD;
+	private static final String BASE_CURRENCY = Currency.USD;
 
 	private static final Sort SORT_ASC_DATE = Sort.by(Direction.ASC, "date");
 	private static final Sort SORT_DESC_DATE = Sort.by(Direction.DESC, "date");
@@ -107,21 +107,21 @@ public class RateService {
 	}
 
 	/**
-	 * Add the given quote. If an existing quote has a time <= to the given
-	 * quote, does nothing.
-	 * 
-	 * @param quote
+	 * Add the given quote. If an existing quote has a time > to the given quote, does nothing.
 	 */
 	public void addLatestRate(Quote quote) {
 		Objects.requireNonNull(quote, "quote must be not null");
 
-		LatestRate existingRate = latestRateRepository.findByFromcurCodeAndTocurCode(quote.getCode(), quote.getCurrency());
+		LatestRate existingRate = latestRateRepository.findByFromcurCodeAndTocurCode(quote.code(), quote.currency());
 
 		if (existingRate == null) {
-			latestRateRepository.save(new LatestRate(quote.getCode(), quote.getCurrency(), quote.getPrice(), quote.getTime()));
-		} else if (existingRate.getDate().isBefore(quote.getTime())) {
-			existingRate.setDate(quote.getTime());
-			existingRate.setValue(quote.getPrice());
+			var sourceSymbol = symbolRepository.findById(quote.code()).orElseThrow();
+			var currencySymbol = symbolRepository.findById(quote.currency()).orElseThrow();
+
+			latestRateRepository.save(new LatestRate(sourceSymbol, currencySymbol, quote.price(), quote.time()));
+		} else if (existingRate.getDate().isBefore(quote.time())) {
+			existingRate.setDate(quote.time());
+			existingRate.setValue(quote.price());
 			latestRateRepository.save(existingRate);
 		}
 	}
@@ -133,24 +133,12 @@ public class RateService {
 
 		Preconditions.checkArgument(!startDate.isAfter(endDate), "startDate:%s is after endDate:%s", startDate, endDate);
 
-		final List<DateValue> result;
-
-		switch (AverageRangeType.getRange(startDate, endDate)) {
-			case WEEK:
-				result = historicalRateRepository.findWeeklyValues(fromcur, tocur, startDate, endDate);
-			break;
-			case DAY:
-				result = historicalRateRepository.findDailyValues(fromcur, tocur, startDate, endDate);
-			break;
-			case HOUR:
-				result = historicalRateRepository.findHourlyValues(fromcur, tocur, startDate, endDate);
-			break;
-			case NONE:
-			default:
-				result = historicalRateRepository.findDateValues(fromcur, tocur, startDate, endDate);
-		}
-
-		return result;
+		return switch (AverageRangeType.getRange(startDate, endDate)) {
+			case WEEK -> historicalRateRepository.findWeeklyValues(fromcur, tocur, startDate, endDate);
+			case DAY -> historicalRateRepository.findDailyValues(fromcur, tocur, startDate, endDate);
+			case HOUR -> historicalRateRepository.findHourlyValues(fromcur, tocur, startDate, endDate);
+			default -> historicalRateRepository.findDateValues(fromcur, tocur, startDate, endDate);
+		};
 	}
 
 	public void addHistoricalRates(List<Quote> quotes) {
@@ -159,15 +147,15 @@ public class RateService {
 
 		for (Quote quote : quotes) {
 
-			BooleanExpression exp = historicalRate.fromcur.code.eq(quote.getCode())
-					.and(historicalRate.tocur.code.eq(quote.getCurrency()))
-					.and(historicalRate.date.eq(quote.getTime()));
+			BooleanExpression exp = historicalRate.fromcur.code.eq(quote.code())
+					.and(historicalRate.tocur.code.eq(quote.currency()))
+					.and(historicalRate.date.eq(quote.time()));
 
 			if (!historicalRateRepository.exists(exp)) {
-				SymbolEntity symbolCode = symbolRepository.findById(quote.getCode()).get();
-				SymbolEntity symbolCurrency = symbolRepository.findById(quote.getCurrency()).get();
+				SymbolEntity symbolCode = symbolRepository.findById(quote.code()).orElseThrow();
+				SymbolEntity symbolCurrency = symbolRepository.findById(quote.currency()).orElseThrow();
 
-				ratesToAdd.add(new HistoricalRate(symbolCode, symbolCurrency, quote.getPrice(), quote.getTime()));
+				ratesToAdd.add(new HistoricalRate(symbolCode, symbolCurrency, quote.price(), quote.time()));
 			}
 		}
 

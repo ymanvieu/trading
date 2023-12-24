@@ -1,6 +1,6 @@
 package fr.ymanvieu.trading.datacollect.rate;
 
-import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.USD;
+import static fr.ymanvieu.trading.common.symbol.Currency.USD;
 import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +25,7 @@ import fr.ymanvieu.trading.common.rate.entity.HistoricalRate;
 import fr.ymanvieu.trading.common.rate.entity.LatestRate;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
 import fr.ymanvieu.trading.common.rate.repository.LatestRateRepository;
+import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.datacollect.config.MapperTestConfig;
 import fr.ymanvieu.trading.datacollect.config.RepositoryTestConfig;
 
@@ -65,12 +66,12 @@ public class RateUpdaterServiceTest {
 		// given
 		List<Quote> quotes = getBrentQuotes();
 
-		HistoricalRate expected1 = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00"));
-		HistoricalRate expected2 = new HistoricalRate(BRE, USD, new BigDecimal("56.72"), parse("2015-04-03T02:00:00"));
-		HistoricalRate expected3 = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-07T02:00:00"));
-		HistoricalRate expected4 = new HistoricalRate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00"));
-		HistoricalRate expected5 = new HistoricalRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
-		LatestRate expected6 = new LatestRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		HistoricalRate expected1 = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("55.18"), parse("2015-04-02T02:00:00"));
+		HistoricalRate expected2 = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("56.72"), parse("2015-04-03T02:00:00"));
+		HistoricalRate expected3 = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("55.18"), parse("2015-04-07T02:00:00"));
+		HistoricalRate expected4 = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("57.8"), parse("2015-04-08T02:00:00"));
+		HistoricalRate expected5 = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		LatestRate expected6 = new LatestRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
 
 		// when
 		rateUpdaterService.updateRates(quotes);
@@ -93,11 +94,11 @@ public class RateUpdaterServiceTest {
 		// given
 		List<Quote> quotes = getBrentQuotes();
 
-		HistoricalRate expectedOldLatest = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-06T02:00:00"));
-		HistoricalRate expectedAdded = new HistoricalRate(BRE, USD, new BigDecimal("57.8"), parse("2015-04-08T02:00:00"));
-		HistoricalRate expectedNewLatest = new HistoricalRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
-		LatestRate expectedNewLatest1 = new LatestRate(BRE, USD, new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
-		HistoricalRate olderButAdded = new HistoricalRate(BRE, USD, new BigDecimal("55.18"), parse("2015-04-02T02:00:00"));
+		HistoricalRate expectedOldLatest = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("55.18"), parse("2015-04-06T02:00:00"));
+		HistoricalRate expectedAdded = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("57.8"), parse("2015-04-08T02:00:00"));
+		HistoricalRate expectedNewLatest = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		LatestRate expectedNewLatest1 = new LatestRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("58.3"), parse("2015-04-09T02:00:00"));
+		HistoricalRate olderButAdded = new HistoricalRate(new SymbolEntity(BRE), new SymbolEntity(USD), new BigDecimal("55.18"), parse("2015-04-02T02:00:00"));
 
 		// when
 		rateUpdaterService.updateRates(quotes);

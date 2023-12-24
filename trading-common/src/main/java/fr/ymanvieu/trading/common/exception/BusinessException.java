@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 public class BusinessException extends RuntimeException {
 
-	private static final long serialVersionUID = 5894630703257348547L;
-
 	private final Object[] args;
 
 	private final String key;

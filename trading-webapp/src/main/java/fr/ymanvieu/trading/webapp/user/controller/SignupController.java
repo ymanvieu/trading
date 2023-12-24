@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.ymanvieu.trading.common.user.UserService;
+import fr.ymanvieu.trading.webapp.config.RecaptchaProperties;
 import fr.ymanvieu.trading.webapp.jwt.JwtAuthenticationResponse;
 import fr.ymanvieu.trading.webapp.jwt.JwtTokenUtil;
 import fr.ymanvieu.trading.webapp.recaptcha.RecaptchaService;
@@ -25,13 +26,16 @@ public class SignupController {
     @Autowired(required = false)
     private RecaptchaService recaptchaService;
 
+    @Autowired(required = false)
+    private RecaptchaProperties recaptchaProperties;
+
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping
     public ResponseEntity<JwtAuthenticationResponse> signup(@Valid @RequestBody SignupForm form, HttpServletRequest httpServletRequest) {
 
-        if (recaptchaService != null) {
+        if (recaptchaProperties != null && recaptchaProperties.isEnabled()) {
             if (!recaptchaService.isValidRecaptcha(form.getRecaptchaResponse(), httpServletRequest)) {
                 throw new RecaptchaException("Invalid recaptchaResponse");
             }

@@ -42,7 +42,7 @@ public interface PairRepository extends JpaRepository<PairEntity, Integer>, Quer
 			p.target.code,
 			p.exchange, 
 			p.providerCode)
-		FROM PairEntity p 
+		FROM #{#entityName} p 
 		LEFT JOIN LatestRate lr on p.source=lr.fromcur AND p.target=lr.tocur 
 		where lower(p.symbol) like concat('%', lower(:symbol), '%') OR lower(p.name) like concat('%', lower(:name), '%')
 		""")

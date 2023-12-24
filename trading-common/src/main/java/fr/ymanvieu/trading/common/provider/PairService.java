@@ -10,6 +10,7 @@ import fr.ymanvieu.trading.common.provider.entity.PairEntity;
 import fr.ymanvieu.trading.common.provider.mapper.PairMapper;
 import fr.ymanvieu.trading.common.provider.repository.PairRepository;
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
+import fr.ymanvieu.trading.common.symbol.repository.SymbolRepository;
 
 @Service
 @Transactional
@@ -17,6 +18,9 @@ public class PairService {
 
 	@Autowired
 	private PairRepository pairRepo;
+
+	@Autowired
+	private SymbolRepository symbolRepository;
 	
 	@Autowired
 	private PairMapper pairMapper;
@@ -26,7 +30,10 @@ public class PairService {
 	}
 
 	public Pair create(String code, String name, String source, String target, String exchange, String provider) {
-		PairEntity pe = new PairEntity(code, name, new SymbolEntity(source), new SymbolEntity(target), exchange, provider);
+		var sourceSymbol = symbolRepository.findById(source).orElseThrow();
+		var targetSymbol = symbolRepository.findById(target).orElseThrow();
+
+		PairEntity pe = new PairEntity(code, name, sourceSymbol, targetSymbol, exchange, provider);
 		pe = pairRepo.save(pe);
 		return pairMapper.mapToPair(pe);
 	}

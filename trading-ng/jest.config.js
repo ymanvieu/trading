@@ -1,10 +1,10 @@
 /** jest.config.js */
 
 module.exports = {
-
+    preset: 'jest-preset-angular',
     collectCoverageFrom: [
         '<rootDir>/src/app/**/*.ts',
-        '!<rootDir>/src/app/**/index.ts',
+        '!<rootDir>/src/app/**/en.ts',
         '!<rootDir>/src/app/**/*.module.ts'
     ],
 

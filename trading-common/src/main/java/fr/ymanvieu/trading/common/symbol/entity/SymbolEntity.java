@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Table(name = "symbols")
 @Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "code")
 @EntityListeners(AuditingEntityListener.class)

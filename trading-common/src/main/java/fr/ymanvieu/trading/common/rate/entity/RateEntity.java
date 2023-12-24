@@ -24,10 +24,6 @@ public abstract class RateEntity {
 	protected BigDecimal value;
 	protected Instant date;
 
-	public RateEntity(String from, String to, BigDecimal value, Instant date) {
-		this(new SymbolEntity(from), new SymbolEntity(to), value, date);
-	}
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(fromcur, tocur, date, value);
@@ -35,17 +31,17 @@ public abstract class RateEntity {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
+		}
 
-		if (obj == null || !(obj instanceof RateEntity))
+		if (!(obj instanceof RateEntity other)) {
 			return false;
+		}
 
-		RateEntity other = (RateEntity) obj;
-
-		return Objects.equals(fromcur, other.fromcur) //
-				&& Objects.equals(tocur, other.tocur) //
-				&& Objects.equals(date, other.date) //
+		return Objects.equals(fromcur, other.fromcur)
+				&& Objects.equals(tocur, other.tocur)
+				&& Objects.equals(date, other.date)
 				&& value.compareTo(other.value) == 0;
 	}	
 }

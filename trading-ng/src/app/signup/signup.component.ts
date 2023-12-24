@@ -1,13 +1,30 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthenticationService } from '../authentication';
-import { Captcha } from 'primeng/captcha';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { RecaptchaComponent, RecaptchaModule } from 'ng-recaptcha';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { PasswordModule } from 'primeng/password';
 import { environment } from 'environments/environment';
 import { MustMatch } from 'app/shared/must-match.validator';
+import { AuthenticationService } from '../authentication/authentication.service';
 
 @Component({
   selector: 'app-signup',
+  standalone: true,
+  imports: [
+    CommonModule,
+    TranslateModule,
+    ReactiveFormsModule,
+    RecaptchaModule,
+    ButtonModule,
+    MessageModule,
+    InputTextModule,
+    PasswordModule
+  ],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss']
 })
@@ -18,11 +35,10 @@ export class SignupComponent implements OnInit {
   passwordMinLength = 8;
   passwordMaxLength = 64;
 
-  recaptchaSiteKey = environment.recaptcha.siteKey;
-
   @ViewChild('recaptcha')
-  private recaptchaComponent: Captcha;
-  recaptcha: any;
+  private recaptchaComponent: RecaptchaComponent;
+
+  recaptchaSiteKey = environment.recaptcha.siteKey;
 
   form: UntypedFormGroup;
 
@@ -31,12 +47,11 @@ export class SignupComponent implements OnInit {
 
   constructor(
     private formBuilder: UntypedFormBuilder,
+    private translateService: TranslateService,
     private authenticationService: AuthenticationService,
     private router: Router) {}
 
   ngOnInit(): void {
-    this.recaptcha = (window as any).grecaptcha;
-
     this.form = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(this.usernameMinLength), Validators.maxLength(this.usernameMaxLength)]],
       password: ['', [Validators.required, Validators.minLength(this.passwordMinLength), Validators.maxLength(this.passwordMaxLength)]],
@@ -48,17 +63,8 @@ export class SignupComponent implements OnInit {
 
   get f() { return this.form.controls; }
 
-  showResponse(event: any) {
-    this.recaptchaResponse = event.response;
-  }
-
-  expireRecaptcha() {
-    this.recaptchaResponse = null;
-  }
-
-  resetRecaptcha() {
-    this.recaptchaComponent.reset();
-    this.recaptchaResponse = null;
+  showResponse(captchaResponse: any) {
+    this.recaptchaResponse = captchaResponse;
   }
 
   signup() {
@@ -69,9 +75,9 @@ export class SignupComponent implements OnInit {
     this.authenticationService.signup(this.form.value.username, this.form.value.password, this.recaptchaResponse)
     .subscribe(
       () => this.router.navigate(['/portofolio']),
-      response => {
-        this.error = response.error.message;
-        this.resetRecaptcha();
+      error => {
+        this.error = this.translateService.instant(error.error.message, error.error.args);
+        this.recaptchaComponent.reset();
       });
   }
 }

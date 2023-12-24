@@ -1,16 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ClarityModule, ClrForm } from '@clr/angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ConfirmationService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 import { Pair } from '../model/pair';
 
 @Component({
   selector: 'app-actions-pair',
-  templateUrl: './actions-pair.component.html',
-  styleUrls: ['./actions-pair.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, ClarityModule, TranslateModule, CommonModule]
+  imports: [ReactiveFormsModule, TranslateModule, CommonModule, ButtonModule, DialogModule, InputTextModule, ConfirmPopupModule],
+  providers: [ConfirmationService],
+  templateUrl: './actions-pair.component.html',
+  styleUrls: ['./actions-pair.component.scss']
 })
 export class ActionsPairComponent implements OnInit {
 
@@ -25,11 +30,9 @@ export class ActionsPairComponent implements OnInit {
   @Output()
   updateConfirmed: EventEmitter<Pair> = new EventEmitter();
 
-  @ViewChild(ClrForm, {static: true}) clrForm;
-
   pairForm: FormGroup;
 
-  constructor() {}
+  constructor(private confirmationService: ConfirmationService, private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.pairForm = new FormGroup({
@@ -50,9 +53,24 @@ export class ActionsPairComponent implements OnInit {
 
   update() {
     this.updateConfirmed.emit(this.pairForm.value);
+    this.opened = false;
   }
 
-  delete(withSymbol: boolean) {
+  private delete(withSymbol: boolean) {
     this.removeConfirmed.emit(withSymbol);
+    this.opened = false;
+  }
+
+  confirm(event: Event, withSymbol: boolean) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: this.translateService.instant('admin.confirm-delete'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.delete(withSymbol);
+      },
+      reject: () => {
+      }
+    });
   }
 }

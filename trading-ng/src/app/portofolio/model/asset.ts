@@ -11,4 +11,8 @@ export class Asset {
   currentRate: number;
   percentChange: number;
   valueChange: number;
+
+  constructor(obj?: Partial<Asset>) {
+    Object.assign(this, obj);
+  }
 }

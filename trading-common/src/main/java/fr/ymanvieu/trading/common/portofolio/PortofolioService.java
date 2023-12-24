@@ -125,7 +125,7 @@ public class PortofolioService {
 		Objects.requireNonNull(symbolCode, "symbolCode is null");
 
 		SymbolEntity selectedSymbol = symbolRepo.findById(symbolCode)
-			.orElseThrow(() -> SymbolException.UNKNOWN(symbolCode));
+			.orElseThrow(() -> SymbolException.unknown(symbolCode));
 
 		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 
@@ -190,7 +190,7 @@ public class PortofolioService {
 		}
 
 		SymbolEntity fromSymbol = symbolRepo.findById(code)
-			.orElseThrow(() -> SymbolException.UNKNOWN(code));
+			.orElseThrow(() -> SymbolException.unknown(code));
 
 		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 		Order order = portofolio.buy(fromSymbol, quantity, rateService);
@@ -207,7 +207,7 @@ public class PortofolioService {
 		}
 
 		final SymbolEntity fromSymbol = symbolRepo.findById(code)
-			.orElseThrow(() -> SymbolException.UNKNOWN(code));
+			.orElseThrow(() -> SymbolException.unknown(code));
 
 		PortofolioEntity portofolio = portofolioRepo.findByUserId(userId);
 		Order order = portofolio.sell(fromSymbol, quantity, rateService);

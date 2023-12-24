@@ -22,7 +22,7 @@ public interface LatestRateRepository extends JpaRepository<LatestRate, LatestRa
 
 	LatestRate findByFromcurCodeAndTocurCode(String fromcur, String tocur);
 
-	@Query("SELECT (fs.userId is not null) as favorite, lr.fromcur as fromcur, lr.tocur as tocur, lr.value as value, lr.date as date FROM LatestRate lr LEFT JOIN FavoriteSymbolEntity fs ON lr.fromcur=fs.fromSymbolCode AND lr.tocur=fs.toSymbolCode AND fs.userId=:userId")
+	@Query("SELECT (fs.userId is not null) as favorite, lr.fromcur as fromcur, lr.tocur as tocur, lr.value as value, lr.date as date FROM LatestRate lr LEFT JOIN FavoriteSymbolEntity fs ON lr.fromcur.code=fs.fromSymbolCode AND lr.tocur.code=fs.toSymbolCode AND fs.userId=:userId")
 	List<FavoriteRate> findAllWithFavorites(@Param("userId") Integer userId);
 
 	@Modifying(clearAutomatically = true)

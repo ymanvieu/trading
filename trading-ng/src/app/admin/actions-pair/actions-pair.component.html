@@ -1,42 +1,27 @@
-<clr-modal [(clrModalOpen)]="opened" [clrModalStaticBackdrop]="false">
+<p-button size="small" (click)="open()"><i class="pi pi-pencil"></i></p-button>
 
-  <h5 class="modal-title">
-    {{pair.name}}
-  </h5>
+<p-dialog header="Header" [(visible)]="opened" [modal]="true" [formGroup]="pairForm">
+  <ng-template pTemplate="header">
+    <span class="text-xl font-bold">{{pair.name}}</span>
+  </ng-template>
 
-  <div class="modal-body">
-    <form clrForm class="clr-form" clrLayout="vertical" [formGroup]="pairForm">
-      <clr-input-container>
-        <label>Code</label>
-        <input clrInput formControlName="symbol" />
-      </clr-input-container>
-      <clr-input-container>
-        <label>Name</label>
-        <input clrInput formControlName="name" />
-      </clr-input-container>
-      <clr-input-container>
-        <label>Symbol code</label>
-        <input clrInput formControlName="sourceCode" />
-      </clr-input-container>
-      <p></p>
-    </form>
-    <div class="btn-group btn-primary">
-      <button class="btn" [ngClass]="this.pairForm.pristine ? 'disabled' : ''" (click)="update()">Update</button>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn btn-danger" (click)="delete(false)">{{ 'admin.delete-pair' | translate }}</button>
-      &nbsp;
-      <clr-dropdown>
-        <button class="btn btn-danger" clrDropdownTrigger>{{ 'admin.delete-pair-symbol' | translate }}</button>
-        <clr-dropdown-menu *clrIfOpen>
-          <button class="btn" (click)="delete(true)">Confirm</button>
-        </clr-dropdown-menu>
-      </clr-dropdown>
-    </div>
+  <div class="field">
+    <label for="code">Code</label>
+    <input pInputText  id="code" type="text" formControlName="symbol" class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
   </div>
-  <div class="modal-footer">
+  <div class="field">
+    <label for="name">Name</label>
+    <input pInputText  id="name" type="text" formControlName="name" class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"/>
   </div>
-</clr-modal>
+  <div class="field">
+    <label for="symbolCode">Symbol code</label>
+    <input pInputText  id="symbolCode" type="text" formControlName="sourceCode" class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"/>
+  </div>
 
-<button class="btn btn-primary" (click)="open()"><cds-icon shape="pencil"></cds-icon></button>
+  <ng-template pTemplate="footer">
+    <p-button [disabled]="this.pairForm.pristine" (click)="update()" label="{{ 'admin.update-pair' | translate }}"></p-button>
+    <p-button severity="danger" (click)="confirm($event,false)" label="{{ 'admin.delete-pair' | translate }}"></p-button>
+    <p-button severity="danger" (click)="confirm($event, true)" label="{{ 'admin.delete-pair-symbol' | translate }}"></p-button>
+    <p-confirmPopup></p-confirmPopup>
+  </ng-template>
+</p-dialog>

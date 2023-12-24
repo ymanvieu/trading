@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -20,6 +21,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,6 +34,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "pair", uniqueConstraints = @UniqueConstraint(columnNames = { "symbol", "provider_code" }))
 @EntityListeners(AuditingEntityListener.class)
+@EqualsAndHashCode(of = {"symbol", "providerCode"})
 public class PairEntity {
 
 	@Id

@@ -8,9 +8,11 @@
 					"exchangeName": "NMS",
 					"instrumentType": "EQUITY",
 					"firstTradeDate": 345459600,
+					"regularMarketTime": 1685044804,
 					"gmtoffset": -14400,
 					"timezone": "EDT",
 					"exchangeTimezoneName": "America/New_York",
+					"regularMarketPrice": 172.99,
 					"currentTradingPeriod": {
 						"pre": {
 							"timezone": "EDT",

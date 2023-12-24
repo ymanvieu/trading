@@ -1,6 +1,7 @@
 package fr.ymanvieu.trading.common.admin;
 
 import static fr.ymanvieu.trading.common.rate.entity.QHistoricalRate.historicalRate;
+import static fr.ymanvieu.trading.common.symbol.Currency.EUR;
 import static fr.ymanvieu.trading.test.time.DateParser.parse;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +38,7 @@ import fr.ymanvieu.trading.common.rate.RateService;
 import fr.ymanvieu.trading.common.rate.entity.HistoricalRate;
 import fr.ymanvieu.trading.common.rate.repository.HistoricalRateRepository;
 import fr.ymanvieu.trading.common.symbol.SymbolService;
+import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 
 @DataJpaTest
 @ComponentScan(basePackageClasses = {AdminService.class, SymbolService.class, RateService.class, PortofolioService.class})
@@ -48,6 +50,9 @@ public class AdminServiceTest {
 
 	@Autowired
 	private RateService rateService;
+
+	@Autowired
+	private SymbolService symbolService;
 
 	@MockBean
 	private LookupService lookupService;
@@ -74,12 +79,13 @@ public class AdminServiceTest {
 		String symbol = "UBI.PA";
 		String name = "Ubi";
 		String provider = "Provider";
+		var source = "UBI";
 
 		when(lookupService.search(provider)).thenReturn(List.of(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
-		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", "EPA", provider));
+		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, source, EUR, "EPA", provider));
 
-		Quote histoQuote = new Quote(symbol, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
-		Quote latestQuote = new Quote(symbol, new BigDecimal("25"), parse("2016-06-30T19:32:00+02:00"));
+		Quote histoQuote = new Quote(source, EUR, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
+		Quote latestQuote = new Quote(source, EUR, new BigDecimal("25"), parse("2016-06-30T19:32:00+02:00"));
 		
 		when(rateProviderService.getHistoricalProvider(ProviderType.STOCK)).thenReturn(hrp);
 		when(rateProviderService.getLatestProvider(ProviderType.STOCK)).thenReturn(lrp);
@@ -93,13 +99,25 @@ public class AdminServiceTest {
 		// then
 		Pair pairResult = pairService.getForCodeAndProvider(symbol, provider);
 
-		assertThat(result.getCode()).isEqualTo(pairResult.getSymbol());
-		assertThat(result.getName()).isEqualTo(pairResult.getName());
-		assertThat(result.getQuote().getCode()).isEqualTo(pairResult.getSource().getCode());
-		assertThat(result.getQuote().getCurrency()).isEqualTo(pairResult.getTarget().getCode());
+		assertThat(symbolService.getForCode(source).orElseThrow()).satisfies(symbolSource -> {
+			assertThat(symbolSource.getName()).isEqualTo(name);
+			assertThat(symbolSource.getCurrency()).isNotNull();
+		});
+		assertThat(symbolService.getForCode(EUR).orElseThrow()).satisfies(symbolSource -> {
+			assertThat(symbolSource.getName()).isEqualTo("Euro");
+			assertThat(symbolSource.getCountryFlag()).isEqualTo("eu");
+			assertThat(symbolSource.getCurrency()).isNull();
+		});
 
-		assertThat(result.getQuote().getPrice()).isEqualTo("25");
-		assertThat(result.getQuote().getTime()).isEqualTo(parse("2016-06-30T19:32:00+02:00"));
+		assertThat(result.code()).isEqualTo(pairResult.getSymbol());
+		assertThat(result.name()).isEqualTo(pairResult.getName());
+
+		assertThat(result.quote()).satisfies(quote -> {
+			assertThat(quote.code()).isEqualTo(pairResult.getSource().getCode());
+			assertThat(quote.currency()).isEqualTo(pairResult.getTarget().getCode());
+			assertThat(quote.price()).isEqualTo("25");
+			assertThat(quote.time()).isEqualTo(parse("2016-06-30T19:32:00+02:00"));
+		});
 
 		BooleanExpression exp = historicalRate.fromcur.code.eq("UBI").and(historicalRate.tocur.code.eq("EUR"));
 
@@ -114,13 +132,14 @@ public class AdminServiceTest {
 		String symbol = "UBI.PA";
 		String name = "Ubi";
 		String provider = "Provider";
+		var source = "UBI";
 
 		when(lookupService.search(provider)).thenReturn(List.of(new LookupInfo(symbol, name, "Paris", "Titres", provider)));
-		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, "UBI", "EUR", "EPA", provider));
+		when(lookupService.getDetails(symbol, provider)).thenReturn(new LookupDetails(symbol, name, source, EUR, "EPA", provider));
 
-		Quote histoQuote = new Quote(symbol, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
-		Quote latestHistoQuote = new Quote(symbol, new BigDecimal("25"), parse("2016-06-30T19:32:00+02:00"));
-		Quote latestQuote = new Quote(symbol, new BigDecimal("25.5"), parse("2016-06-30T19:32:00+02:00"));
+		Quote histoQuote = new Quote(source, EUR, new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00"));
+		Quote latestHistoQuote = new Quote(source, EUR, new BigDecimal("25"), parse("2016-06-30T19:32:00+02:00"));
+		Quote latestQuote = new Quote(source, EUR, new BigDecimal("25.5"), parse("2016-06-30T19:32:00+02:00"));
 		
 		when(rateProviderService.getHistoricalProvider(ProviderType.STOCK)).thenReturn(hrp);
 		when(rateProviderService.getLatestProvider(ProviderType.STOCK)).thenReturn(lrp);
@@ -134,19 +153,31 @@ public class AdminServiceTest {
 		// then
 		Pair pairResult = pairService.getForCodeAndProvider(symbol, provider);
 
-		assertThat(result.getCode()).isEqualTo(pairResult.getSymbol());
-		assertThat(result.getName()).isEqualTo(pairResult.getName());
-		assertThat(result.getQuote().getCode()).isEqualTo(pairResult.getSource().getCode());
-		assertThat(result.getQuote().getCurrency()).isEqualTo(pairResult.getTarget().getCode());
+		assertThat(symbolService.getForCode(source).orElseThrow()).satisfies(symbolSource -> {
+			assertThat(symbolSource.getName()).isEqualTo(name);
+			assertThat(symbolSource.getCurrency()).isNotNull();
+		});
+		assertThat(symbolService.getForCode(EUR).orElseThrow()).satisfies(symbolSource -> {
+			assertThat(symbolSource.getName()).isEqualTo("Euro");
+			assertThat(symbolSource.getCountryFlag()).isEqualTo("eu");
+			assertThat(symbolSource.getCurrency()).isNull();
+		});
 
-		assertThat(result.getQuote().getPrice()).isEqualTo("25.5");
-		assertThat(result.getQuote().getTime()).isEqualTo(parse("2016-06-30T19:32:00+02:00"));
+		assertThat(result.code()).isEqualTo(pairResult.getSymbol());
+		assertThat(result.name()).isEqualTo(pairResult.getName());
+
+		assertThat(result.quote()).satisfies(quote -> {
+			assertThat(quote.code()).isEqualTo(pairResult.getSource().getCode());
+			assertThat(quote.currency()).isEqualTo(pairResult.getTarget().getCode());
+			assertThat(quote.price()).isEqualTo("25.5");
+			assertThat(quote.time()).isEqualTo(parse("2016-06-30T19:32:00+02:00"));
+		});
 
 		Iterable<HistoricalRate> res = hRateRepo.findAll(historicalRate.fromcur.code.eq("UBI").and(historicalRate.tocur.code.eq("EUR")));
 
 		assertThat(res).containsExactly(
-				new HistoricalRate("UBI", "EUR", new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00")),
-				new HistoricalRate("UBI", "EUR", new BigDecimal("25.5"), parse("2016-06-30T19:32:00+02:00")));
+				new HistoricalRate(new SymbolEntity("UBI"), new SymbolEntity("EUR"), new BigDecimal("25.2"), parse("2016-06-30T02:00:00+02:00")),
+				new HistoricalRate(new SymbolEntity("UBI"), new SymbolEntity("EUR"), new BigDecimal("25.5"), parse("2016-06-30T19:32:00+02:00")));
 		
 		
 		assertThat(rateService.getLatest("UBI", "EUR")).isNotNull();

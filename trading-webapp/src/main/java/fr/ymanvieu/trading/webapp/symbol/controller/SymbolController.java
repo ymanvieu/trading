@@ -24,7 +24,7 @@ public class SymbolController {
 	
 	@PostMapping("/favorite")
 	public void addFavoriteSymbol(@RequestBody Map<String, String> symbolCode, Principal p) {
-		symbolService.addFavoriteSymbol(symbolCode.get("fromSymbolCode"), symbolCode.get("toSymbolCode"), Integer.valueOf(p.getName()));
+		symbolService.createFavoriteSymbol(symbolCode.get("fromSymbolCode"), symbolCode.get("toSymbolCode"), Integer.valueOf(p.getName()));
 	}
 	
 	@DeleteMapping("/favorite/{fromSymbolCode}/{toSymbolCode}")

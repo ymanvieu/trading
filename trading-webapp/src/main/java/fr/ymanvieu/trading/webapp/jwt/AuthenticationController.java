@@ -61,7 +61,7 @@ public class AuthenticationController {
         }
 
         var userId = Integer.valueOf(jwtTokenUtil.getSubjectFromToken(token));
-        UserDetails userDetails = userService.getUser(userId);
+        UserDetails userDetails = userService.getUser(userId).orElseThrow(() -> new JwtException("userId doesn't exist: " + userId));
         
         if(!jwtTokenUtil.validateToken(token, userDetails)) {
         	throw new JwtException("wrong username or expired refresh token");

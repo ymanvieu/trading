@@ -25,10 +25,6 @@ public class HistoricalRate extends RateEntity {
 	public HistoricalRate(SymbolEntity fromcur, SymbolEntity tocur, BigDecimal value, Instant date) {
 		super(fromcur, tocur, value, date);
 	}
-	
-	public HistoricalRate(String fromcur, String tocur, BigDecimal value, Instant date) {
-		this(new SymbolEntity(fromcur), new SymbolEntity(tocur), value, date);
-	}
 
 	@Id
 	@Nonnull
@@ -48,14 +44,14 @@ public class HistoricalRate extends RateEntity {
 
 	@Id
 	@Nonnull
-	@Column(precision = 20, scale = 10, nullable = false)
-	public BigDecimal getValue() {
-		return value;
-	}
-
-	@Nonnull
 	@Column(nullable = false)
 	public Instant getDate() {
 		return date;
+	}
+
+	@Nonnull
+	@Column(precision = 20, scale = 10, nullable = false)
+	public BigDecimal getValue() {
+		return value;
 	}
 }

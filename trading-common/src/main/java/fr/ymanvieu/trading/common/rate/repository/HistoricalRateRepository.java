@@ -21,10 +21,10 @@ public interface HistoricalRateRepository extends HistoricalRateRepositoryCustom
 	@Query("select date as date,value as value from HistoricalRate where fromcur.code=:fromcur and tocur.code=:tocur and (date between :start and :end) order by date")
 	List<DateValue> findDateValues(@Param("fromcur") String fromcur, @Param("tocur") String tocur, @Param("start") Instant startDate, @Param("end") Instant endDate);
 
-	@Query("SELECT min(date) as date,avg(value) as value FROM #{#entityName} where fromcur.code=:fromcur and tocur.code=:tocur and (date between :start and :end) group by extract(YEAR FROM date), extract(day of year FROM date),extract(HOUR FROM date) order by min(date)")
+	@Query("SELECT min(date) as date,avg(value) as value FROM #{#entityName} where fromcur.code=:fromcur and tocur.code=:tocur and (date between :start and :end) group by extract(YEAR FROM date), extract(month FROM date), extract(day FROM date), extract(HOUR FROM date) order by min(date)")
 	List<DateValue> findHourlyValues(@Param("fromcur") String fromcur, @Param("tocur") String tocur, @Param("start") Instant startDate, @Param("end") Instant endDate);
 
-	@Query("SELECT min(date) as date,avg(value) as value FROM #{#entityName} where fromcur.code=:fromcur and tocur.code=:tocur and (date between :start and :end) group by extract(YEAR FROM date), extract(day of year FROM date) order by min(date)")
+	@Query("SELECT min(date) as date,avg(value) as value FROM #{#entityName} where fromcur.code=:fromcur and tocur.code=:tocur and (date between :start and :end) group by extract(YEAR FROM date), extract(month FROM date), extract(day FROM date) order by min(date)")
 	List<DateValue> findDailyValues(@Param("fromcur") String fromcur, @Param("tocur") String tocur, @Param("start") Instant startDate, @Param("end") Instant endDate);
 
 	@Query("SELECT min(date) as date,avg(value) as value FROM #{#entityName} where fromcur.code=:fromcur and tocur.code=:tocur and (date between :start and :end) group by extract(YEAR FROM date), extract(WEEK FROM date) order by min(date)")

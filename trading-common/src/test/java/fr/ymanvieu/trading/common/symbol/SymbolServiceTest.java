@@ -1,23 +1,19 @@
 package fr.ymanvieu.trading.common.symbol;
 
-import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.EUR;
-import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.USD;
+import static fr.ymanvieu.trading.common.symbol.Currency.EUR;
+import static fr.ymanvieu.trading.common.symbol.Currency.USD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.symbol.entity.SymbolEntity;
 import fr.ymanvieu.trading.common.symbol.repository.SymbolRepository;
-import jakarta.persistence.EntityNotFoundException;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
 public class SymbolServiceTest {
@@ -29,14 +25,14 @@ public class SymbolServiceTest {
 	private SymbolService symbolService;
 
 	@Test
-	public void testAddSymbol_notExist() {
+	public void createSymbol_notExist() {
 		// given
 		String code = USD;
 		String name = "US Dollar";
 		String countryFlag = "us";
 
 		// when
-		Symbol result = symbolService.addSymbol(code, name, countryFlag, null);
+		Symbol result = symbolService.createSymbol(code, name, countryFlag, null);
 
 		// then
 		assertThat(result).usingRecursiveComparison().isEqualTo(new SymbolEntity(code, name, countryFlag, null));
@@ -45,7 +41,7 @@ public class SymbolServiceTest {
 
 	@Sql("/sql/insert_data.sql")
 	@Test
-	public void testAddSymbol_NotExistWithExistingCurrency() {
+	public void createSymbol_NotExistWithExistingCurrency() {
 		// given
 		String code = "TOTO";
 		String name = "toto";
@@ -53,7 +49,7 @@ public class SymbolServiceTest {
 		String currencyCode = USD;
 
 		// when
-		Symbol result = symbolService.addSymbol(code, name, flag, currencyCode);
+		Symbol result = symbolService.createSymbol(code, name, flag, currencyCode);
 
 		// then
 		assertThat(result).usingRecursiveComparison().isEqualTo(new Symbol(code, name, flag, new Symbol(USD, "US Dollar", "us", null)));
@@ -66,36 +62,35 @@ public class SymbolServiceTest {
 	}
 
 	@Test
-	public void testAddSymbol_NotExistWithNotExistingCurrency() {
+	public void createSymbol_NotExistWithNotExistingCurrency() {
 		// given
 		String code = "TOTO";
 		String name = "toto";
 		String currencyCode = "XXX";
 
 		// when
-		assertThatThrownBy(() -> symbolService.addSymbol(code, name, null, currencyCode))
-				.hasRootCauseInstanceOf(EntityNotFoundException.class)
-				.hasMessageContaining("Unable to find fr.ymanvieu.trading.common.symbol.entity.SymbolEntity with id XXX");
+		assertThatThrownBy(() -> symbolService.createSymbol(code, name, null, currencyCode))
+				.isInstanceOf(SymbolException.class)
+				.hasMessageContaining("symbol.error.unknown: [XXX]");
 	}
 
 	@Sql("/sql/insert_data.sql")
 	@Test
-	public void testAddSymbol_AlreadyExist() {
+	public void createSymbol_AlreadyExist() {
 		// given
-		String code = USD;
 		String name = "US Dollar";
 		String countryFlag = "us";
 
 		// when
-		assertThatThrownBy(() -> symbolService.addSymbol(code, name, countryFlag, null))
+		assertThatThrownBy(() -> symbolService.createSymbol(USD, name, countryFlag, null))
 				.isInstanceOf(SymbolException.class)
-				.hasMessage("symbols.error.already_exists: [USD]");
+				.hasMessage("symbol.error.already_exists: [USD]");
 
 	}
 
 	@Sql("/sql/insert_data.sql")
 	@Test
-	public void testGetForCode() {
+	public void getForCode() {
 		assertThat(symbolService.getForCode(USD))
 		.hasValueSatisfying((result) -> {
 			assertThat(result).isEqualTo(new Symbol(USD, "US Dollar", "us", null));
@@ -104,19 +99,19 @@ public class SymbolServiceTest {
 	}
 
 	@Test
-	public void testGetForCode_NotExist() {
+	public void getForCode_NotExist() {
 		assertThat(symbolService.getForCode(USD)).isNotPresent();
 	}
 
 	@Sql("/sql/insert_user_symbol_favorite.sql")
 	@Test
-	public void testAddFavoriteSymbol() throws Exception {
-		symbolService.addFavoriteSymbol(USD, EUR, 2);
+	public void createFavoriteSymbol() {
+		symbolService.createFavoriteSymbol(USD, EUR, 2);
 	}
 
 	@Sql("/sql/insert_user_symbol_favorite.sql")
 	@Test
-	public void testDeleteFavoriteSymbol() throws Exception {
+	public void testDeleteFavoriteSymbol() {
 		symbolService.deleteFavoriteSymbol("UBI", EUR, 2);
 	}
 }

@@ -1,82 +1,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>trading-webapp</artifactId>
-	<packaging>${packaging.type}</packaging>
 
 	<parent>
 		<groupId>fr.ymanvieu.trading</groupId>
 		<artifactId>trading</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
 	<properties>
-		<packaging.type>jar</packaging.type>
-
 		<apache-commons-text.version>1.10.0</apache-commons-text.version>
-		<testcontainers.version>1.17.5</testcontainers.version>
-		<test-scenario.version>0.0.3</test-scenario.version>
+		<test-scenario.version>0.1.1</test-scenario.version>
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>prod-package</id>
-			<properties>
-				<packaging.type>war</packaging.type>
-			</properties>
-			<build>
-				<finalName>ROOT</finalName>
-			</build>
-			<dependencies>
-				<dependency>
-					<groupId>fr.ymanvieu.trading</groupId>
-					<artifactId>trading-data-collect</artifactId>
-					<version>${project.version}</version>
-					<exclusions>
-						<exclusion>
-							<groupId>org.apache.activemq</groupId>
-							<artifactId>artemis-jms-server</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-artemis</artifactId>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>standalone</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-maven-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>
-									<groupId>com.h2database</groupId>
-									<artifactId>h2</artifactId>
-								</exclude>
-								<exclude>
-									<groupId>org.testcontainers</groupId>
-									<artifactId>postgresql</artifactId>
-								</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.ymanvieu.trading</groupId>
 			<artifactId>trading-common</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.ymanvieu.trading</groupId>
+			<artifactId>trading-data-collect</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>artemis-jms-server</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -100,16 +54,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>${testcontainers.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
 
 		<!-- SpringBoot -->
 		<dependency>
@@ -123,7 +68,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -189,12 +133,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>fr.ymanvieu.trading</groupId>
-			<artifactId>trading-data-collect</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
 			<version>${apache-commons-text.version}</version>
@@ -204,6 +142,23 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<finalName>trading-webapp</finalName>
+					<excludes>
+						<exclude>
+							<groupId>com.h2database</groupId>
+							<artifactId>h2</artifactId>
+						</exclude>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>

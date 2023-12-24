@@ -25,15 +25,11 @@ public class LocalUser extends AbstractGivenParam {
 
     @Override
     protected void internalCreate(ScenarioContext ctx) {
-        AbstractJwtAuthenticationResponseVerification createdUser;
-
         ctx.getDSL()
             .when(new SignupLocalUser()
                 .login(login)
                 .password(password)
-                .recaptchaResponse("random"))
-            .verify(createdUser = new SignupLocalUserVerification().login(login).authorities("ROLE_USER"));
-
-        userId = createdUser.userId();
+                .recaptchaResponse("random"));
+        userId = ctx.getDSL().verify(new SignupLocalUserVerification().login(login).authorities("ROLE_USER")).userId();
     }
 }

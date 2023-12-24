@@ -1,20 +1,26 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { RxStompService } from '@stomp/ng2-stompjs';
 import { RateService } from 'app/rate/rate.service';
 import { RxjsComponent } from 'app/shared/rxjs.component';
 import * as Highcharts from 'highcharts';
+import { HighchartsChartModule } from 'highcharts-angular';
 import Stock from 'highcharts/modules/stock';
-import { Observable, zip } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { Rate } from '../rate/model/rate';
+import { RxStompService } from '../rx-stomp.service';
 
 Stock(Highcharts);
 
 @Component({
   selector: 'app-chart-rate',
+  standalone: true,
+  imports: [
+    CommonModule,
+    HighchartsChartModule
+  ],
   templateUrl: './chart-rate.component.html',
   styleUrls: ['./chart-rate.component.scss']
 })
@@ -56,10 +62,10 @@ export class ChartRateComponent extends RxjsComponent implements OnInit {
         })
     );
 
-    zip(
+    combineLatest([
       this.getData(this.fromcur, this.tocur),
-      this.rateService.getLatestFrom(this.fromcur, this.tocur)
-    ).pipe(first())
+      this.rateService.getLatestFrom(this.fromcur, this.tocur)]
+    )
     .subscribe(([data, latestRate]) => {
       this.latestRate = latestRate;
       this.initChart([...data, [latestRate.date, latestRate.value]]);

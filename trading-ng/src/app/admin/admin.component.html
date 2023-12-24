@@ -1,44 +1,46 @@
-<clr-alert *ngIf="!!message" (clrAlertClosedChange)="resetMessage()"><clr-alert-item><span class="alert-text">{{message}}</span></clr-alert-item></clr-alert>
-<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="resetError()"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
-
-<form class="clr-form clr-form-compact" [formGroup]="searchFormGroup">
-	<div class="clr-form-control">
-			<div class="clr-input-wrapper">
-				<cds-icon shape="search"></cds-icon>
-				<input class="clr-input" type="text" name="code" formControlName="searchCode" placeholder="{{ 'admin.search-placeholder' | translate }}"/>
-				<button class ="btn btn-link btn-icon delete-button"><cds-icon shape="times" *ngIf="searchCode" (click)="resetSearchCode()"></cds-icon></button>
-			</div>
-	</div>
-</form>
-
-<clr-datagrid class="datagrid-compact">
-	<clr-dg-column>{{ 'pair.name' | translate }}</clr-dg-column>
-	<clr-dg-column>{{ 'pair.symbol' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-xs-down">{{ 'pair.exchange' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-sm-down">{{ 'pair.type' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-sm-down">{{ 'pair.provider' | translate }}</clr-dg-column>
-	<clr-dg-column class="clr-hidden-sm-down" [clrDgSortBy]="'lastUpdate'">{{ 'pair.lastUpdate' | translate }}</clr-dg-column>
-	<clr-dg-column></clr-dg-column>
-
-	<clr-dg-row *clrDgItems="let r of result | searchResultToResult">
-		<clr-dg-cell>{{r.name}}</clr-dg-cell>
-		<clr-dg-cell>{{r.code}}</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-xs-down">{{r.exchange}}</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-sm-down">{{r.type}}</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-sm-down">{{r.providerCode}}</clr-dg-cell>
-		<clr-dg-cell class="clr-hidden-sm-down">{{r.lastUpdate | date:'dd/MM/yy HH:mm:ss'}}</clr-dg-cell>
-		<clr-dg-cell>
-			<div class="btn-group">
-				<button *ngIf="r.type" type="button" class="btn btn-success" (click)="add(r.code, r.providerCode)">{{ 'admin.add' | translate }}</button>
+<p-messages></p-messages>
+<p-table [value]="result | searchResultToResult" styleClass="p-datatable-striped p-datatable-sm p-datatable-gridlines"
+				 [sortField]="'lastUpdate'"
+				 [sortOrder]="1"
+				 [paginator]="true"
+				 [rows]="10"
+				 [showPageLinks]="false"
+				 [showJumpToPageDropdown]="true"
+				 currentPageReportTemplate="{first} - {last} ({totalRecords})"
+				 [rowsPerPageOptions]="[10, 20, 50, 100]"
+>
+	<ng-template pTemplate="caption">
+		<div class="flex">
+			<span class="p-input-icon-left ml-auto" [formGroup]="searchFormGroup">
+				<i class="pi pi-search" *ngIf="!searchCode"></i>
+				<i class="pi pi-times" *ngIf="searchCode" (click)="resetSearchCode()"></i>
+				<input class="p-inputtext-sm" pInputText type="text" formControlName="searchCode" placeholder="{{ 'admin.search-placeholder' | translate }}" />
+			</span>
+		</div>
+	</ng-template>
+	<ng-template pTemplate="header">
+		<tr>
+			<th>{{ 'pair.name' | translate }}</th>
+			<th>{{ 'pair.symbol' | translate }}</th>
+			<th class="hidden sm:table-cell">{{ 'pair.exchange' | translate }}</th>
+			<th class="hidden md:table-cell">{{ 'pair.type' | translate }}</th>
+			<th class="hidden md:table-cell">{{ 'pair.provider' | translate }}</th>
+			<th class="hidden md:table-cell" pSortableColumn="lastUpdate">{{ 'pair.lastUpdate' | translate }}<p-sortIcon field="lastUpdate"></p-sortIcon></th>
+			<th></th>
+		</tr>
+	</ng-template>
+	<ng-template pTemplate="body" let-r>
+		<tr data-test="table-line">
+			<td>{{r.name}}</td>
+			<td>{{r.code}}</td>
+			<td class="hidden sm:table-cell">{{r.exchange}}</td>
+			<td class="hidden md:table-cell">{{r.type}}</td>
+			<td class="hidden md:table-cell">{{r.providerCode}}</td>
+			<td class="hidden md:table-cell">{{r.lastUpdate | date:'dd/MM/yy HH:mm:ss'}}</td>
+			<td>
+				<p-button size="small" severity="success" *ngIf="r.type" (click)="add(r.code, r.providerCode)" label="{{ 'admin.add' | translate }}"></p-button>
 				<app-actions-pair *ngIf="!r.type" [pair]="getPairFromResult(r.id)" (removeConfirmed)="remove(getPairFromResult(r.id), $event)" (updateConfirmed)="update($event)"></app-actions-pair>
-			</div>
-		</clr-dg-cell>
-	</clr-dg-row>
-
-	<clr-dg-footer>
-		<clr-dg-pagination #pagination>
-			<clr-dg-page-size [clrPageSizeOptions]="[10,20,50,100]"></clr-dg-page-size>
-			{{ 'pagination.text' | translate: {first: pagination.firstItem + 1, last: pagination.lastItem + 1, total: pagination.totalItems} }}
-		</clr-dg-pagination>
-	</clr-dg-footer>
-</clr-datagrid>
+			</td>
+		</tr>
+	</ng-template>
+</p-table>

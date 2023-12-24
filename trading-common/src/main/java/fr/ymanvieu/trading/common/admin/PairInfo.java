@@ -1,16 +1,15 @@
 package fr.ymanvieu.trading.common.admin;
 
-import fr.ymanvieu.trading.common.provider.Quote;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Objects;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class PairInfo {
-	private Integer id;
-	private String code;
-	private String name;
-	private Quote quote;
+import fr.ymanvieu.trading.common.provider.Quote;
+
+public record PairInfo(Integer id, String code, String name, Quote quote) {
+
+	public PairInfo {
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(code, "code");
+		Objects.requireNonNull(name, "name");
+		//TODO add not null check for quote
+	}
 }

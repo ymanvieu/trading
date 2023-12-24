@@ -29,7 +29,7 @@ public class SymbolService {
 	@Autowired
 	private SymbolMapper symbolMapper;
 
-	public Symbol addSymbol(String code, String name, String countryFlag, String currencyCode) {
+	public Symbol createSymbol(String code, String name, String countryFlag, String currencyCode) {
 		requireNonNull(code, "code is null");
 		requireNonNull(name, "name is null");
 		
@@ -42,7 +42,8 @@ public class SymbolService {
 		se.setCountryFlag(countryFlag);
 		
 		if(currencyCode != null) {
-			se.setCurrency(new SymbolEntity(currencyCode));
+			var currency = symbolRepo.findOneByCodeAndCurrencyIsNull(currencyCode).orElseThrow(() -> SymbolException.unknown(currencyCode));
+			se.setCurrency(currency);
 		}
 
 		return symbolMapper.mapToSymbol(symbolRepo.save(se));
@@ -56,7 +57,7 @@ public class SymbolService {
 		return symbolRepo.findOneByCodeAndCurrencyIsNull(code).map(symbolMapper::mapToSymbol);
 	}
 
-	public void addFavoriteSymbol(String fromSymbolCode, String toSymbolCode, Integer userId) {
+	public void createFavoriteSymbol(String fromSymbolCode, String toSymbolCode, Integer userId) {
 		favoriteSymbolRepository.save(new FavoriteSymbolEntity(userId, fromSymbolCode, toSymbolCode));
 		log.info("Favorite symbol added:{}/{} user:{}", fromSymbolCode, toSymbolCode, userId);
 	}

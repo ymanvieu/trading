@@ -1,15 +1,8 @@
-:host {
-    ::ng-deep {
-        .p-inputnumber-buttons-stacked {
-            max-height: 1.8rem;
+@import "primeflex/primeflex";
+tr {
+  outline: var(--gray-300) solid thin;
+}
 
-            input {
-                max-width: 70%;
-            }
-        }
-
-        .p-inputnumber-button {
-            max-width: 1.5rem;
-        }
-    }
+td {
+  @extend .p-2;
 }

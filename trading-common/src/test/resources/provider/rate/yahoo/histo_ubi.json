@@ -1,0 +1,89 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "EUr",
+          "symbol": "UBI.PA",
+          "exchangeName": "PAR",
+          "instrumentType": "EQUITY",
+          "firstTradeDate": 946886400,
+          "regularMarketTime": 1685086828,
+          "gmtoffset": 7200,
+          "timezone": "CEST",
+          "exchangeTimezoneName": "Europe/Paris",
+          "regularMarketPrice": 24.21,
+          "chartPreviousClose": 24.17,
+          "priceHint": 2,
+          "currentTradingPeriod": {
+            "pre": {
+              "timezone": "CEST",
+              "end": 1685084400,
+              "start": 1685084400,
+              "gmtoffset": 7200
+            },
+            "regular": {
+              "timezone": "CEST",
+              "end": 1685115000,
+              "start": 1685084400,
+              "gmtoffset": 7200
+            },
+            "post": {
+              "timezone": "CEST",
+              "end": 1685115000,
+              "start": 1685115000,
+              "gmtoffset": 7200
+            }
+          },
+          "dataGranularity": "1d",
+          "range": "1d",
+          "validRanges": [
+            "1d",
+            "5d",
+            "1mo",
+            "3mo",
+            "6mo",
+            "1y",
+            "2y",
+            "5y",
+            "10y",
+            "ytd",
+            "max"
+          ]
+        },
+        "timestamp": [
+          1685086828
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "close": [
+                24.209999084472656
+              ],
+              "open": [
+                24.219999313354492
+              ],
+              "high": [
+                24.229999542236328
+              ],
+              "volume": [
+                22821
+              ],
+              "low": [
+                24.06999969482422
+              ]
+            }
+          ],
+          "adjclose": [
+            {
+              "adjclose": [
+                24.209999084472656
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}

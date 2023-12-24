@@ -21,13 +21,9 @@ public class Pair extends AbstractGivenParam {
     protected void internalCreate(ScenarioContext ctx) {
         useAdmin();
 
-        CreatePairVerification createdPair;
-
         ctx.getDSL()
             .when(new CreatePair()
-                .code(code))
-            .verify(createdPair = new CreatePairVerification());
-
-        id = createdPair.getId();
+                .code(code));
+        id = ctx.getDSL().verify(new CreatePairVerification()).getId();
     }
 }

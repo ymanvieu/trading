@@ -1,5 +1,7 @@
 package fr.ymanvieu.trading.webapp.config;
 
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,13 +9,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import fr.ymanvieu.trading.common.config.SecurityConfig;
 import fr.ymanvieu.trading.webapp.jwt.JwtTokenUtil;
@@ -43,45 +48,43 @@ public class WebSecurityConfig {
 	private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			.and()
+	MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
+		return new MvcRequestMatcher.Builder(introspector);
+	}
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
+		http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			// Custom JWT based security filter
-			.csrf().disable();
+			.csrf(AbstractHttpConfigurer::disable);
 
-		http.headers().frameOptions().sameOrigin(); // h2-console
+		http.headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin)); // h2-console
 
-			// https://docs.spring.io/spring-security/site/docs/5.1.0.RELEASE/reference/htmlsingle/#oauth2login-advanced-login-page
-		http.oauth2Login()
-			.authorizationEndpoint()
-			.baseUri("/api/oauth2/authorization")
-			.authorizationRequestRepository(cookieAuthorizationRequestRepository())
-			.and()
-			.redirectionEndpoint()
-			.baseUri("/api/login/oauth2/code/*")
-			.and()
-			.userInfoEndpoint()
-			.oidcUserService(customOidcUserService)
-			.userService(customOAuth2UserService)
-			.and()
-			.successHandler(oAuth2AuthenticationSuccessHandler)
-			.failureHandler(oAuth2AuthenticationFailureHandler)
-		.and()
-		.oauth2ResourceServer()
-			.jwt()
-			.jwtAuthenticationConverter(jwtAuthenticationConverter())
-			.and()
+		// https://docs.spring.io/spring-security/site/docs/5.1.0.RELEASE/reference/htmlsingle/#oauth2login-advanced-login-page
+		http.oauth2Login(oauth2Login -> oauth2Login
+				.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
+					.baseUri("/api/oauth2/authorization")
+					.authorizationRequestRepository(cookieAuthorizationRequestRepository()))
+
+			.redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
+				.baseUri("/api/login/oauth2/code/*"))
+
+			.userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+				.oidcUserService(customOidcUserService)
+				.userService(customOAuth2UserService))
+				.successHandler(oAuth2AuthenticationSuccessHandler)
+				.failureHandler(oAuth2AuthenticationFailureHandler))
+
+		.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer
+			.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
 			.accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-			.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
+			.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()));
 
 		http.authorizeHttpRequests(authorize -> authorize
-			.requestMatchers("/api/rate/**", "/api/refresh", "/api/auth", "/api/signup").permitAll()
-			.requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-			.requestMatchers("/stomp/**").permitAll()
-
-			// Since spring security 6.0, we must explicit default paths (otherwise implicitly Deny access)
-			// https://github.com/spring-projects/spring-security/issues/11967
-			.anyRequest().authenticated()
+			.requestMatchers(mvc.pattern("/api/rate/**"), mvc.pattern("/api/refresh"), mvc.pattern("/api/auth"), mvc.pattern("/api/signup")).permitAll()
+			.requestMatchers(mvc.pattern("/api/**")).authenticated()
+			.requestMatchers(mvc.pattern("/stomp/**")).permitAll()
+			.requestMatchers(antMatcher("/h2-console/**")).permitAll()
 		);
 
 		return http.build();

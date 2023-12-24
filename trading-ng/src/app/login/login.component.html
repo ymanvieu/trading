@@ -1,20 +1,28 @@
-<form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="loginForm" id="loginForm" role="form" novalidate>
+<form class="lg:col-offset-3 lg:col-6" [formGroup]="loginForm" id="loginForm" role="form" novalidate>
 
-	<a href="{{ googleURL }}" class="btn google"><i class="pi pi-google"></i>Log in with Google</a>
-	<a href="{{ githubURL }}" class="btn btn-primary github"><i class="pi pi-github"></i>Log in with Github</a>
+	<button pButton class="p-button-sm google mr-2 mb-2" data-test="google-login"><a class="google" href="{{googleURL}}"><i class="pi pi-google"></i>Log in with Google</a></button>
+	<button pButton class="p-button-sm github mb-2" data-test="github-login"><a class="github" href="{{githubURL}}"><i class="pi pi-github"></i>Log in with Github</a></button>
 
-	<hr/>
+	<hr class="mt-2 mb-4"/>
 
-	<clr-alert clrAlertType="danger" *ngIf="!!hasError" (clrAlertClosedChange)="hasError = false"><clr-alert-item><span class="alert-text">{{ 'login.error.bad-credentials' | translate }}</span></clr-alert-item></clr-alert>
+	<div class="field grid">
+		<label for="username" class="col-12 mb-2 md:col-2 md:mb-0">{{ 'login.login' | translate }}</label>
+		<div class="col-12 md:col-10">
+			<input data-test="username" pInputText id="username" type="text" formControlName="username" class="p-inputtext-sm" />
+		</div>
+	</div>
+	<div class="field grid">
+		<label for="password" class="col-12 mb-2 md:col-2 md:mb-0">{{ 'login.password' | translate }}</label>
+		<div class="col-12 md:col-10">
+			<p-password data-test="password" id="password" class="p-inputtext-sm" formControlName="password" [feedback]="false" [toggleMask]="true"/>
+		</div>
+	</div>
 
-	<clr-input-container>
-		<label>{{ 'login.login' | translate }}</label> 
-		<input clrInput type="text" formControlName="username" /> 
-	</clr-input-container>
-	<clr-password-container>
-		<label>{{ 'login.password' | translate }}</label> 
-		<input clrPassword formControlName="password" /> 
-	</clr-password-container>
-		
-	<button class="btn btn-primary btn-block clr-col-sm-6" [disabled]="!loginForm.valid" (click)="login()">{{ 'login.title' | translate }}</button>
+	<div class="field grid pt-2 pb-2">
+		<button pButton data-test="login" class="p-button" [disabled]="!loginForm.valid" (click)="login()">{{ 'login.title' | translate }}</button>
+	</div>
+
+	<div class="field grid">
+		<p-message *ngIf="hasError" severity="error" [text]="'login.error.bad-credentials' | translate"></p-message>
+	</div>
 </form>

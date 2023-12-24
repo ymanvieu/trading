@@ -1,87 +1,89 @@
-<clr-modal [(clrModalOpen)]="opened" [clrModalStaticBackdrop]="false">
-	
-	<h5 class="modal-title">
-		{{orderInfo?.selectedCurrency.symbol.name}} <cds-icon shape="angle" direction="right"></cds-icon> {{orderInfo?.selected.symbol.name}}
-	</h5>
+<span *ngIf="asset">
+    <p-button data-test="buy-asset" class="xl:mr-1" size="small" severity="success" (click)="open('BUY')" label="{{ 'order.buy' | translate }}"></p-button>
+    <p-button data-test="sell-asset" size="small" severity="danger" (click)="open('SELL')" label="{{ 'order.sell' | translate }}"></p-button>
+</span>
+<p-button *ngIf="!asset" data-test="buy-new-asset" size="small" severity="success" (click)="open('BUY')" label="{{ 'order.buy-new-asset' | translate }}"></p-button>
 
-	<div class="modal-body">
-		<form class="clr-form clr-form-compact">
-			<p-inputNumber [disabled]="sellAll" class="order" name="input" inputId="input" [ngModel]="selectedQuantity" (onInput)="selectedQuantity = $event.value" [showButtons]="true" [min]="0"></p-inputNumber>
+<p-dialog *ngIf="orderInfo && opened" data-test="order-modal" header="Header" [(visible)]="opened" [modal]="true">
+	<ng-template pTemplate="header">
+		<span class="text-xl font-bold">{{orderInfo.selectedCurrency.symbol.name}}<i class="pi pi-angle-right"></i>{{orderInfo.selected.symbol.name}}</span>
+	</ng-template>
 
-			<clr-toggle-container *ngIf="orderType === 'SELL'">
-				<clr-toggle-wrapper>
-					<input type="checkbox" clrToggle name="options" value="option1" [(ngModel)]="sellAll" />
-					<label>{{'order.sell-all' | translate}}</label>
-				</clr-toggle-wrapper>
-			</clr-toggle-container>
-
-			<select clrSelect [(ngModel)]="selectedSymbol" *ngIf="availableSymbols" name="selectedSymbol">
-				<option *ngFor="let s of availableSymbols" [ngValue]="s">{{s.code}} - {{s.name}}</option>
-			</select>
-
-		</form>
-	
-		<div class="row">
-			<div class="col-md-8 offset-md-2">
-				<table class="table table-striped table-hover" *ngIf="orderInfo?.selected as selected">
-					<tbody>
-						<tr *ngIf="selected.quantity">
-							<td>{{ 'asset.owned' | translate }}</td>
-							<td>{{selected.quantity | number}}</td>
-						</tr>
-						<tr *ngIf="asset?.currentValue">
-							<td>{{ 'asset.current-value' | translate }}</td>
-							<td>{{asset.currentValue | number}}</td>
-						</tr>
-						<tr *ngIf="selected.currentRate">
-							<td>{{ 'asset.current-rate' | translate }}</td>
-							<td>{{selected.currentRate | number}}</td>
-						</tr>
-						<tr *ngIf="asset?.percentChange">
-							<td>{{ 'percent-change' | translate }}</td>
-							<td [appBalancedColor]="asset.percentChange">{{asset.percentChange | number}}</td>
-						</tr>
-						<tr *ngIf="selected.valueChange">
-							<td>{{ 'value-change' | translate }}</td>
-							<td [appBalancedColor]="selected.valueChange">{{selected.valueChange | number}} {{orderInfo.selectedCurrency?.symbol.code}}</td>
-						</tr>
-						<tr *ngIf="orderInfo.selectedCurrency as sc">
-							<td>{{ 'order-info.currency-available' | translate }}</td>
-							<td><span>{{sc.quantity | number}} {{sc.symbol.code}}</span></td>
-						</tr>
-						<tr *ngIf="orderInfo.gainCost">
-							<ng-template [ngIf]="orderType === 'BUY'" [ngIfElse]="gainSell">
-								<td>
-									<b>{{ 'order-info.cost' | translate }}</b>
-								</td>
-								<td [appBalancedColor]="-1*orderInfo.gainCost">
-									<b>{{-1*orderInfo.gainCost | number}} {{orderInfo.selectedCurrency?.symbol.code}}</b>
-								</td>
-							</ng-template>
-							<ng-template #gainSell>
-								<td>
-									<b>{{ 'order-info.gain' | translate }}</b>
-								</td>
-								<td [appBalancedColor]="orderInfo.gainCost">
-									<b>{{orderInfo.gainCost | number}} {{orderInfo.selectedCurrency?.symbol.code}}</b>
-								</td>
-							</ng-template>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+	<div class="field grid">
+		<div class="col">
+			<p-inputNumber data-test="quantity-selection" [disabled]="sellAll" class="order" name="input" inputId="input"
+										 [ngModel]="selectedQuantity" (onInput)="selectedQuantity = $event.value"
+										 [showButtons]="true"
+										 [min]="1"
+										 buttonLayout="horizontal"
+										 incrementButtonIcon="pi pi-plus"
+										 decrementButtonIcon="pi pi-minus">
+			</p-inputNumber>
 		</div>
-
-		<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="resetError()"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
 	</div>
-	<div class="modal-footer">
-    	<button type="button" (click)="order()" [className]="orderType === 'BUY' ? 'btn btn-success' : 'btn btn-danger'">{{orderType}}</button>
+	<div class="field grid" *ngIf="orderType === 'SELL'">
+		<div class="col-3">
+			<p-inputSwitch data-test="sell-all" id="sellAll" [(ngModel)]="sellAll"  />
+		</div>
+		<label class="font-bold" for="sellAll">{{'order.sell-all' | translate}}</label>
 	</div>
-</clr-modal>
+	<div class="field grid">
+		<div class="col">
+			<p-dropdown *ngIf="availableSymbols" data-test="symbol-selector" appendTo="body" [filter]="true" filterBy="name" [options]="availableSymbols" [(ngModel)]="selectedSymbol" optionLabel="name" name="selectedSymbol"></p-dropdown>
+		</div>
+	</div>
 
-<div class="btn-group" *ngIf="asset">
-	<button type="button" class="btn btn-success" (click)="open('BUY')">{{ 'order.buy' | translate }}</button>
-	<button type="button" class="btn btn-danger" (click)="open('SELL')">{{ 'order.sell' | translate }}</button>
-</div>
+	<table class="w-full" *ngIf="orderInfo.selected as selected">
+		<tbody>
+			<tr *ngIf="selected.quantity">
+				<td>{{ 'asset.owned' | translate }}</td>
+				<td>{{selected.quantity | number}}</td>
+			</tr>
+			<tr *ngIf="asset?.currentValue">
+				<td>{{ 'asset.current-value' | translate }}</td>
+				<td>{{asset.currentValue | number}}</td>
+			</tr>
+			<tr *ngIf="selected.currentRate">
+				<td>{{ 'asset.current-rate' | translate }}</td>
+				<td>{{selected.currentRate | number}}</td>
+			</tr>
+			<tr *ngIf="asset?.percentChange">
+				<td>{{ 'percent-change' | translate }}</td>
+				<td [appBalancedColor]="asset.percentChange">{{asset.percentChange | number}}</td>
+			</tr>
+			<tr *ngIf="selected.valueChange">
+				<td>{{ 'value-change' | translate }}</td>
+				<td [appBalancedColor]="selected.valueChange">{{selected.valueChange | number}} {{orderInfo.selectedCurrency?.symbol.code}}</td>
+			</tr>
+			<tr *ngIf="orderInfo.selectedCurrency && orderType === 'BUY'">
+				<td>{{ 'order-info.currency-available' | translate }}</td>
+				<td><span>{{orderInfo.selectedCurrency.quantity | number}} {{orderInfo.selectedCurrency.symbol.code}}</span></td>
+			</tr>
+			<tr *ngIf="orderInfo.gainCost">
+				<ng-template [ngIf]="orderType === 'BUY'" [ngIfElse]="gainSell">
+					<td>
+						<b>{{ 'order-info.cost' | translate }}</b>
+					</td>
+					<td [appBalancedColor]="-1*orderInfo.gainCost">
+						<b>{{-1*orderInfo.gainCost | number}} {{orderInfo.selectedCurrency?.symbol.code}}</b>
+					</td>
+				</ng-template>
+				<ng-template #gainSell>
+					<td>
+						<b>{{ 'order-info.gain' | translate }}</b>
+					</td>
+					<td [appBalancedColor]="orderInfo.gainCost">
+						<b>{{orderInfo.gainCost | number}} {{orderInfo.selectedCurrency?.symbol.code}}</b>
+					</td>
+				</ng-template>
+			</tr>
+		</tbody>
+	</table>
 
-<button *ngIf="!asset" type="button" class="btn btn-success" (click)="open('BUY')">{{ 'order.buy-new-asset' | translate }}</button>
+	<div *ngIf="error" class="mt-3">
+	<p-message data-test="error-message" severity="error" text="{{error}}"></p-message>
+	</div>
+	<ng-template pTemplate="footer">
+		<p-button data-test="order-action" [severity]="orderType === 'BUY' ? 'success' : 'danger'" (click)="order()">{{orderType}}</p-button>
+	</ng-template>
+</p-dialog>

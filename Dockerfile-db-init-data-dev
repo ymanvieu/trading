@@ -1,0 +1,4 @@
+FROM postgres:15
+WORKDIR /
+ADD trading-data-collect/src/main/resources/data-dev-collect.sql data-dev.sql
+CMD sleep 5 && psql --u postgres --host trading-db -d trading -f data-dev.sql

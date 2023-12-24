@@ -1,0 +1,10 @@
+{
+  "message": "order.error.not_enough_fund",
+  "args": [
+    1.0,
+    "TTWO",
+    "USD",
+    100.0,
+    155.60
+  ]
+}

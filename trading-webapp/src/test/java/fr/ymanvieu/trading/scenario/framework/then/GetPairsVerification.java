@@ -23,7 +23,7 @@ public class GetPairsVerification extends AbstractThenVerification {
 
         var result = action.parseResult();
 
-        assertThat(result.getExistingPairs().size() + result.getAvailableSymbols().size()).isEqualTo(resultSize);
-        assertThat(result.getExistingPairs()).hasSize(existingPairsSize);
+        assertThat(result.existingPairs().size() + result.availableSymbols().size()).isEqualTo(resultSize);
+        assertThat(result.existingPairs()).hasSize(existingPairsSize);
     }
 }

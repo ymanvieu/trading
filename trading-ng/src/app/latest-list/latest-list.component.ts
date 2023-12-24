@@ -1,36 +1,47 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
+import { SortEvent } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { Table, TableModule } from 'primeng/table';
+import { AuthenticationService } from '../authentication/authentication.service';
 import { RateService } from '../rate/rate.service';
 import { Rate } from '../rate/model/rate';
 import {Component, NgZone, OnInit} from '@angular/core';
-import { AuthenticationService } from '../authentication';
+import { RxStompService } from '../rx-stomp.service';
+import { TimeAgoPipe } from '../shared/pipes/time-ago.pipe';
 import { SymbolService } from '../symbol/symbol.service';
-import { ClrDatagridSortOrder, ClrDatagridComparatorInterface } from '@clr/angular';
 import { map, tap, switchMap } from 'rxjs/operators';
-import { RxStompService } from '@stomp/ng2-stompjs';
 import { timer } from 'rxjs';
 import { RxjsComponent } from 'app/shared/rxjs.component';
 
-class FavoriteAndDateComparator implements ClrDatagridComparatorInterface<Rate> {
-  compare(a: Rate, b: Rate) {
-    if (a.favorite && !b.favorite) { return 1; }
-    if (!a.favorite && b.favorite) { return -1; }
-    return <any>a.date - <any>b.date;
-  }
-}
-
 @Component({
   selector: 'app-latest-list',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+    FormsModule,
+    TimeAgoPipe,
+    CommonModule,
+    RouterModule
+  ],
   templateUrl: './latest-list.component.html',
   styleUrls: ['./latest-list.component.scss']
 })
 export class LatestListComponent extends RxjsComponent implements OnInit {
-  rates: Rate[];
 
-  descSort = ClrDatagridSortOrder.DESC;
-  sortFavoriteAndDate = new FavoriteAndDateComparator();
+  rates: Rate[];
 
   isAuthorised: boolean;
 
   now: Date;
+
+  filter: string;
 
   constructor(
     private rateService: RateService,
@@ -39,6 +50,35 @@ export class LatestListComponent extends RxjsComponent implements OnInit {
     private rxStompService: RxStompService,
     private ngZone: NgZone
   ) { super(); }
+
+
+  customSort(event: SortEvent) {
+    event.data.sort((data1, data2) => {
+      let value1 = data1[event.field];
+      let value2 = data2[event.field];
+      let result;
+
+      if (value1 == null && value2 != null) result = -1;
+      else if (value1 != null && value2 == null) result = 1;
+      else if (value1 == null && value2 == null) result = 0;
+      else if (typeof value1 === 'string' && typeof value2 === 'string') result = value1.localeCompare(value2);
+      else if (event.field === 'favorite') result = this.compare(data1, data2);
+      else result = value1 < value2 ? -1 : value1 > value2 ? 1 : 0;
+
+      return event.order * result;
+    });
+  }
+
+  compare(a: Rate, b: Rate) {
+    if (a.favorite && !b.favorite) { return 1; }
+    if (!a.favorite && b.favorite) { return -1; }
+    return b.fromcur.name.localeCompare(a.fromcur.name);
+  }
+
+  clearTable(table: Table) {
+    this.filter = null;
+    table.clear();
+  }
 
   ngOnInit(): void {
 

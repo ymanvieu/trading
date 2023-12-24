@@ -1,5 +1,9 @@
-main {
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+.main {
+  margin-top: 1rem;
+  max-width: 1200px;
+}
+
+
+::ng-deep .p-menuitem-link-active{
+  background-color: var(--gray-300);
 }

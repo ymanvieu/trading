@@ -1,16 +1,14 @@
 package fr.ymanvieu.trading.common.provider;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Objects;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class LookupInfo {
-	private String code;
-	private String name;
-	private String exchange;
-	private String type;
-	private String providerCode;
+public record LookupInfo(String code, String name, String exchange, String type, String providerCode) {
+
+    public LookupInfo {
+        Objects.requireNonNull(code);
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(exchange);
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(providerCode);
+    }
 }

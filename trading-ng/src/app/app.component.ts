@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { RxStompService } from '@stomp/ng2-stompjs';
-import { distinctUntilChanged, tap, first, filter, switchMap } from 'rxjs/operators';
-import { AuthenticationService } from './authentication';
-import { PortofolioService } from './portofolio';
+import { NgxPermissionsService } from 'ngx-permissions';
+import { MenuItem } from 'primeng/api';
+import { distinctUntilChanged, tap, first, filter } from 'rxjs/operators';
+import { AuthenticationService } from './authentication/authentication.service';
+import { PortofolioService } from './portofolio/portofolio.service';
 import { TokenStorage } from './authentication/token-storage.service';
-import { PromptUpdateService } from './prompt-update.service';
 import { Asset } from './portofolio/model/asset';
 import { Router } from '@angular/router';
+import { RxStompService } from './rx-stomp.service';
 
 @Component({
   selector: 'app-root',
@@ -19,26 +20,48 @@ export class AppComponent implements OnInit {
   baseCurrency: Asset;
   login: string;
 
+  items: MenuItem[];
+
+  logoutItems: MenuItem[];
+
   constructor(
     private authService: AuthenticationService,
     private portofolioService: PortofolioService,
-    translateService: TranslateService,
+    private translateService: TranslateService,
     private rxStompService: RxStompService,
     private tokenStorage: TokenStorage,
-    promptUpdateService: PromptUpdateService,
+    private permissionsService: NgxPermissionsService,
     private router: Router
-    ) {
-      translateService.setDefaultLang('en');
+    ) {}
+
+    private loadItems() {
+
+      const isAdmin = this.permissionsService.getPermission('ROLE_ADMIN') !== undefined;
+      let items: MenuItem[] = [];
+
+      this.translateService.get(['app.name', 'logout.title']).subscribe(trads  => {
+        items.push({label: trads['app.name'], routerLink: '/latest'});
+        items.push({label: 'Portofolio', routerLink: '/portofolio'});
+
+        if (isAdmin) {
+          items.push({label: 'Admin', routerLink: '/admin'});
+        }
+
+        this.items = items;
+        this.logoutItems = [{label: trads['logout.title'], command: () => this.logout()}];
+      });
     }
 
   ngOnInit(): void {
+    this.loadItems();
+
     this.portofolioService.getPortofolio().subscribe(p => this.baseCurrency = !!p ? p.baseCurrency : null);
 
     this.authService.getAccessToken()
         .pipe(
             first(),
             filter(token => !!token),
-            switchMap(() => this.authService.refreshToken()))
+            tap(() => this.authService.refreshUser()))
         .subscribe();
 
     this.authService.getUser()
@@ -52,6 +75,7 @@ export class AppComponent implements OnInit {
         } else {
           this.portofolioService.clear();
         }
+        this.loadItems();
       });
 
     this.tokenStorage.getAccessToken()

@@ -67,12 +67,8 @@ public class AdminService {
 		Quote latestQuote = rProvider.getLatestRate(code);
 
 		if (latestQuote == null) {
-			throw SymbolException.UNAVAILABLE(code);
+			throw SymbolException.unavailable(code);
 		}
-
-		// TODO immutability ! copy data
-		latestQuote.setCode(pair.getSource().getCode());
-		latestQuote.setCurrency(pair.getTarget().getCode());
 
 		List<Quote> historicalQuotes = new ArrayList<>();
 
@@ -80,17 +76,12 @@ public class AdminService {
 
 		try {
 			historicalQuotes.addAll(hRProvider.getHistoricalRates(code));
-		} catch (IOException | RuntimeException e) {
+		} catch (RuntimeException e) {
 			// generally, if provider cannot get historical data, it throws exception
 			log.warn("Cannot get historical data for: {} (provider: {})", code, provider, e);
 		}
 
-		for (Quote q : historicalQuotes) {
-			q.setCode(pair.getSource().getCode());
-			q.setCurrency(pair.getTarget().getCode());
-		}
-
-		historicalQuotes.removeIf(q -> q.getTime().compareTo(latestQuote.getTime()) == 0);
+		historicalQuotes.removeIf(q -> q.time().compareTo(latestQuote.time()) == 0);
 
 		historicalQuotes.add(latestQuote);
 
@@ -128,10 +119,10 @@ public class AdminService {
 			if(existingSourceSymbol.get().getCurrency() == null) {
 				throw AdminException.currencyAlreadyExists(source);
 			} else if (!existingSourceSymbol.get().getCurrency().getCode().equals(currency)) {
-				throw AdminException.alreadyExistsWithOtherCurrency(source, existingSourceSymbol.get().getCurrency().getCode());
+				throw AdminException.symbolAlreadyExistsWithOtherCurrency(source, existingSourceSymbol.get().getCurrency().getCode());
 			}
 		} else {
-			symbolService.addSymbol(source, name, null, currency);
+			symbolService.createSymbol(source, name, null, currency);
 		}
 
 		return pairService.create(code, name, source, currency, exchange, provider);
@@ -175,7 +166,7 @@ public class AdminService {
 	}
 
 	private void removeDuplicates(List<LookupInfo> availableSymbols, List<UpdatedPair> existingSymbols) {
-		availableSymbols.removeIf(as -> existingSymbols.stream().map(UpdatedPair::getSymbol).anyMatch(s -> s.equals(as.getCode())));
+		availableSymbols.removeIf(as -> existingSymbols.stream().map(UpdatedPair::getSymbol).anyMatch(s -> s.equals(as.code())));
 	}
 
 	public PairInfo update(UpdatedPair pair, Long connectedUserId) throws IOException {

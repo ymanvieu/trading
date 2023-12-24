@@ -4,8 +4,6 @@ import fr.ymanvieu.trading.common.exception.BusinessException;
 
 public class PairException extends BusinessException {
 
-	private static final long serialVersionUID = 8715490540458309882L;
-
 	private PairException(String key, Object... args) {
 		super(key, args);
 	}

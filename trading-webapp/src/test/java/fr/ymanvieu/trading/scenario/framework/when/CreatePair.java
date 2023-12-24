@@ -5,14 +5,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 
 import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 
 import fr.ymanvieu.trading.common.admin.PairInfo;
-import fr.ymanvieu.trading.common.symbol.util.CurrencyUtils;
 import fr.ymanvieu.trading.scenario.framework.ScenarioContext;
 import lombok.Getter;
 import lombok.Setter;

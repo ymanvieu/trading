@@ -1,7 +1,7 @@
 package fr.ymanvieu.trading.common.rate.repository;
 
-import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.EUR;
-import static fr.ymanvieu.trading.common.symbol.util.CurrencyUtils.USD;
+import static fr.ymanvieu.trading.common.symbol.Currency.EUR;
+import static fr.ymanvieu.trading.common.symbol.Currency.USD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.atIndex;
 

@@ -1,0 +1,39 @@
+{
+  "selected": {
+    "symbol": {
+      "code": "TTWO",
+      "name": "Take-Two Interactive Software, Inc.",
+      "countryFlag": null
+    },
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "countryFlag": "us"
+    },
+    "quantity": 0.0,
+    "value": null,
+    "currentValue": null,
+    "currentRate": 155.6,
+    "percentChange": null,
+    "valueChange": null
+  },
+  "selectedCurrency": {
+    "symbol": {
+      "code": "USD",
+      "name": "US Dollar",
+      "countryFlag": "us"
+    },
+    "currency": {
+      "code": "EUR",
+      "name": "Euro",
+      "countryFlag": "eu"
+    },
+    "quantity": 100.0,
+    "value": null,
+    "currentValue": null,
+    "currentRate": null,
+    "percentChange": null,
+    "valueChange": null
+  },
+  "gainCost": 155.60
+}

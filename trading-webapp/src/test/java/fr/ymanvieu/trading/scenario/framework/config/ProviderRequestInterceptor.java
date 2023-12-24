@@ -34,17 +34,15 @@ public class ProviderRequestInterceptor extends AbstractGivenParam {
         var server = ctx.getBean(MockRestServiceServer.class);
 
         //lookup
-        server.expect(between(0, Integer.MAX_VALUE), requestTo(startsWith("https://finance.yahoo.com/_finance_doubledown/api/resource/searchassist"))).andRespond(createLookupResponse());
+        server.expect(between(0, Integer.MAX_VALUE), requestTo(startsWith("https://yahoo-lookup/"))).andRespond(createLookupResponse());
         //histo
-        server.expect(between(0, Integer.MAX_VALUE), requestTo(startsWith("https://query1.finance.yahoo.com/v8/finance/chart/"))).andRespond(createHistoResponse());
-        //latest
-        server.expect(between(0, Integer.MAX_VALUE), requestTo(startsWith("https://query1.finance.yahoo.com/v7/finance/quote"))).andRespond(createLatestResponse());
+        server.expect(between(0, Integer.MAX_VALUE), requestTo(startsWith("https://yahoo-history/"))).andRespond(createHistoResponse());
     }
 
     ResponseCreator createLookupResponse() {
         return request -> {
             try {
-                var pattern = Pattern.compile("/_finance_doubledown/api/resource/searchassist;searchTerm=(.*)");
+                var pattern = Pattern.compile("/searchassist;searchTerm=(.*)");
                 var matcher = pattern.matcher(request.getURI().getPath());
                 matcher.matches();
 
@@ -76,28 +74,6 @@ public class ProviderRequestInterceptor extends AbstractGivenParam {
                     .replace(Files.readString(Path.of(new ClassPathResource("scenario/provider/histo_template.json").getURI())));
 
                 return withSuccess(histoResponse, MediaType.APPLICATION_JSON).createResponse(request);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        };
-    }
-
-
-    ResponseCreator createLatestResponse() {
-        return request -> {
-            try {
-                var params = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
-
-                //TODO assert exists
-                var symbols = params.getFirst("symbols");
-
-                var latestResponse = new StringSubstitutor(
-                    Map.of("symbol", symbols,
-                        "regularMarketPrice", 1,
-                        "regularMarketTime", Instant.now().getEpochSecond()))
-                    .replace(Files.readString(Path.of(new ClassPathResource("scenario/provider/latest_template.json").getURI())));
-
-                return withSuccess(latestResponse, MediaType.APPLICATION_JSON).createResponse(request);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

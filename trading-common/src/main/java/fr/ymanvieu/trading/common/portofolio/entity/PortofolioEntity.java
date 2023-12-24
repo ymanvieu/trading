@@ -117,7 +117,7 @@ public class PortofolioEntity extends AuditableEntity {
 		BigDecimal amountNeeded = q.getValue().multiply(BigDecimal.valueOf(quantity));
 
 		if (currencyAmount.compareTo(amountNeeded) < 0) {
-			throw OrderException.NOT_ENOUGH_FUND(fromSymbol.getCode(), quantity, currency.getCode(), currencyAmount.doubleValue(),
+			throw OrderException.notEnoughFund(fromSymbol.getCode(), quantity, currency.getCode(), currencyAmount.doubleValue(),
 					amountNeeded.doubleValue());
 		}
 
@@ -151,13 +151,13 @@ public class PortofolioEntity extends AuditableEntity {
 		final AssetEntity ownedAsset = getAsset(fromSymbol.getCode());
 
 		if (ownedAsset == null) {
-			throw OrderException.NO_QUANTITY_OWNED(fromSymbol.getCode());
+			throw OrderException.noQuantityOwned(fromSymbol.getCode());
 		}
 
 		BigDecimal quantityAfterSell = ownedAsset.getQuantity().subtract(BigDecimal.valueOf(quantity));
 
 		if (quantityAfterSell.signum() < 0) {
-			throw OrderException.NOT_ENOUGH_OWNED(fromSymbol.getCode(), ownedAsset.getQuantity().doubleValue(), quantity);
+			throw OrderException.notEnoughOwned(fromSymbol.getCode(), ownedAsset.getQuantity().doubleValue(), quantity);
 		}
 
 		final SymbolEntity currency = getCurrencyFor(fromSymbol);

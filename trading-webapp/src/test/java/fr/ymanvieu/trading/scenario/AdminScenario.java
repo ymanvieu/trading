@@ -35,8 +35,7 @@ public class AdminScenario extends Scenario {
 
     @Test
     void deletePair() {
-        Pair pair;
-        given(pair = new Pair().code("AAPL"));
+        Pair pair = given(new Pair().code("AAPL"));
 
         when(new DeletePair().id(pair.id()));
         verify(new DeletePairVerification());
@@ -47,8 +46,7 @@ public class AdminScenario extends Scenario {
 
     @Test
     void deletePair_withSymbol() {
-        Pair pair;
-        given(pair = new Pair().code("AAPL"));
+        Pair pair = given(new Pair().code("AAPL"));
 
         when(new DeletePair().id(pair.id()).withSymbol(true));
         verify(new DeletePairVerification());
@@ -59,8 +57,7 @@ public class AdminScenario extends Scenario {
 
     @Test
     void updatePair() {
-        Pair pair;
-        given(pair = new Pair().code("AAPL"));
+        Pair pair = given(new Pair().code("AAPL"));
 
         when(new UpdatePair().id(pair.id()).symbol("MSFT"));
         verify(new UpdatePairVerification());

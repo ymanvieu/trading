@@ -1,34 +1,43 @@
-<form clrForm class="clr-offset-xl-3 clr-col-xl-6" [formGroup]="form" id="signupForm" role="form" novalidate>
-	
-	<clr-alert clrAlertType="danger" *ngIf="!!error" (clrAlertClosedChange)="error = null"><clr-alert-item><span class="alert-text">{{error}}</span></clr-alert-item></clr-alert>
+<form class="xl:col-offset-3 xl:col-6" [formGroup]="form" id="signupForm" novalidate>
 
-	<clr-input-container>
-		<label>{{ 'signup.username' | translate }}</label> 
-		<input clrInput type="text" formControlName="username" />
-		<clr-control-error *ngIf="f.username.errors?.required">{{ 'form.validation.required' | translate }}</clr-control-error>
-		<clr-control-error *ngIf="f.username.errors?.minlength">{{ 'form.validation.length.min' | translate: {'length':usernameMinLength} }}</clr-control-error>
-		<clr-control-error *ngIf="f.username.errors?.maxlength">{{ 'form.validation.length.max' | translate: {'length':usernameMaxLength} }}</clr-control-error>
-	</clr-input-container>
-	<p></p>
-	<clr-password-container>
-		<label>{{ 'signup.password' | translate }}</label> 
-		<input clrPassword formControlName="password" /> 
-		<clr-control-error *ngIf="f.password.errors?.required">{{ 'form.validation.required' | translate }}</clr-control-error>
-		<clr-control-error *ngIf="f.password.errors?.minlength">{{ 'form.validation.length.min' | translate: {'length':passwordMinLength} }}</clr-control-error>
-		<clr-control-error *ngIf="f.password.errors?.maxlength">{{ 'form.validation.length.max' | translate: {'length':passwordMaxLength} }}</clr-control-error>
-	</clr-password-container>
-	<clr-password-container>
-		<label>{{ 'signup.confirmation' | translate }}</label> 
-		<input clrPassword formControlName="confirmation" /> 
-		<clr-control-error *ngIf="f.confirmation.errors?.required">{{ 'form.validation.required' | translate }}</clr-control-error>
-		<clr-control-error *ngIf="f.confirmation.errors?.mustMatch">{{ 'form.validation.password-mismatch' | translate }}</clr-control-error>
-	</clr-password-container>
-    
-	<div id="recaptcha" *ngIf="recaptcha">
-        <p-captcha #recaptcha [siteKey]="recaptchaSiteKey" (onResponse)="showResponse($event)" (onExpire)="expireRecaptcha()"></p-captcha>
+	<div class="field grid">
+		<label for="username" class="col-12 mb-2 md:col-3 md:mb-0">{{ 'signup.username' | translate }}</label>
+		<div class="col-12 md:col-9">
+			<input pInputText id="username" type="text" formControlName="username" class="p-inputtext-sm mr-2" />
+			<small class="p-error" *ngIf="f.username.dirty && f.username.errors?.required">{{ 'form.validation.required' | translate }}</small>
+			<small class="p-error" *ngIf="f.username.dirty && f.username.errors?.minlength">{{ 'form.validation.length.min' | translate: {'length':usernameMinLength} }}</small>
+			<small class="p-error" *ngIf="f.username.dirty && f.username.errors?.maxlength">{{ 'form.validation.length.max' | translate: {'length':usernameMaxLength} }}</small>
+		</div>
+	</div>
+	<div class="field grid">
+		<label for="password" class="col-12 mb-2 md:col-3 md:mb-0">{{ 'signup.password' | translate }}</label>
+		<div class="col-12 md:col-9">
+			<p-password id="password" class="p-inputtext-sm mr-2" formControlName="password" [feedback]="false" [toggleMask]="true"/>
+			<small class="p-error" *ngIf="f.password.dirty && f.password.errors?.required">{{ 'form.validation.required' | translate }}</small>
+			<small class="p-error" *ngIf="f.password.dirty && f.password.errors?.minlength">{{ 'form.validation.length.min' | translate: {'length':passwordMinLength} }}</small>
+			<small class="p-error" *ngIf="f.password.dirty && f.password.errors?.maxlength">{{ 'form.validation.length.max' | translate: {'length':passwordMaxLength} }}</small>
+		</div>
+	</div>
+	<div class="field grid">
+		<label for="confirmation" class="col-12 mb-2 md:col-3 md:mb-0">{{ 'signup.confirmation' | translate }}</label>
+		<div class="col-12 md:col-9">
+			<p-password id="confirmation" class="p-inputtext-sm mr-2" formControlName="confirmation" [feedback]="false" [toggleMask]="true"/>
+			<small class="p-error" *ngIf="f.confirmation.dirty && f.confirmation.errors?.required">{{ 'form.validation.required' | translate }}</small>
+			<small class="p-error" *ngIf="f.confirmation.dirty && f.confirmation.errors?.mustMatch">{{ 'form.validation.password-mismatch' | translate }}</small>
+		</div>
+	</div>
+
+	<div id="recaptcha" class="field grid">
+		<re-captcha #recaptcha [siteKey]="recaptchaSiteKey" (resolved)="showResponse($event)"></re-captcha>
 	</div>
 
 	<p></p>
-		
-	<button class="btn btn-success btn-block clr-col-sm-6" (click)="signup()">{{ 'signup.title' | translate }}</button>
+
+	<div class="field grid pt-2 pb-2">
+		<p-button severity="success" (click)="signup()">{{ 'signup.title' | translate }}</p-button>
+	</div>
+
+	<div class="field grid">
+		<p-message *ngIf="error" severity="error" [text]="error"></p-message>
+	</div>
 </form>

@@ -1,5 +1,6 @@
 package fr.ymanvieu.trading.common.user;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import fr.ymanvieu.trading.common.portofolio.PortofolioService;
-import fr.ymanvieu.trading.common.symbol.util.CurrencyUtils;
+import fr.ymanvieu.trading.common.symbol.Currency;
 import fr.ymanvieu.trading.common.user.entity.AuthorityEntity;
 import fr.ymanvieu.trading.common.user.entity.UserEntity;
 import fr.ymanvieu.trading.common.user.repository.UserRepository;
@@ -41,7 +42,7 @@ public class UserService {
 
         createPortofolio(ue.getId());
 
-        return getUser(ue.getId());
+        return getUser(ue.getId()).orElseThrow();
     }
 
     public User createSocialUser(String username, UserProvider socialProvider, String socialProviderUserId, String email) {
@@ -58,7 +59,7 @@ public class UserService {
 
         createPortofolio(ue.getId());
 
-        return getUser(ue.getId());
+        return getUser(ue.getId()).orElseThrow();
     }
 
     public User updateSocialUser(String email, String username) {
@@ -71,20 +72,21 @@ public class UserService {
         ue.setUsername(username);
         ue = userRepository.save(ue);
 
-        return getUser(ue.getId());
+        return getUser(ue.getId()).orElseThrow();
     }
 
     private void createPortofolio(Integer userId) {
-        portofolioService.createPortofolio(userId, CurrencyUtils.EUR, 100_000);
+        portofolioService.createPortofolio(userId, Currency.EUR, 100_000);
     }
 
     //todo find solution to merge getUser()/getUsername()
-    public User getUser(Integer userId) {
-        UserEntity ue = userRepository.findById(userId).orElseThrow();
-        var authorities = ue.getAuthorities()
-            .stream().map(a -> new SimpleGrantedAuthority(a.getAuthority())).collect(Collectors.toList());
+    public Optional<User> getUser(Integer userId) {
+        return userRepository.findById(userId).map(ue -> {
+            var authorities = ue.getAuthorities()
+                .stream().map(a -> new SimpleGrantedAuthority(a.getAuthority())).collect(Collectors.toList());
 
-        return new User(String.valueOf(ue.getId()), "", authorities);
+            return new User(String.valueOf(ue.getId()), "", authorities);
+        });
     }
 
     public String getUsername(Integer userId) {

@@ -1,26 +1,46 @@
-<clr-datagrid>
-	<clr-dg-column [clrDgField]="'fromcur.name'" [clrDgSortBy]="sortFavoriteAndDate" [clrDgSortOrder]="descSort">{{ 'rate.from' | translate }}</clr-dg-column>
-	<clr-dg-column>{{ 'rate.value' | translate }}</clr-dg-column>
-	<clr-dg-column [clrDgSortBy]="'date'" >{{ 'rate.updated' | translate }}</clr-dg-column>
-
-	<clr-dg-row *clrDgItems="let r of rates">
-		<clr-dg-cell>
-			<ng-container *ngIf="isAuthorised">
-				<cds-icon shape="star" class="favorite" [attr.solid]="r.favorite" (click)="switchFavorite(r)"></cds-icon>&nbsp;
-			</ng-container>
-			<a routerLink="/chart/{{r.fromcur.code}}/{{r.tocur.code}}">{{r.fromcur.name}}</a>&nbsp;
-			<img *ngIf="r.fromcur.countryFlag" class="clr-hidden-xs-down" src="../assets/img/flag/{{r.fromcur.countryFlag}}.gif"/>
-		</clr-dg-cell>
-		<clr-dg-cell>
-			{{ r.value | currency:r.tocur.code }}
-			<img class="clr-hidden-xs-down" src="../assets/img/flag/{{r.tocur.countryFlag}}.gif"/>
-		</clr-dg-cell>
-		<clr-dg-cell title="{{r.date | date:'dd/MM/yy HH:mm:ss' }}">{{ r.date | timeAgo:now }}</clr-dg-cell>
-	</clr-dg-row>
-	<clr-dg-footer>
-		<clr-dg-pagination #pagination>
-			<clr-dg-page-size [clrPageSizeOptions]="[10,20,50,100]"></clr-dg-page-size>
-			{{ 'pagination.text' | translate: {first: pagination.firstItem + 1, last: pagination.lastItem + 1, total: pagination.totalItems} }}
-		</clr-dg-pagination>
-	</clr-dg-footer>
-</clr-datagrid>
+<p-table #dt1 [value]="rates" data-test="latest-list-table" styleClass="p-datatable-striped p-datatable-sm p-datatable-gridlines"
+				 [sortField]="'favorite'"
+				 [sortOrder]="-1"
+				 [defaultSortOrder]="-1"
+				 [paginator]="true"
+				 [rows]="10"
+				 [showPageLinks]="false"
+				 [showJumpToPageDropdown]="true"
+				 currentPageReportTemplate="{first} - {last} ({totalRecords})"
+				 [rowsPerPageOptions]="[10, 20, 50, 100]"
+				 (sortFunction)="customSort($event)"
+				 [customSort]="true"
+				 [globalFilterFields]="['fromcur.code','fromcur.name', 'tocur.code', 'tocur.name']"
+>
+	<ng-template pTemplate="caption">
+		<div class="flex">
+			<span class="p-input-icon-left ml-auto">
+				<i class="pi pi-search" *ngIf="!filter"></i>
+				<i class="pi pi-times" *ngIf="filter" (click)="clearTable(dt1)"></i>
+				<input class="p-inputtext-sm" pInputText type="text" [(ngModel)]="filter" (input)="dt1.filterGlobal($event.target.value, 'contains')" />
+			</span>
+		</div>
+	</ng-template>
+	<ng-template pTemplate="header">
+		<tr>
+			<th pSortableColumn="favorite">{{ 'rate.from' | translate }}<p-sortIcon field="favorite"></p-sortIcon></th>
+			<th>{{ 'rate.value' | translate }}</th>
+			<th pSortableColumn="date">{{ 'rate.updated' | translate }}<p-sortIcon field="date"></p-sortIcon></th>
+		</tr>
+	</ng-template>
+	<ng-template pTemplate="body" let-r>
+		<tr data-test="table-line">
+			<td>
+				<ng-container *ngIf="isAuthorised">
+					<i data-test="favorite" [ngClass]="'pi ' + (r.favorite ? 'pi-star-fill' : 'pi-star')" (click)="switchFavorite(r)"></i>&nbsp;
+				</ng-container>
+				<a routerLink="/chart/{{r.fromcur.code}}/{{r.tocur.code}}">{{r.fromcur.name}}</a>&nbsp;
+				<img *ngIf="r.fromcur.countryFlag" class="hidden sm:inline" src="../assets/img/flag/{{r.fromcur.countryFlag}}.gif"/>
+			</td>
+			<td>
+				{{ r.value | currency:r.tocur.code }}&nbsp;<img class="hidden sm:inline" src="../assets/img/flag/{{r.tocur.countryFlag}}.gif"/>
+			</td>
+			<td title="{{r.date | date:'dd/MM/yy HH:mm:ss' }}">{{ r.date | timeAgo:now }}</td>
+		</tr>
+	</ng-template>
+</p-table>

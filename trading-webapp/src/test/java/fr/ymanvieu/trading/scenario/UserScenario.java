@@ -18,9 +18,16 @@ public class UserScenario extends Scenario {
     }
 
     @Test
+    void signup_local_userAlreadyExist() {
+        given(new LocalUser().login("user"));
+
+        when(new SignupLocalUser().login("user").password("password").recaptchaResponse("nope"));
+        verify(new SignupLocalUserVerification().error().userAlreadyExist());
+    }
+
+    @Test
     void login() {
-        var user = new LocalUser();
-        given(user);
+        var user = given(new LocalUser());
 
         when(new LoginUser().login(user.login()).password(user.password()));
         verify(new LoginUserVerification().login(user.login()).authorities("ROLE_USER"));

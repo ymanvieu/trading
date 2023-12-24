@@ -1,11 +1,10 @@
-import { tap } from 'rxjs/operators';
-import { Order } from '../order/model/order';
-import { OrderInfo } from '../order/model/order-info';
-import { Portofolio } from './model/portofolio';
-import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { Symbol } from '../symbol/model/symbol';
+import { Order } from './model/order';
+import { OrderInfo } from './model/order-info';
+import { Portofolio } from './model/portofolio';
 
 @Injectable({providedIn: 'root'})
 export class PortofolioService {
@@ -53,8 +52,7 @@ export class PortofolioService {
   }
 
   order(code: string, quantity: number, type: string): Observable<Order> {
-    return this.http.post<Order>(`${this.url}/order`, {code: code, quantity: quantity, type: type})
-    .pipe(tap(() => this.refreshPortofolioAndAvailableSymbols()));
+    return this.http.post<Order>(`${this.url}/order`, {code: code, quantity: quantity, type: type});
   }
 
   refreshPortofolioAndAvailableSymbols() {

@@ -1,45 +1,23 @@
-<clr-main-container>
-	<clr-header>
-		<div class="branding">
-			<a routerLink="/latest" class="nav-link">
-				<span class="title">{{ 'app.name' | translate }}</span>
-			</a>
-		</div>
-		<div class="header-nav" [clr-nav-level]="1">
-			<a routerLink="/portofolio" routerLinkActive="active" class="nav-link"><span class="nav-text">{{ 'portofolio.title' | translate }}</span></a>
-			<a routerLink="/admin" routerLinkActive="active" *ngxPermissionsOnly="['ROLE_ADMIN']" class="nav-link"><span class="nav-text">{{ 'admin.title' | translate }}</span></a>
-		</div>
-		<div class="header-actions">
-			<ng-container *ngIf="login">
-				<a class="nav-link">
-					<span *ngIf="baseCurrency" class="nav-text" [style.color]="baseCurrency.quantity | balancedColor">
-						<strong>{{baseCurrency.quantity | currency:baseCurrency.symbol.code}}</strong>
-					</span>
-				</a>
-				<clr-dropdown>
-					<button class="nav-text" clrDropdownTrigger>
-						{{login}}
-						<cds-icon shape="angle" direction="down"></cds-icon>
-					</button>
-					<clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
-						<a (click)="logout()" clrDropdownItem>{{ 'logout.title' | translate }}</a>
-					</clr-dropdown-menu>
-				</clr-dropdown>
-			</ng-container>
-	
-			<ng-container *ngIf="!login">
-				<div class="clr-row clr-align-items-center">
-					<div class="clr-col">
-						<a routerLink="/login" class="btn btn-primary-outline"><cds-icon shape="login"></cds-icon> {{ 'login.title' | translate }}</a>
-						<a routerLink="/signup" class="btn btn-success-outline">{{ 'signup.title' | translate }}</a>
-					</div>
+<p-menubar [model]="items" data-test="header">
+  <ng-template pTemplate="end">
+		<ng-container *ngIf="login">
+			<div class="flex align-items-center">
+				<div class="col" *ngIf="baseCurrency" [style.color]="baseCurrency.quantity | balancedColor">
+					<strong data-test="currency-quantity">{{baseCurrency.quantity | currency:baseCurrency.symbol.code}}</strong>
 				</div>
-			</ng-container>
-		</div>
-	</clr-header>
-	<div class="content-container">
-		<main class="content-area">
-			<router-outlet></router-outlet>
-		</main>
-	</div>
-</clr-main-container>
+				<p-menu class="col" #menu [model]="logoutItems" [popup]="true"></p-menu>
+				<p-button size="small" (click)="menu.toggle($event)" icon="pi pi-angle-down" [label]="login"></p-button>
+			</div>
+		</ng-container>
+		<ng-container *ngIf="!login">
+			<p-button data-test="login" size="small" [outlined]="true"  routerLink="/login" icon="pi pi-sign-in" [label]="'login.title' | translate"></p-button>
+			&nbsp;
+			<p-button data-test="signup" size="small" [outlined]="true" severity="success" routerLink="/signup" [label]="'signup.title' | translate"></p-button>
+		</ng-container>
+
+  </ng-template>
+</p-menubar>
+
+<div class="main ml-auto mr-auto">
+	<router-outlet></router-outlet>
+</div>

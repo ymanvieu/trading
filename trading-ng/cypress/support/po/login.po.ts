@@ -1,18 +1,24 @@
 export class LoginPo {
 
-  static page() {
-    return cy.get('app-login');
+  private static page = 'app-login';
+
+  static google() {
+    return cy.get(`${this.page} [data-test="google-login"]`);
+  }
+
+  static github() {
+    return cy.get(`${this.page} [data-test="github-login"]`);
   }
 
   static loginField() {
-    return this.page().find('input[formcontrolname="username"]');
+    return cy.get(`${this.page} [data-test="username"]`);
   }
 
   static passwordField() {
-    return this.page().find('input[formcontrolname="password"]');
+    return cy.get(`${this.page} [data-test="password"]`);
   }
 
   static loginButton() {
-    return this.page().contains('button', 'Log in');
+    return cy.get(`${this.page} [data-test="login"]`);
   }
 }

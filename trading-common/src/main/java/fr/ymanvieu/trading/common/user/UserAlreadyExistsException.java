@@ -1,17 +1,10 @@
 package fr.ymanvieu.trading.common.user;
 
-public class UserAlreadyExistsException extends RuntimeException {
+import fr.ymanvieu.trading.common.exception.BusinessException;
 
-	private static final long serialVersionUID = 3392756365434206128L;
-	
-	private final String login;
+public class UserAlreadyExistsException extends BusinessException {
 
-	public UserAlreadyExistsException(String login) {
-		super(login);
-		this.login = login;
-	}
-	
-	public String getLogin() {
-		return login;
+	public UserAlreadyExistsException(String username) {
+		super("user.error.username-already-exists", username);
 	}
 }

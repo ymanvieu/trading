@@ -1,0 +1,18 @@
+{
+  "symbol": {
+    "code": "TTWO",
+    "name": "Take-Two Interactive Software, Inc.",
+    "countryFlag": null
+  },
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "countryFlag": "us"
+  },
+  "quantity": 5.0,
+  "value": 776.6,
+  "currentValue": 776.6,
+  "currentRate": 155.32,
+  "percentChange": 0.0,
+  "valueChange": 0.0
+}

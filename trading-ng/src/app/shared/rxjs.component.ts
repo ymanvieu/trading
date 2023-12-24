@@ -1,11 +1,11 @@
-import { ChangeDetectorRef, OnDestroy, Component, Directive } from '@angular/core';
+import { ChangeDetectorRef, OnDestroy, Directive } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
 @Directive()
-export class RxjsComponent implements OnDestroy {
+export abstract class RxjsComponent implements OnDestroy {
   subs: Subscription[] = [];
 
-  constructor(private cdRef?: ChangeDetectorRef) {}
+  protected constructor(private cdRef?: ChangeDetectorRef) {}
 
   register(...sub: Subscription[]) {
     this.subs = this.subs.concat(sub);

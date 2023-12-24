@@ -1,31 +1,38 @@
-clr-password-container + .btn-primary {
-    margin-top: 2rem;
-}
-
 .pi {
     vertical-align: text-bottom;
     margin-right: 0.5rem;
 }
 
 a.google {
+    color: black;
+    text-decoration: none;
+}
+
+button.google {
     background-color: white;
     color: black;
     border-color: black;
 }
-a:hover.google {
+
+button:hover.google {
     background-color: lightgrey;
 }
 
-a.github {
+button.github {
     background-color: dimgrey;
-    color: white;
     border-color: dimgrey;
 }
-a:hover.github {
+
+button:hover.github {
     background-color: black;
-    color: white;
 }
 
-hr {
-    margin-top: 1rem;
+a.github {
+    color: white;
+    border-color: dimgrey;
+    text-decoration: none;
+}
+
+a:hover.github {
+    color: white;
 }

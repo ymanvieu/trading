@@ -1,1 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import "primeflex/primeflex";
+@media screen and (min-width: $sm){
+  .sm\:table-cell {
+    display: table-cell !important;
+  }
+}
+@media screen and (min-width: $md){
+  .md\:table-cell {
+    display: table-cell !important;
+  }
+}
+@media screen and (min-width: $lg){
+  .lg\:table-cell {
+    display: table-cell !important;
+  }
+}
+@media screen and (min-width: $xl){
+  .xl\:table-cell {
+    display: table-cell !important;
+  }
+}

@@ -4,30 +4,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public record Quote(String code, String currency, BigDecimal price, Instant time) {
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Quote {
-
-	private String code;
-	private String currency;
-
-	private BigDecimal price;
-	private Instant time;
-
-	public Quote(String code, BigDecimal price, Instant time) {
-		this.code = code;
-		this.price = price;
-		this.time = time;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(code, currency, price, time);
+	public Quote {
+		Objects.requireNonNull(code, "code");
+		Objects.requireNonNull(currency, "currency");
+		Objects.requireNonNull(price, "price");
+		Objects.requireNonNull(time, "time");
 	}
 
 	@Override

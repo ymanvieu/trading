@@ -1,6 +1,6 @@
 export const defaultEnvironment  = {
     production: false,
     recaptcha: {
-      siteKey: '<sitekey>'
+      siteKey: 'site-key'
     }
   };

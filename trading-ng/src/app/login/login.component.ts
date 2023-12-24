@@ -1,11 +1,27 @@
-import {AuthenticationService} from '../authentication/authentication.service';
+import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { PasswordModule } from 'primeng/password'
 import {Component, OnInit} from '@angular/core';
-import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import {Router} from '@angular/router';
+import { AuthenticationService } from '../authentication/authentication.service';
 import {AppConstants} from "./app.constants";
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    ButtonModule,
+    MessageModule,
+    PasswordModule,
+    InputTextModule,
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

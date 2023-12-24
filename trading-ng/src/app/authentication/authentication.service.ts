@@ -1,11 +1,11 @@
 import { throwError as observableThrowError, Observable, BehaviorSubject } from 'rxjs';
 import { catchError, tap, map, switchMap, filter, first } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpRequest } from '@angular/common/http';
 import { AuthService } from 'ngx-auth';
 import { TokenStorage } from './token-storage.service';
 import { NgxPermissionsService } from 'ngx-permissions';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 interface AccessData {
   accessToken: string;
@@ -69,10 +69,13 @@ export class AuthenticationService implements AuthService {
         }),
         tap(accessData => this.saveAccessData(accessData)),
         tap(() => this.refreshUser()),
-        catchError((err) => {
-          this.logout();
+        catchError(err => {
 
-          return observableThrowError(err);
+          if (this.refreshShouldHappen(err)) {
+            this.logout();
+          }
+
+          return observableThrowError(() => err);
         })
       );
   }
@@ -94,13 +97,13 @@ export class AuthenticationService implements AuthService {
       filter(token => !!token))
     .subscribe(token => {
       try {
-        const tokenInfo : any = jwt_decode(token);
-        this.setUser(tokenInfo.username);
+        const tokenInfo : any = jwtDecode(token);
         this.permissionsService.loadPermissions(tokenInfo.scope.split(' '));
+        this.setUser(tokenInfo.username);
       } catch (error) {
         console.error(error);
-        this.setUser(null);
         this.permissionsService.flushPermissions();
+        this.setUser(null);
       }
     });
   }
@@ -108,11 +111,9 @@ export class AuthenticationService implements AuthService {
   /**
    * Verify that outgoing request is refresh-token,
    * so interceptor won't intercept this request
-   * @param {string} url
-   * @returns {boolean}
    */
-  public verifyTokenRequest(url: string): boolean {
-    return url.endsWith(this.REFRESH_URL);
+  public verifyRefreshToken(request: HttpRequest<any>): boolean {
+    return request.url.endsWith(this.REFRESH_URL);
   }
 
   public login(login: string, password: string): Observable<AccessData> {
@@ -129,8 +130,8 @@ export class AuthenticationService implements AuthService {
 
   public logout(): void {
     this.tokenStorage.clear();
-    this.setUser(null);
     this.permissionsService.flushPermissions();
+    this.setUser(null);
   }
 
   /**

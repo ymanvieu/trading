@@ -23,13 +23,12 @@
             ],
             "styles": [
               "src/styles.scss",
-              "node_modules/@clr/ui/clr-ui.min.css",
-              "node_modules/primeng/resources/themes/nova/theme.css",
+              "node_modules/primeng/resources/themes/lara-light-blue/theme.css",
               "node_modules/primeng/resources/primeng.min.css",
-              "node_modules/primeicons/primeicons.css"
+              "node_modules/primeicons/primeicons.css",
+              "node_modules/primeflex/primeflex.css"
             ],
             "scripts": [
-              "node_modules/@webcomponents/custom-elements/custom-elements.min.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -68,31 +67,31 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "trading-ng:build"
+            "buildTarget": "trading-ng:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "trading-ng:build:production"
+              "buildTarget": "trading-ng:build:production"
             }
           }
         },
         "serve-dev": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "trading-ng:build",
+            "buildTarget": "trading-ng:build",
             "proxyConfig": "proxy.conf.dev.js",
             "port": 4201
           },
           "configurations": {
             "production": {
-              "browserTarget": "trading-ng:build:production"
+              "buildTarget": "trading-ng:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "trading-ng:build"
+            "buildTarget": "trading-ng:build"
           }
         },
         "test": {

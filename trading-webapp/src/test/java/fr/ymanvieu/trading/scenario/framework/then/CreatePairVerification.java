@@ -20,11 +20,11 @@ public class CreatePairVerification extends AbstractThenVerification {
 
         var result = createPair.parseResult();
 
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getCode()).isNotNull();
-        assertThat(result.getName()).isNotNull();
-        assertThat(result.getQuote()).hasNoNullFieldsOrProperties();
+        assertThat(result.id()).isNotNull();
+        assertThat(result.code()).isNotNull();
+        assertThat(result.name()).isNotNull();
+        assertThat(result.quote()).hasNoNullFieldsOrProperties();
 
-        id = result.getId();
+        id = result.id();
     }
 }

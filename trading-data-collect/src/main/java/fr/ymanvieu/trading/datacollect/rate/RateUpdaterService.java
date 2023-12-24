@@ -1,6 +1,5 @@
 package fr.ymanvieu.trading.datacollect.rate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -43,8 +42,8 @@ public class RateUpdaterService {
 	@Autowired
 	private RateMapper rateMapper;
 
-	@Retryable
-	public void updateRates(LatestRateProvider provider) throws IOException {
+	@Retryable(maxAttempts = 2)
+	public void updateRates(LatestRateProvider provider) {
 
 		String providerName = provider.getClass().getSimpleName();
 
@@ -52,7 +51,7 @@ public class RateUpdaterService {
 
 		Stopwatch startWatch = Stopwatch.createStarted();
 
-		List<Quote> quotes = provider.getRates();
+		List<Quote> quotes = provider.getLatestRates();
 
 		String downloadTimeFormatted =  startWatch.toString();
 
@@ -83,7 +82,7 @@ public class RateUpdaterService {
 
 		List<Quote> quotesList = new ArrayList<>(quotes);
 
-		quotesList.sort(Comparator.comparing(Quote::getTime));
+		quotesList.sort(Comparator.comparing(Quote::time));
 
 		List<LatestRate> existingLatestRates = latestRepo.findAll();
 
@@ -97,28 +96,28 @@ public class RateUpdaterService {
 
 			if (existingLatestRate == null) {
 
-				SymbolEntity fromcur = getFromList(symbols, quote.getCode());
+				SymbolEntity fromcur = getFromList(symbols, quote.code());
 				
 				if(fromcur == null) {
-					log.warn("Cannot find symbol '{}' in DB, skipping it.", quote.getCode());
+					log.warn("Cannot find symbol '{}' in DB, skipping it.", quote.code());
 					continue;
 				}
 
-				SymbolEntity tocur = getFromList(symbols, quote.getCurrency());
+				SymbolEntity tocur = getFromList(symbols, quote.currency());
 
 				if(tocur == null) {
-					log.warn("Cannot find symbol '{}' in DB, skipping it.", quote.getCurrency());
+					log.warn("Cannot find symbol '{}' in DB, skipping it.", quote.currency());
 					continue;
 				}
 				
-				LatestRate newLatestRate = new LatestRate(fromcur, tocur, quote.getPrice(), quote.getTime());
+				LatestRate newLatestRate = new LatestRate(fromcur, tocur, quote.price(), quote.time());
 
 				newLatestRates.add(newLatestRate);
 				existingLatestRates.add(newLatestRate);
 
-			} else if (quote.getTime().isAfter(existingLatestRate.getDate())) {
-				existingLatestRate.setDate(quote.getTime());
-				existingLatestRate.setValue(quote.getPrice());
+			} else if (quote.time().isAfter(existingLatestRate.getDate())) {
+				existingLatestRate.setDate(quote.time());
+				existingLatestRate.setValue(quote.price());
 
 				if (!newLatestRates.contains(existingLatestRate)) {
 					newLatestRates.add(existingLatestRate);
@@ -139,7 +138,7 @@ public class RateUpdaterService {
 
 	private LatestRate getFromList(List<LatestRate> ratesList, Quote q) {
 		return ratesList.stream()
-				.filter(r -> r.getFromcur().getCode().equals(q.getCode()) && r.getTocur().getCode().equals(q.getCurrency()))
+				.filter(r -> r.getFromcur().getCode().equals(q.code()) && r.getTocur().getCode().equals(q.currency()))
 				.findFirst().orElse(null);
 	}
 

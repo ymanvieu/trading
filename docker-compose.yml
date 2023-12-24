@@ -1,0 +1,49 @@
+version: '3'
+services:
+
+  trading-db:
+    container_name: trading-db
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=trading
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+
+  trading-webapp:
+    container_name: trading-webapp
+    environment:
+      - spring.artemis.broker-url=tcp://trading-data-collect:61616
+      - spring.datasource.url=jdbc:postgresql://trading-db/trading
+    build:
+      context: trading-webapp
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - trading-db
+
+  trading-data-collect:
+    container_name: trading-data-collect
+    environment:
+      - spring.datasource.url=jdbc:postgresql://trading-db/trading
+      - spring.artemis.broker-url=tcp://trading-data-collect:61616
+      - spring.sql.init.platform=dev
+    build:
+      context: trading-data-collect
+      dockerfile: Dockerfile
+    ports:
+      - "61616"
+    depends_on:
+      - trading-db
+
+  trading-db-dev-data:
+    container_name: trading-db-dev-data
+    environment:
+      - PGPASSWORD=password
+    build:
+      context: .
+      dockerfile: Dockerfile-db-init-data-dev
+    depends_on:
+      - trading-data-collect
