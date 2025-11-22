@@ -3,7 +3,7 @@
 Trading is an application collecting financial data from an external provider and allow users to manage their virtual portofolio.
 
 ## Live demo
-<https://cloud-app.one>
+<https://cloud-dev.eu>
 
 
 ## Requirements
